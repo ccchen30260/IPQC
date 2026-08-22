@@ -11,6 +11,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- SortableJS (拖拽排序) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <style>
         :root {
@@ -83,6 +85,7 @@
         .card-custom .card-header i { color: var(--primary-color); }
         .card-custom .card-body { padding: 20px; }
 
+        /* 統計卡片：可拖拽排序 */
         .stat-card {
             border-radius: var(--border-radius);
             padding: 18px 20px;
@@ -94,8 +97,11 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            cursor: grab; /* 提示可拖曳 */
+            user-select: none; /* 避免拖曳時選取文字 */
         }
         .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+        .stat-card:active { cursor: grabbing; }
         .stat-card .stat-icon { position: absolute; right: 15px; top: 15px; font-size: 2.5rem; opacity: 0.3; }
         .stat-card .stat-number { font-size: 2.2rem; font-weight: 800; line-height: 1; }
         .stat-card .stat-label { font-size: 0.9rem; opacity: 0.9; font-weight: 500; margin-top: 4px; }
@@ -104,6 +110,15 @@
         .stat-s2 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
         .stat-s3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
         .stat-s4 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+        /* SortableJS 拖拽樣式 */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #ddd !important;
+        }
+        .sortable-chosen {
+            box-shadow: 0 0 20px rgba(0,0,0,0.3) !important;
+        }
 
         .filter-section .form-label { font-weight: 600; font-size: 0.85rem; color: #555; margin-bottom: 4px; }
         .filter-section .form-select, .filter-section .form-control {
@@ -314,37 +329,37 @@
             </div>
         </div>
 
-        <!-- 統計卡片區域 -->
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-md-2">
+        <!-- 統計卡片區域（可拖拽排序） -->
+        <div class="row g-3 mb-4" id="statsRow">
+            <div class="col-6 col-md-2" data-card="total">
                 <div class="stat-card stat-total">
                     <i class="fas fa-chart-bar stat-icon"></i>
                     <div class="stat-number" id="statTotal">0</div>
                     <div class="stat-label">總異常數</div>
                 </div>
             </div>
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-2" data-card="S1">
                 <div class="stat-card stat-s1">
                     <i class="fas fa-sun stat-icon"></i>
                     <div class="stat-number" id="statS1">0</div>
                     <div class="stat-label">S1 異常</div>
                 </div>
             </div>
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-2" data-card="S2">
                 <div class="stat-card stat-s2">
                     <i class="fas fa-cloud-sun stat-icon"></i>
                     <div class="stat-number" id="statS2">0</div>
                     <div class="stat-label">S2 異常</div>
                 </div>
             </div>
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-2" data-card="S3">
                 <div class="stat-card stat-s3">
                     <i class="fas fa-moon stat-icon"></i>
                     <div class="stat-number" id="statS3">0</div>
                     <div class="stat-label">S3 異常</div>
                 </div>
             </div>
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-2" data-card="S4">
                 <div class="stat-card stat-s4">
                     <i class="fas fa-star stat-icon"></i>
                     <div class="stat-number" id="statS4">0</div>
@@ -521,7 +536,7 @@
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
         // ============================================================
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbydYcIk8fRfW1_k4REfkFmihpenfAcD8-KO938fx1RaYZPNvg1nUQW0TuabCzoiYPeS/exec';
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxX4Gqh4vapwm0iCRT2zQK-i_yLJNe6m4wXF6-YToXSY1duyRzU1Wc2Yi9DEalDZij4/exec';
         // 例如：https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxx/exec
         // ============================================================
 
@@ -575,6 +590,7 @@
             initDateFilter();
             initDescriptionOptions();
             initPersonDropdown();
+            initSortable(); // 初始化拖拽排序
             initInputDefaults();
             const now = new Date();
             document.getElementById('filterYear').value = now.getFullYear();
@@ -647,6 +663,22 @@
                 html += `<option value="${name}">${name}</option>`;
             });
             select.innerHTML = html;
+        }
+
+        // 初始化拖拽排序
+        function initSortable() {
+            const statsRow = document.getElementById('statsRow');
+            if (statsRow) {
+                new Sortable(statsRow, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    handle: '.stat-card', // 整個卡片可拖曳
+                    onEnd: function(evt) {
+                        // 可以在這裡加入儲存順序的程式碼（目前不儲存）
+                    }
+                });
+            }
         }
 
         function initInputDefaults() {
