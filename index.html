@@ -231,6 +231,26 @@
         .option-item .btn-sm {
             white-space: nowrap;
         }
+
+        /* ========== 拖曳排序相關樣式 ========== */
+        .dashboard-block {
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .dashboard-block.dragging {
+            opacity: 0.5;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: scale(0.98);
+        }
+        .dashboard-block .drag-handle {
+            cursor: grab;
+            user-select: none;
+        }
+        .dashboard-block .drag-handle:active {
+            cursor: grabbing;
+        }
+        .dashboard-block.drag-over {
+            border-top: 4px solid var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -315,83 +335,94 @@
             </div>
         </div>
 
-        <!-- 圖表與人員統計區域 -->
-        <div class="row g-3 mb-4">
-            <div class="col-lg-7">
-                <div class="card card-custom h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span><i class="fas fa-chart-column"></i> 班別統計圖表</span>
-                        <span class="badge bg-primary" id="chartTotalBadge">當月總計：0</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="shiftChart"></canvas>
-                        </div>
+        <!-- 可拖曳排序的儀表板區塊 -->
+        <div id="dashboardContainer" class="d-flex flex-column gap-3 mb-4">
+            <!-- 1. 班別統計圖表 -->
+            <div class="card card-custom dashboard-block" data-block="shiftChart" draggable="true">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="drag-handle">
+                        <i class="fas fa-grip-vertical me-2"></i>
+                        <i class="fas fa-chart-column"></i> 班別統計圖表
+                    </span>
+                    <span class="badge bg-primary" id="chartTotalBadge">當月總計：0</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="shiftChart"></canvas>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-5">
-                <div class="card card-custom h-100">
-                    <div class="card-header">
+
+            <!-- 2. 人員異常統計 -->
+            <div class="card card-custom dashboard-block" data-block="personStats" draggable="true">
+                <div class="card-header">
+                    <span class="drag-handle">
+                        <i class="fas fa-grip-vertical me-2"></i>
                         <i class="fas fa-user-tag"></i> 人員異常統計
-                    </div>
-                    <div class="card-body" id="personStatsContainer" style="max-height: 280px; overflow-y: auto;">
-                        <div class="empty-state py-3">
-                            <i class="fas fa-user-slash"></i>
-                            <p class="mb-0">尚無人員統計數據</p>
-                        </div>
+                    </span>
+                </div>
+                <div class="card-body" id="personStatsContainer" style="max-height: 280px; overflow-y: auto;">
+                    <div class="empty-state py-3">
+                        <i class="fas fa-user-slash"></i>
+                        <p class="mb-0">尚無人員統計數據</p>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 異常原因統計表 -->
-        <div class="card card-custom mb-4">
-            <div class="card-header">
-                <i class="fas fa-list-alt"></i> 異常原因統計表
-            </div>
-            <div class="card-body" id="descriptionStatsContainer" style="max-height: 300px; overflow-y: auto;">
-                <div class="empty-state py-3">
-                    <i class="fas fa-chart-pie"></i>
-                    <p class="mb-0">尚無異常原因統計數據</p>
+            <!-- 3. 異常原因統計表 -->
+            <div class="card card-custom dashboard-block" data-block="descriptionStats" draggable="true">
+                <div class="card-header">
+                    <span class="drag-handle">
+                        <i class="fas fa-grip-vertical me-2"></i>
+                        <i class="fas fa-list-alt"></i> 異常原因統計表
+                    </span>
+                </div>
+                <div class="card-body" id="descriptionStatsContainer" style="max-height: 300px; overflow-y: auto;">
+                    <div class="empty-state py-3">
+                        <i class="fas fa-chart-pie"></i>
+                        <p class="mb-0">尚無異常原因統計數據</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 數據列表區域 -->
-        <div class="card card-custom">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="fas fa-list"></i> 異常數據列表</span>
-                <span class="badge bg-primary" id="dataCountBadge">0 筆</span>
-            </div>
-            <div class="card-body p-0">
-                <div id="dataTableContainer">
-                    <div class="loading-spinner" id="loadingSpinner">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">載入中...</span>
+            <!-- 4. 異常數據列表 -->
+            <div class="card card-custom dashboard-block" data-block="dataList" draggable="true">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="drag-handle">
+                        <i class="fas fa-grip-vertical me-2"></i>
+                        <i class="fas fa-list"></i> 異常數據列表
+                    </span>
+                    <span class="badge bg-primary" id="dataCountBadge">0 筆</span>
+                </div>
+                <div class="card-body p-0">
+                    <div id="dataTableContainer">
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">載入中...</span>
+                            </div>
                         </div>
-                    </div>
-                    <div id="dataTableWrapper" style="display:none;">
-                        <div class="table-responsive">
-                            <table class="table table-custom mb-0">
-                                <thead>
-                                    <tr>
-                                        <th style="width:50px;">序號</th>
-                                        <th>異常日期</th>
-                                        <th>異常班別</th>
-                                        <th>異常人員</th>
-                                        <th>異常描述</th>
-                                        <th>異常照片</th>
-                                        <th style="width:80px;">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="dataTableBody"></tbody>
-                            </table>
-                        </div>
-                        <div id="emptyState" class="empty-state" style="display:none;">
-                            <i class="fas fa-inbox"></i>
-                            <h5>暫無異常數據</h5>
-                            <p class="text-muted">點擊右下角 + 按鈕新增異常記錄</p>
+                        <div id="dataTableWrapper" style="display:none;">
+                            <div class="table-responsive">
+                                <table class="table table-custom mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:50px;">序號</th>
+                                            <th>異常日期</th>
+                                            <th>異常班別</th>
+                                            <th>異常人員</th>
+                                            <th>異常描述</th>
+                                            <th>異常照片</th>
+                                            <th style="width:80px;">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dataTableBody"></tbody>
+                                </table>
+                            </div>
+                            <div id="emptyState" class="empty-state" style="display:none;">
+                                <i class="fas fa-inbox"></i>
+                                <h5>暫無異常數據</h5>
+                                <p class="text-muted">點擊右下角 + 按鈕新增異常記錄</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -582,6 +613,7 @@
             document.getElementById('filterMonth').value = now.getMonth() + 1;
             loadData();
             loadStats();
+            initDashboardDragDrop(); // 初始化拖曳排序
         });
 
         function initDateDisplay() {
@@ -1176,6 +1208,82 @@
             const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
             toast.show();
             toastEl.addEventListener('hidden.bs.toast', function() { toastEl.remove(); });
+        }
+
+        // ==================== 區塊拖曳排序功能 ====================
+        function initDashboardDragDrop() {
+            const container = document.getElementById('dashboardContainer');
+            const blocks = container.querySelectorAll('.dashboard-block');
+            let draggedBlock = null;
+
+            // 讀取 localStorage 中儲存的順序
+            const savedOrder = JSON.parse(localStorage.getItem('dashboardOrder') || '[]');
+            if (savedOrder.length === blocks.length) {
+                savedOrder.forEach(blockId => {
+                    const block = container.querySelector(`[data-block="${blockId}"]`);
+                    if (block) container.appendChild(block);
+                });
+            }
+
+            blocks.forEach(block => {
+                const handle = block.querySelector('.drag-handle');
+                handle.addEventListener('mousedown', () => {
+                    block.draggable = true;
+                });
+                handle.addEventListener('mouseup', () => {
+                    block.draggable = false;
+                });
+                // 觸控支援
+                handle.addEventListener('touchstart', () => {
+                    block.draggable = true;
+                }, { passive: true });
+                handle.addEventListener('touchend', () => {
+                    block.draggable = false;
+                });
+
+                block.addEventListener('dragstart', (e) => {
+                    draggedBlock = block;
+                    block.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', block.dataset.block);
+                });
+
+                block.addEventListener('dragend', () => {
+                    block.classList.remove('dragging');
+                    draggedBlock = null;
+                    saveDashboardOrder();
+                });
+
+                block.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    block.classList.add('drag-over');
+                });
+
+                block.addEventListener('dragleave', () => {
+                    block.classList.remove('drag-over');
+                });
+
+                block.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    block.classList.remove('drag-over');
+                    if (draggedBlock && draggedBlock !== block) {
+                        const rect = block.getBoundingClientRect();
+                        const after = e.clientY > rect.top + rect.height / 2;
+                        if (after) {
+                            block.parentNode.insertBefore(draggedBlock, block.nextSibling);
+                        } else {
+                            block.parentNode.insertBefore(draggedBlock, block);
+                        }
+                    }
+                });
+            });
+
+            function saveDashboardOrder() {
+                const orderedBlocks = container.querySelectorAll('.dashboard-block');
+                const order = Array.from(orderedBlocks).map(block => block.dataset.block);
+                localStorage.setItem('dashboardOrder', JSON.stringify(order));
+            }
         }
     </script>
 </body>
