@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>異常數據管理系統</title>
+    <title>IPQC異常資料統計</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -413,6 +413,15 @@
             height: 220px;
             width: 100%;
         }
+
+        /* 多選下拉樣式微調 */
+        select[multiple] {
+            height: auto;
+            min-height: 120px;
+        }
+        select[multiple] option {
+            padding: 4px 8px;
+        }
     </style>
 </head>
 <body>
@@ -422,7 +431,7 @@
         <div class="container">
             <a class="navbar-brand" href="#">
                 <i class="fas fa-clipboard-list"></i>
-                異常數據管理系統
+                IPQC異常資料統計
             </a>
             <span class="badge-date" id="currentDateDisplay">
                 <i class="fas fa-calendar-alt me-1"></i>
@@ -495,7 +504,7 @@
             </div>
         </div>
 
-        <!-- 統計卡片區域 -->
+        <!-- 統計卡片區域（已取消「涉及人員」卡片） -->
         <div class="row g-3 mb-4" id="statsRow">
             <div class="col-6 col-md-2">
                 <div class="stat-card stat-total">
@@ -530,13 +539,6 @@
                     <i class="fas fa-star stat-icon"></i>
                     <div class="stat-number" id="statS4">0</div>
                     <div class="stat-label">S4 異常</div>
-                </div>
-            </div>
-            <div class="col-6 col-md-2">
-                <div class="stat-card" style="background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);">
-                    <i class="fas fa-users stat-icon"></i>
-                    <div class="stat-number" id="statPersons">0</div>
-                    <div class="stat-label">涉及人員</div>
                 </div>
             </div>
         </div>
@@ -635,7 +637,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">異常班別 <span class="text-danger">*</span></label>
-                                <select class="form-select" id="inputShift" required>
+                                <select class="form-select" id="inputShift" required onchange="updatePersonOptions()">
                                     <option value="">請選擇班別</option>
                                     <option value="S1">S1</option>
                                     <option value="S2">S2</option>
@@ -645,15 +647,19 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">異常人員 <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="inputPerson" placeholder="請輸入異常人員姓名" required>
+                                <select class="form-select" id="inputPerson" required>
+                                    <option value="">請先選擇班別</option>
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">異常照片</label>
                                 <input type="file" class="form-control" id="inputPhoto" accept="image/*" onchange="previewPhoto(event)">
                             </div>
                             <div class="col-12">
-                                <label class="form-label fw-bold">異常描述 <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="inputDescription" rows="3" placeholder="請詳細描述異常情況..." required></textarea>
+                                <label class="form-label fw-bold">異常描述 <span class="text-danger">*</span>（可複選，按住 Ctrl 鍵點選）</label>
+                                <select class="form-select" id="inputDescription" multiple size="6" required>
+                                    <!-- 選項將由 JavaScript 動態產生 -->
+                                </select>
                             </div>
                             <div class="col-12" id="photoPreviewContainer" style="display:none;">
                                 <div class="photo-preview-container">
@@ -704,9 +710,55 @@
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
         // ============================================================
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzIqxLuAZJm6MtKo2z8tcjD9WfYghbkfxEGFeArheJ_HvWwpr3G7ym5sFqYAMN4h4Zl/exec';
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyUFk0lyZ1AS__nmqgEgNEmS08ICh6pKuUxfu1R_wnKCM-Ad2rIOZ2gWKauoafzUt86/exec';
         // 例如：https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxx/exec
         // ============================================================
+
+        // 人員名單（依班別群組）
+        const S1_S3_PERSONNEL = [
+            "方慎之","陳泰安","蔡南嘉","李珮菁","朱建穎","王泳淇","吳峻霖","黃詠綺",
+            "蘭狄","凱文","勞倫司","安東尼","明華","艾麥倫","邱立斯","拉特","羅內爾","艾佛森",
+            "陳文全","吳國隆","李茂玄","葉秀芬","王俊智","吳慧如","黃筱珊","吳明珠","蘇炫元",
+            "托弗","杰倫","艾諾","吳氏莊","納撒","格林","喬司華","喬丹","吉姆"
+        ];
+        const S2_S4_PERSONNEL = [
+            "黃正忠","張韶眞","陳宥庠","黃威翔","羅翊禎","黃文靖","蔡易良","吳奇玲",
+            "詹姆士","達力","山博","羅傑","達路","童氏蓮","羅德","達布","安吉","羅蘭多",
+            "陳喬志","楊代億","廖曉彤","蔡靜儀","賴建亦","施榮傑","陰其德","黃譯鋒","楊雅婷","羅啟倫",
+            "埃爾默","拉斯特","雷伊","漢斯","達利斯","甘達","特拉多","達爾文"
+        ];
+
+        // 異常描述選項（可複選）
+        const DESCRIPTION_OPTIONS = [
+            "JR黑頭",
+            "極柄撞歪",
+            "接頭未剔除",
+            "插單過流",
+            "隔離紙未端過流",
+            "極柄角度異常",
+            "極柄數量異常",
+            "JR撞(夾)傷",
+            "極柄彎折",
+            "極片皺摺",
+            "極柄膠帶貼覆異常",
+            "中心孔異常",
+            "JR抽頭(尾)",
+            "極柄歪斜",
+            "封止膠帶貼覆異常",
+            "極片破損",
+            "雙正極柄重疊寬度異常",
+            "極片接頭(M1)",
+            "中心孔皺摺",
+            "迴轉點異常",
+            "雙正極柄合焊異常",
+            "封止膠帶超出JR",
+            "極柄反折",
+            "負極柄壓花異常",
+            "JR異物",
+            "極柄長度異常",
+            "極柄裁切異常",
+            "隔離紙抽絲"
+        ];
 
         let currentData = [];
         let shiftChartInstance = null;
@@ -717,6 +769,7 @@
             initDateDisplay();
             initYearFilter();
             initDateFilter();
+            initDescriptionOptions();
             initInputDefaults();
             const now = new Date();
             document.getElementById('filterYear').value = now.getFullYear();
@@ -753,16 +806,49 @@
             }
         }
 
+        // 動態產生異常描述選項
+        function initDescriptionOptions() {
+            const select = document.getElementById('inputDescription');
+            DESCRIPTION_OPTIONS.forEach(desc => {
+                const option = document.createElement('option');
+                option.value = desc;
+                option.textContent = desc;
+                select.appendChild(option);
+            });
+        }
+
         function initInputDefaults() {
             const now = new Date();
             const dateStr = now.toISOString().split('T')[0];
             document.getElementById('inputDate').value = dateStr;
             document.getElementById('inputShift').value = '';
-            document.getElementById('inputPerson').value = '';
-            document.getElementById('inputDescription').value = '';
+            document.getElementById('inputPerson').innerHTML = '<option value="">請先選擇班別</option>';
+            document.getElementById('inputDescription').selectedIndex = -1; // 清除選取
             photoBase64 = '';
             document.getElementById('photoPreviewContainer').style.display = 'none';
             document.getElementById('inputPhoto').value = '';
+        }
+
+        // 根據班別更新人員下拉選單
+        function updatePersonOptions() {
+            const shift = document.getElementById('inputShift').value;
+            const select = document.getElementById('inputPerson');
+            let list = [];
+
+            if (shift === 'S1' || shift === 'S3') {
+                list = S1_S3_PERSONNEL;
+            } else if (shift === 'S2' || shift === 'S4') {
+                list = S2_S4_PERSONNEL;
+            } else {
+                select.innerHTML = '<option value="">請先選擇班別</option>';
+                return;
+            }
+
+            let html = '<option value="">請選擇人員</option>';
+            list.forEach(name => {
+                html += `<option value="${name}">${name}</option>`;
+            });
+            select.innerHTML = html;
         }
 
         document.getElementById('filterShift').addEventListener('change', function() { loadData(); loadStats(); });
@@ -855,9 +941,6 @@
             document.getElementById('statS2').textContent = (stats.byShift && stats.byShift.S2) || 0;
             document.getElementById('statS3').textContent = (stats.byShift && stats.byShift.S3) || 0;
             document.getElementById('statS4').textContent = (stats.byShift && stats.byShift.S4) || 0;
-
-            const personCount = stats.byPerson ? Object.keys(stats.byPerson).length : 0;
-            document.getElementById('statPersons').textContent = personCount;
 
             updateShiftChart(stats.byShift || { S1: 0, S2: 0, S3: 0, S4: 0 });
             updatePersonStatsList(stats.byPerson || {});
@@ -1010,11 +1093,15 @@
         async function submitData() {
             const date = document.getElementById('inputDate').value;
             const shift = document.getElementById('inputShift').value;
-            const person = document.getElementById('inputPerson').value.trim();
-            const description = document.getElementById('inputDescription').value.trim();
+            const person = document.getElementById('inputPerson').value;
 
-            if (!date || !shift || !person || !description) {
-                showToast('warning', '資料不完整', '請填寫所有必填欄位');
+            // 取得所有勾選的異常描述
+            const descSelect = document.getElementById('inputDescription');
+            const selectedDescriptions = Array.from(descSelect.selectedOptions).map(opt => opt.value);
+            const description = selectedDescriptions.join('、'); // 用「、」連接
+
+            if (!date || !shift || !person || selectedDescriptions.length === 0) {
+                showToast('warning', '資料不完整', '請填寫所有必填欄位（異常描述至少選擇一項）');
                 return;
             }
 
@@ -1138,7 +1225,7 @@
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             const params = getFilterParams();
-            const fileName = `異常數據_${params.year || '全部'}_${params.month || '全部'}_${new Date().getTime()}.csv`;
+            const fileName = `IPQC異常資料_${params.year || '全部'}_${params.month || '全部'}_${new Date().getTime()}.csv`;
             link.download = fileName;
             link.click();
             URL.revokeObjectURL(link.href);
