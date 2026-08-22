@@ -448,7 +448,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">異常班別 <span class="text-danger">*</span></label>
-                                <select class="form-select" id="inputShift" required>
+                                <select class="form-select" id="inputShift" required onchange="updatePersonOptions()">
                                     <option value="">請選擇班別</option>
                                     <option value="S1">S1</option>
                                     <option value="S2">S2</option>
@@ -459,7 +459,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">異常人員 <span class="text-danger">*</span></label>
                                 <select class="form-select" id="inputPerson" required>
-                                    <option value="">請選擇人員</option>
+                                    <option value="">請先選擇班別</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -521,7 +521,7 @@
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
         // ============================================================
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbydYcIk8fRfW1_k4REfkFmihpenfAcD8-KO938fx1RaYZPNvg1nUQW0TuabCzoiYPeS/exec';
+        const GAS_WEB_APP_URL = 'YOUR_GAS_WEB_APP_URL_HERE';
         // 例如：https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxx/exec
         // ============================================================
 
@@ -549,6 +549,10 @@
         S2_PERSONNEL.forEach(p => personShiftMap[p] = 'S2');
         S3_PERSONNEL.forEach(p => personShiftMap[p] = 'S3');
         S4_PERSONNEL.forEach(p => personShiftMap[p] = 'S4');
+
+        // 下拉選單用合併名單
+        const S1_S3_PERSONNEL = [...S1_PERSONNEL, ...S3_PERSONNEL];
+        const S2_S4_PERSONNEL = [...S2_PERSONNEL, ...S4_PERSONNEL];
 
         // 異常描述選項
         const DESCRIPTION_OPTIONS = [
@@ -617,23 +621,31 @@
             });
         }
 
-        // 人員下拉選單：S1/S3 合併、S2/S4 合併
+        // 初始化人員下拉選單（預設顯示提示）
         function initPersonDropdown() {
             const select = document.getElementById('inputPerson');
+            select.innerHTML = '<option value="">請先選擇班別</option>';
+        }
+
+        // 根據異常班別更新人員選項
+        function updatePersonOptions() {
+            const shift = document.getElementById('inputShift').value;
+            const select = document.getElementById('inputPerson');
+            let list = [];
+
+            if (shift === 'S1' || shift === 'S3') {
+                list = S1_S3_PERSONNEL;
+            } else if (shift === 'S2' || shift === 'S4') {
+                list = S2_S4_PERSONNEL;
+            } else {
+                select.innerHTML = '<option value="">請先選擇班別</option>';
+                return;
+            }
+
             let html = '<option value="">請選擇人員</option>';
-            
-            // S1/S3 群組
-            html += '<optgroup label="S1 / S3">';
-            S1_PERSONNEL.forEach(name => html += `<option value="${name}">${name}</option>`);
-            S3_PERSONNEL.forEach(name => html += `<option value="${name}">${name}</option>`);
-            html += '</optgroup>';
-            
-            // S2/S4 群組
-            html += '<optgroup label="S2 / S4">';
-            S2_PERSONNEL.forEach(name => html += `<option value="${name}">${name}</option>`);
-            S4_PERSONNEL.forEach(name => html += `<option value="${name}">${name}</option>`);
-            html += '</optgroup>';
-            
+            list.forEach(name => {
+                html += `<option value="${name}">${name}</option>`;
+            });
             select.innerHTML = html;
         }
 
@@ -642,7 +654,7 @@
             const dateStr = now.toISOString().split('T')[0];
             document.getElementById('inputDate').value = dateStr;
             document.getElementById('inputShift').value = '';
-            document.getElementById('inputPerson').value = '';
+            updatePersonOptions(); // 重置人員選單
             document.getElementById('inputDescription').selectedIndex = -1;
             photoBase64 = '';
             document.getElementById('photoPreviewContainer').style.display = 'none';
@@ -740,7 +752,6 @@
             document.getElementById('statS3').textContent = (stats.byShift && stats.byShift.S3) || 0;
             document.getElementById('statS4').textContent = (stats.byShift && stats.byShift.S4) || 0;
 
-            // 更新圖表卡片標題中的當月總計
             document.getElementById('chartTotalBadge').textContent = '當月總計：' + (stats.total || 0);
 
             updateShiftChart(stats.byShift || { S1: 0, S2: 0, S3: 0, S4: 0 });
