@@ -1,393 +1,1548 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>異常資料管理系統</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-      background: #f0f2f5;
-      margin: 0;
-      padding: 16px;
-      color: #333;
-    }
-    .container { max-width: 1100px; margin: 0 auto; }
-    h1 { text-align: center; color: #1a73e8; }
-    h2 { margin-top: 0; font-size: 18px; color: #1a73e8; }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      padding: 20px;
-      margin-bottom: 16px;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px;
-    }
-    .form-grid label { font-weight: 600; font-size: 14px; display: block; margin-bottom: 4px; }
-    .form-grid input, .form-grid select, .form-grid textarea {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    .form-grid textarea { grid-column: span 2; resize: vertical; }
-    .actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
-    .btn {
-      padding: 10px 18px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 600;
-    }
-    .btn-primary { background: #1a73e8; color: white; }
-    .btn-primary:hover { background: #1557b0; }
-    .btn-danger { background: #dc3545; color: white; }
-    .btn-outline { background: white; color: #1a73e8; border: 1px solid #1a73e8; }
-    .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
-    .filter-item { display: flex; flex-direction: column; gap: 4px; }
-    .filter-item label { font-size: 14px; font-weight: 600; }
-    .filter-item input, .filter-item select {
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .stat-box {
-      background: #f8f9fa;
-      border-radius: 10px;
-      padding: 12px;
-      text-align: center;
-      font-size: 14px;
-    }
-    .stat-box .number { font-size: 24px; font-weight: 700; color: #1a73e8; }
-    .record-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
-    .record-item {
-      border-left: 4px solid #1a73e8;
-      background: #fafafa;
-      border-radius: 8px;
-      padding: 12px 16px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: start;
-    }
-    .record-info { flex: 1; min-width: 200px; }
-    .record-info div { margin-bottom: 4px; }
-    .record-photo img {
-      max-width: 120px;
-      max-height: 120px;
-      border-radius: 8px;
-      object-fit: cover;
-      cursor: pointer;
-    }
-    .tag {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      background: #e7f0fe;
-      color: #1a73e8;
-      font-size: 13px;
-    }
-    .empty { text-align: center; color: #888; padding: 30px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>異常數據管理系統</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --primary-dark: #1557b0;
+            --success-color: #34a853;
+            --danger-color: #ea4335;
+            --warning-color: #fbbc04;
+            --bg-light: #f8f9fa;
+            --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            padding-bottom: 40px;
+        }
+
+        /* 頂部導航 */
+        .navbar-custom {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 16px 0;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-custom .navbar-brand i {
+            font-size: 1.8rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .navbar-custom .badge-date {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            font-size: 0.9rem;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* 卡片樣式 */
+        .card-custom {
+            background: #fff;
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card-custom:hover {
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-custom .card-header {
+            background: #fff;
+            border-bottom: 2px solid #e8ecf1;
+            padding: 16px 20px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #333;
+        }
+
+        .card-custom .card-header i {
+            color: var(--primary-color);
+        }
+
+        .card-custom .card-body {
+            padding: 20px;
+        }
+
+        /* 統計卡片 */
+        .stat-card {
+            border-radius: var(--border-radius);
+            padding: 18px 20px;
+            color: #fff;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            min-height: 110px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        }
+
+        .stat-card .stat-icon {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 2.5rem;
+            opacity: 0.3;
+        }
+
+        .stat-card .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .stat-total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .stat-s1 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-s2 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stat-s3 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .stat-s4 {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        /* 查詢區域 */
+        .filter-section .form-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 4px;
+        }
+
+        .filter-section .form-select,
+        .filter-section .form-control {
+            border-radius: 8px;
+            border: 1.5px solid #dee2e6;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            padding: 8px 12px;
+        }
+
+        .filter-section .form-select:focus,
+        .filter-section .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
+        }
+
+        /* 按鈕樣式 */
+        .btn-custom-primary {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-custom-primary:hover {
+            background: var(--primary-dark);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-custom-outline {
+            background: #fff;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-custom-outline:hover {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-custom-danger {
+            background: #fff;
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-custom-danger:hover {
+            background: var(--danger-color);
+            color: #fff;
+        }
+
+        /* 表格樣式 */
+        .table-custom {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        .table-custom thead th {
+            background: #f1f4f9;
+            color: #333;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 14px;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        .table-custom tbody td {
+            padding: 12px 14px;
+            vertical-align: middle;
+            border-bottom: 1px solid #eef0f3;
+            font-size: 0.9rem;
+            color: #444;
+        }
+
+        .table-custom tbody tr {
+            transition: var(--transition);
+        }
+
+        .table-custom tbody tr:hover {
+            background: #f8fafd;
+        }
+
+        .table-custom tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge-shift {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .badge-shift-S1 {
+            background: #fde8e8;
+            color: #c0392b;
+        }
+        .badge-shift-S2 {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        .badge-shift-S3 {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .badge-shift-S4 {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .photo-thumb {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid #e8ecf1;
+        }
+
+        .photo-thumb:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .photo-placeholder {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            background: #f1f4f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #b0b8c4;
+            font-size: 1.3rem;
+            border: 2px dashed #d0d7e2;
+        }
+
+        /* 空狀態 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9aa5b1;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h5 {
+            font-weight: 600;
+            color: #666;
+        }
+
+        /* 載入動畫 */
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        /* 照片預覽 */
+        .photo-preview-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .photo-preview-container img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            object-fit: cover;
+        }
+
+        .photo-preview-container .btn-remove-photo {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--danger-color);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 大圖查看模態框 */
+        .modal-photo-view .modal-content {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        .modal-photo-view .modal-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .modal-photo-view .modal-body img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 浮動添加按鈕 */
+        .fab-add {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            font-size: 1.8rem;
+            box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab-add:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 28px rgba(26, 115, 232, 0.55);
+            background: var(--primary-dark);
+        }
+
+        /* Toast 通知 */
+        .toast-container-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast-custom {
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border: none;
+            overflow: hidden;
+            min-width: 300px;
+        }
+
+        .toast-custom .toast-header {
+            border-bottom: none;
+            padding: 12px 16px;
+            font-weight: 600;
+        }
+
+        /* 人員統計列表 */
+        .person-stat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .person-stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .person-stat-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .person-stat-count {
+            background: var(--primary-color);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            .navbar-custom .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .stat-card {
+                min-height: 80px;
+                padding: 14px 16px;
+            }
+
+            .stat-card .stat-number {
+                font-size: 1.6rem;
+            }
+
+            .table-custom thead th,
+            .table-custom tbody td {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+
+            .photo-thumb {
+                width: 42px;
+                height: 42px;
+            }
+
+            .fab-add {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .filter-section .col-md-2,
+            .filter-section .col-md-3 {
+                margin-bottom: 10px;
+            }
+        }
+
+        /* 描述文字截斷 */
+        .description-text {
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            cursor: default;
+        }
+
+        .description-text:hover {
+            white-space: normal;
+            overflow: visible;
+            word-break: break-all;
+        }
+
+        /* 圖表容器 */
+        .chart-container {
+            position: relative;
+            height: 220px;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📋 異常資料管理系統</h1>
 
-    <!-- 新增異常資料 -->
-    <div class="card">
-      <h2>➕ 新增異常資料</h2>
-      <form id="recordForm" onsubmit="event.preventDefault(); submitRecord();">
-        <div class="form-grid">
-          <div>
-            <label>異常日期</label>
-            <input type="date" id="date" required>
-          </div>
-          <div>
-            <label>異常班別</label>
-            <select id="shift" required>
-              <option value="">請選擇</option>
-              <option>早班</option>
-              <option>中班</option>
-              <option>晚班</option>
-              <option>夜班</option>
-            </select>
-          </div>
-          <div>
-            <label>異常人員</label>
-            <input type="text" id="person" placeholder="姓名／工號" required>
-          </div>
-          <div>
-            <label>異常照片</label>
-            <input type="file" id="photo" accept="image/*">
-          </div>
-          <div style="grid-column: span 2;">
-            <label>異常描述</label>
-            <textarea id="description" rows="2" placeholder="請輸入異常描述" required></textarea>
-          </div>
+    <!-- ==================== 頂部導航 ==================== -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-clipboard-list"></i>
+                異常數據管理系統
+            </a>
+            <span class="badge-date" id="currentDateDisplay">
+                <i class="fas fa-calendar-alt me-1"></i>
+                載入中...
+            </span>
         </div>
-        <div class="actions">
-          <button type="submit" class="btn btn-primary">新增資料</button>
+    </nav>
+
+    <!-- ==================== 主要內容 ==================== -->
+    <div class="container mt-4">
+
+        <!-- 查詢篩選區域 -->
+        <div class="card card-custom mb-4">
+            <div class="card-header">
+                <i class="fas fa-filter"></i> 查詢篩選
+            </div>
+            <div class="card-body filter-section">
+                <div class="row g-3 align-items-end">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label">班別</label>
+                        <select class="form-select" id="filterShift">
+                            <option value="all">全部班別</option>
+                            <option value="S1">S1</option>
+                            <option value="S2">S2</option>
+                            <option value="S3">S3</option>
+                            <option value="S4">S4</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label">年份</label>
+                        <select class="form-select" id="filterYear">
+                            <option value="all">全部年份</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label">月份</label>
+                        <select class="form-select" id="filterMonth">
+                            <option value="all">全部月份</option>
+                            <option value="1">1月</option>
+                            <option value="2">2月</option>
+                            <option value="3">3月</option>
+                            <option value="4">4月</option>
+                            <option value="5">5月</option>
+                            <option value="6">6月</option>
+                            <option value="7">7月</option>
+                            <option value="8">8月</option>
+                            <option value="9">9月</option>
+                            <option value="10">10月</option>
+                            <option value="11">11月</option>
+                            <option value="12">12月</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label">日期</label>
+                        <select class="form-select" id="filterDate">
+                            <option value="all">全部日期</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4 d-flex gap-2">
+                        <button class="btn btn-custom-primary flex-grow-1" onclick="loadData()">
+                            <i class="fas fa-search"></i> 查詢
+                        </button>
+                        <button class="btn btn-custom-outline" onclick="resetFilters()" title="重置篩選">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button class="btn btn-custom-outline" onclick="exportCSV()" title="匯出CSV">
+                            <i class="fas fa-file-export"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </form>
+
+        <!-- 統計卡片區域 -->
+        <div class="row g-3 mb-4" id="statsRow">
+            <div class="col-6 col-md-2">
+                <div class="stat-card stat-total">
+                    <i class="fas fa-chart-bar stat-icon"></i>
+                    <div class="stat-number" id="statTotal">0</div>
+                    <div class="stat-label">總異常數</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card stat-s1">
+                    <i class="fas fa-sun stat-icon"></i>
+                    <div class="stat-number" id="statS1">0</div>
+                    <div class="stat-label">S1 異常</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card stat-s2">
+                    <i class="fas fa-cloud-sun stat-icon"></i>
+                    <div class="stat-number" id="statS2">0</div>
+                    <div class="stat-label">S2 異常</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card stat-s3">
+                    <i class="fas fa-moon stat-icon"></i>
+                    <div class="stat-number" id="statS3">0</div>
+                    <div class="stat-label">S3 異常</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card stat-s4">
+                    <i class="fas fa-star stat-icon"></i>
+                    <div class="stat-number" id="statS4">0</div>
+                    <div class="stat-label">S4 異常</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card" style="background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);">
+                    <i class="fas fa-users stat-icon"></i>
+                    <div class="stat-number" id="statPersons">0</div>
+                    <div class="stat-label">涉及人員</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 圖表區域 -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-7">
+                <div class="card card-custom h-100">
+                    <div class="card-header">
+                        <i class="fas fa-chart-column"></i> 班別統計圖表
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="shiftChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card card-custom h-100">
+                    <div class="card-header">
+                        <i class="fas fa-user-tag"></i> 人員異常統計
+                    </div>
+                    <div class="card-body" id="personStatsContainer" style="max-height: 280px; overflow-y: auto;">
+                        <div class="empty-state py-3">
+                            <i class="fas fa-user-slash"></i>
+                            <p class="mb-0">尚無人員統計數據</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 數據列表區域 -->
+        <div class="card card-custom">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-list"></i> 異常數據列表</span>
+                <span class="badge bg-primary" id="dataCountBadge">0 筆</span>
+            </div>
+            <div class="card-body p-0">
+                <div id="dataTableContainer">
+                    <div class="loading-spinner" id="loadingSpinner">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">載入中...</span>
+                        </div>
+                    </div>
+                    <div id="dataTableWrapper" style="display:none;">
+                        <div class="table-responsive">
+                            <table class="table table-custom mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width:50px;">序號</th>
+                                        <th>異常日期</th>
+                                        <th>異常班別</th>
+                                        <th>異常人員</th>
+                                        <th>異常描述</th>
+                                        <th>異常照片</th>
+                                        <th style="width:80px;">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dataTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="emptyState" class="empty-state" style="display:none;">
+                            <i class="fas fa-inbox"></i>
+                            <h5>暫無異常數據</h5>
+                            <p class="text-muted">點擊右下角 + 按鈕新增異常記錄</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- 查詢與統計 -->
-    <div class="card">
-      <h2>🔍 查詢與統計</h2>
-      <div class="filter-bar">
-        <div class="filter-item">
-          <label>年份</label>
-          <select id="filterYear"></select>
+    <!-- ==================== 浮動添加按鈕 ==================== -->
+    <button class="fab-add" onclick="openAddModal()" title="新增異常記錄">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- ==================== 新增數據模態框 ==================== -->
+    <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: #fff; border-radius: 16px 16px 0 0; padding: 18px 24px;">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-plus-circle me-2"></i>新增異常記錄
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="addForm" onsubmit="return submitData(event)">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">異常日期 <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="inputDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">異常班別 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="inputShift" required>
+                                    <option value="">請選擇班別</option>
+                                    <option value="S1">S1</option>
+                                    <option value="S2">S2</option>
+                                    <option value="S3">S3</option>
+                                    <option value="S4">S4</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">異常人員 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="inputPerson" placeholder="請輸入異常人員姓名" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">異常照片</label>
+                                <input type="file" class="form-control" id="inputPhoto" accept="image/*" onchange="previewPhoto(event)">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">異常描述 <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="inputDescription" rows="3" placeholder="請詳細描述異常情況..." required></textarea>
+                            </div>
+                            <div class="col-12" id="photoPreviewContainer" style="display:none;">
+                                <div class="photo-preview-container">
+                                    <img id="photoPreview" src="" alt="照片預覽">
+                                    <button type="button" class="btn-remove-photo" onclick="removePhoto()" title="移除照片">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #eef0f3; padding: 16px 24px;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:8px;">
+                        <i class="fas fa-times me-1"></i> 取消
+                    </button>
+                    <button type="button" class="btn btn-custom-primary" onclick="submitData()">
+                        <i class="fas fa-save me-1"></i> 儲存
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="filter-item">
-          <label>月份</label>
-          <select id="filterMonth"></select>
-        </div>
-        <div class="filter-item">
-          <label>日期</label>
-          <input type="date" id="filterDate">
-        </div>
-        <div class="filter-item">
-          <label>班別</label>
-          <select id="filterShift">
-            <option value="">全部班別</option>
-            <option>早班</option>
-            <option>中班</option>
-            <option>晚班</option>
-            <option>夜班</option>
-          </select>
-        </div>
-        <div class="filter-item">
-          <button class="btn btn-primary" onclick="loadRecords()">查詢</button>
-        </div>
-      </div>
-      <div id="statsContainer"></div>
     </div>
 
-    <!-- 資料列表 -->
-    <div class="card">
-      <h2>📄 資料列表（<span id="listTitle">當月</span>）</h2>
-      <div id="recordsContainer" class="record-list"></div>
+    <!-- ==================== 照片大圖查看模態框 ==================== -->
+    <div class="modal fade modal-photo-view" id="photoViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img id="photoViewImage" src="" alt="異常照片大圖">
+                </div>
+                <div class="text-center mt-2">
+                    <button type="button" class="btn btn-light btn-lg rounded-circle" data-bs-dismiss="modal" style="width:50px;height:50px;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+    <!-- ==================== Toast 通知容器 ==================== -->
+    <div class="toast-container-custom" id="toastContainer"></div>
 
-    function setDefaultDate() {
-      const today = new Date();
-      document.getElementById('date').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    }
+    <!-- ==================== Bootstrap 5 JS ==================== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
 
-    function populateFilters() {
-      const yearSelect = document.getElementById('filterYear');
-      const startYear = 2020;
-      for (let y = currentYear; y >= startYear; y--) {
-        const opt = document.createElement('option');
-        opt.value = y;
-        opt.textContent = y + '年';
-        if (y === currentYear) opt.selected = true;
-        yearSelect.appendChild(opt);
-      }
+    <script>
+        // ============================================================
+        //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
+        // ============================================================
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxorNjr9EmPBo-UESYKdXjE1P6THUo2Drl34kXZ4Ph8-50_FfjEheUuQxXa-7T4fH1W/exec';
+        // 例如：https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec
+        // ============================================================
 
-      const monthSelect = document.getElementById('filterMonth');
-      for (let m = 1; m <= 12; m++) {
-        const val = String(m).padStart(2, '0');
-        const opt = document.createElement('option');
-        opt.value = val;
-        opt.textContent = val + '月';
-        if (val === currentMonth) opt.selected = true;
-        monthSelect.appendChild(opt);
-      }
+        // 全域變數
+        let currentData = [];
+        let shiftChartInstance = null;
+        let uploadedPhotoUrl = ''; // 儲存已上傳的照片URL
+        let photoBase64 = ''; // 儲存照片的base64數據
 
-      document.getElementById('filterDate').value = '';
-      document.getElementById('filterShift').value = '';
-    }
+        // ============================================================
+        //  初始化
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            initDateDisplay();
+            initYearFilter();
+            initDateFilter();
+            initInputDefaults();
+            // 設置預設查詢為當前月份
+            const now = new Date();
+            document.getElementById('filterYear').value = now.getFullYear();
+            document.getElementById('filterMonth').value = now.getMonth() + 1;
+            loadData();
+            loadStats();
+        });
 
-    function submitRecord() {
-      const date = document.getElementById('date').value;
-      const shift = document.getElementById('shift').value;
-      const person = document.getElementById('person').value.trim();
-      const description = document.getElementById('description').value.trim();
-
-      if (!date || !shift || !person || !description) {
-        alert('請完整填寫異常日期、班別、人員、描述');
-        return;
-      }
-
-      const fileInput = document.getElementById('photo');
-      const file = fileInput.files[0];
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          google.script.run
-            .withSuccessHandler(onAddSuccess)
-            .withFailureHandler(onFailure)
-            .addRecord(
-              { date: date, shift: shift, person: person, description: description },
-              e.target.result,
-              file.name,
-              file.type
-            );
-        };
-        reader.readAsDataURL(file);
-      } else {
-        google.script.run
-          .withSuccessHandler(onAddSuccess)
-          .withFailureHandler(onFailure)
-          .addRecord(
-            { date: date, shift: shift, person: person, description: description },
-            null, null, null
-          );
-      }
-    }
-
-    function onAddSuccess(res) {
-      if (res.success) {
-        const addedDate = document.getElementById('date').value;
-        alert('✅ 新增成功');
-        document.getElementById('recordForm').reset();
-        setDefaultDate();
-
-        // 將查詢條件設定到剛新增的日期，方便立刻看到該筆資料
-        if (addedDate) {
-          const [y, m] = addedDate.split('-');
-          document.getElementById('filterYear').value = y;
-          document.getElementById('filterMonth').value = m;
-          document.getElementById('filterDate').value = addedDate;
-          document.getElementById('filterShift').value = '';
+        // 初始化日期顯示
+        function initDateDisplay() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('currentDateDisplay').innerHTML =
+                '<i class="fas fa-calendar-alt me-1"></i>' + now.toLocaleDateString('zh-TW', options);
         }
 
-        loadRecords();
-      } else {
-        alert('❌ 新增失敗：' + res.error);
-      }
-    }
-
-    function onFailure(err) {
-      alert('❌ 系統錯誤：' + err.message);
-    }
-
-    function loadRecords() {
-      const year = document.getElementById('filterYear').value;
-      const month = document.getElementById('filterMonth').value;
-      const date = document.getElementById('filterDate').value;
-      const shift = document.getElementById('filterShift').value;
-
-      const title = date ? date : (year + '-' + month);
-      document.getElementById('listTitle').textContent = title + (shift ? ' / ' + shift : '');
-
-      google.script.run
-        .withSuccessHandler(renderRecords)
-        .withFailureHandler(onFailure)
-        .getStatistics(year, month, shift, date);
-    }
-
-    function renderRecords(stats) {
-      renderStats(stats);
-
-      const container = document.getElementById('recordsContainer');
-      container.innerHTML = '';
-
-      if (!stats.records || stats.records.length === 0) {
-        container.innerHTML = '<div class="empty">尚無資料</div>';
-        return;
-      }
-
-      stats.records.forEach(rec => {
-        const div = document.createElement('div');
-        div.className = 'record-item';
-
-        let photoHtml = '';
-        if (rec.photoUrl) {
-          photoHtml = `
-            <div class="record-photo">
-              <a href="${rec.photoUrl}" target="_blank">
-                <img src="${rec.photoUrl}" alt="異常照片">
-              </a>
-            </div>
-          `;
+        // 初始化年份篩選
+        function initYearFilter() {
+            const select = document.getElementById('filterYear');
+            const currentYear = new Date().getFullYear();
+            for (let y = currentYear + 1; y >= 2020; y--) {
+                const option = document.createElement('option');
+                option.value = y;
+                option.textContent = y + '年';
+                select.appendChild(option);
+            }
         }
 
-        div.innerHTML = `
-          <div class="record-info">
-            <div>
-              <span class="tag">${rec.date}</span>
-              <span class="tag">${rec.shift}</span>
-            </div>
-            <div><strong>人員：</strong>${rec.person}</div>
-            <div><strong>描述：</strong>${rec.description}</div>
-            <div style="margin-top:6px;">
-              <button class="btn btn-danger" onclick="deleteRecord('${rec.id}')">刪除</button>
-            </div>
-          </div>
-          ${photoHtml}
-        `;
+        // 初始化日期篩選
+        function initDateFilter() {
+            const select = document.getElementById('filterDate');
+            for (let d = 1; d <= 31; d++) {
+                const option = document.createElement('option');
+                option.value = d;
+                option.textContent = d + '日';
+                select.appendChild(option);
+            }
+        }
 
-        container.appendChild(div);
-      });
-    }
+        // 初始化輸入表單默認值
+        function initInputDefaults() {
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            document.getElementById('inputDate').value = dateStr;
+            document.getElementById('inputShift').value = '';
+            document.getElementById('inputPerson').value = '';
+            document.getElementById('inputDescription').value = '';
+            uploadedPhotoUrl = '';
+            photoBase64 = '';
+            document.getElementById('photoPreviewContainer').style.display = 'none';
+            document.getElementById('inputPhoto').value = '';
+        }
 
-    function renderStats(stats) {
-      const container = document.getElementById('statsContainer');
+        // 監聽篩選變化
+        document.getElementById('filterShift').addEventListener('change', function() {
+            loadData();
+            loadStats();
+        });
+        document.getElementById('filterYear').addEventListener('change', function() {
+            loadData();
+            loadStats();
+        });
+        document.getElementById('filterMonth').addEventListener('change', function() {
+            loadData();
+            loadStats();
+        });
+        document.getElementById('filterDate').addEventListener('change', function() {
+            loadData();
+            loadStats();
+        });
 
-      const byShiftHtml = Object.entries(stats.byShift || {}).map(([k, v]) => `<div>${k}：${v}筆</div>`).join('') || '無';
-      const byDateHtml = Object.entries(stats.byDate || {}).sort().map(([k, v]) => `<div>${k}：${v}筆</div>`).join('') || '無';
-      const byPersonHtml = Object.entries(stats.byPerson || {}).map(([k, v]) => `<div>${k}：${v}筆</div>`).join('') || '無';
+        // ============================================================
+        //  重置篩選
+        // ============================================================
+        function resetFilters() {
+            document.getElementById('filterShift').value = 'all';
+            const now = new Date();
+            document.getElementById('filterYear').value = now.getFullYear();
+            document.getElementById('filterMonth').value = now.getMonth() + 1;
+            document.getElementById('filterDate').value = 'all';
+            loadData();
+            loadStats();
+        }
 
-      container.innerHTML = `
-        <div class="stats-grid">
-          <div class="stat-box">
-            <div class="number">${stats.total}</div>
-            <div>符合筆數</div>
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:10px;">
-          <div class="stat-box"><strong>依班別</strong><hr>${byShiftHtml}</div>
-          <div class="stat-box"><strong>依日期</strong><hr>${byDateHtml}</div>
-          <div class="stat-box"><strong>依人員</strong><hr>${byPersonHtml}</div>
-        </div>
-      `;
-    }
+        // ============================================================
+        //  獲取當前篩選參數
+        // ============================================================
+        function getFilterParams() {
+            return {
+                shift: document.getElementById('filterShift').value,
+                year: document.getElementById('filterYear').value,
+                month: document.getElementById('filterMonth').value,
+                date: document.getElementById('filterDate').value
+            };
+        }
 
-    function deleteRecord(id) {
-      if (!confirm('確定要刪除此筆資料嗎？')) return;
+        // ============================================================
+        //  載入數據
+        // ============================================================
+        async function loadData() {
+            const params = getFilterParams();
+            showLoading(true);
 
-      google.script.run
-        .withSuccessHandler(res => {
-          if (res.success) {
-            alert('🗑️ 已刪除');
-            loadRecords();
-          } else {
-            alert('刪除失敗：' + res.error);
-          }
-        })
-        .withFailureHandler(onFailure)
-        .deleteRecord(id);
-    }
+            try {
+                const queryString = new URLSearchParams({
+                    action: 'getData',
+                    shift: params.shift,
+                    year: params.year,
+                    month: params.month,
+                    date: params.date
+                }).toString();
 
-    // 初始化
-    setDefaultDate();
-    populateFilters();
-    loadRecords();
-  </script>
+                const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentData = result.data;
+                    renderDataTable(currentData);
+                    updateDataCountBadge(currentData.length);
+                } else {
+                    showToast('error', '載入失敗', result.message || '未知錯誤');
+                    currentData = [];
+                    renderDataTable([]);
+                    updateDataCountBadge(0);
+                }
+            } catch (error) {
+                console.error('載入數據錯誤:', error);
+                showToast('error', '網路錯誤', '無法連接到伺服器，請檢查GAS URL設定');
+                currentData = [];
+                renderDataTable([]);
+                updateDataCountBadge(0);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // ============================================================
+        //  載入統計數據
+        // ============================================================
+        async function loadStats() {
+            const params = getFilterParams();
+
+            try {
+                const queryString = new URLSearchParams({
+                    action: 'getStats',
+                    year: params.year,
+                    month: params.month
+                }).toString();
+
+                const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    updateStatsDisplay(result.stats);
+                }
+            } catch (error) {
+                console.error('載入統計錯誤:', error);
+            }
+        }
+
+        // ============================================================
+        //  更新統計顯示
+        // ============================================================
+        function updateStatsDisplay(stats) {
+            document.getElementById('statTotal').textContent = stats.total || 0;
+            document.getElementById('statS1').textContent = (stats.byShift && stats.byShift.S1) || 0;
+            document.getElementById('statS2').textContent = (stats.byShift && stats.byShift.S2) || 0;
+            document.getElementById('statS3').textContent = (stats.byShift && stats.byShift.S3) || 0;
+            document.getElementById('statS4').textContent = (stats.byShift && stats.byShift.S4) || 0;
+
+            const personCount = stats.byPerson ? Object.keys(stats.byPerson).length : 0;
+            document.getElementById('statPersons').textContent = personCount;
+
+            // 更新圖表
+            updateShiftChart(stats.byShift || { S1: 0, S2: 0, S3: 0, S4: 0 });
+
+            // 更新人員統計列表
+            updatePersonStatsList(stats.byPerson || {});
+        }
+
+        // ============================================================
+        //  更新班別統計圖表
+        // ============================================================
+        function updateShiftChart(byShift) {
+            const ctx = document.getElementById('shiftChart').getContext('2d');
+
+            if (shiftChartInstance) {
+                shiftChartInstance.destroy();
+            }
+
+            shiftChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['S1', 'S2', 'S3', 'S4'],
+                    datasets: [{
+                        label: '異常次數',
+                        data: [
+                            byShift.S1 || 0,
+                            byShift.S2 || 0,
+                            byShift.S3 || 0,
+                            byShift.S4 || 0
+                        ],
+                        backgroundColor: [
+                            'rgba(240, 147, 251, 0.85)',
+                            'rgba(79, 172, 254, 0.85)',
+                            'rgba(67, 233, 123, 0.85)',
+                            'rgba(250, 112, 154, 0.85)'
+                        ],
+                        borderColor: [
+                            'rgba(240, 147, 251, 1)',
+                            'rgba(79, 172, 254, 1)',
+                            'rgba(67, 233, 123, 1)',
+                            'rgba(250, 112, 154, 1)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' 次異常';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { size: 12 } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 14, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================================
+        //  更新人員統計列表
+        // ============================================================
+        function updatePersonStatsList(byPerson) {
+            const container = document.getElementById('personStatsContainer');
+            const persons = Object.entries(byPerson).sort((a, b) => b[1] - a[1]);
+
+            if (persons.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state py-3">
+                        <i class="fas fa-user-slash"></i>
+                        <p class="mb-0">尚無人員統計數據</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            persons.forEach(([name, count]) => {
+                html += `
+                    <div class="person-stat-item">
+                        <span class="person-stat-name">
+                            <i class="fas fa-user-circle me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}
+                        </span>
+                        <span class="person-stat-count">${count} 次</span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        //  渲染數據表格
+        // ============================================================
+        function renderDataTable(data) {
+            const tableBody = document.getElementById('dataTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const tableWrapper = document.getElementById('dataTableWrapper');
+
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = '';
+                emptyState.style.display = 'block';
+                tableWrapper.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            tableWrapper.style.display = 'block';
+
+            let html = '';
+            data.forEach((item, index) => {
+                const shiftClass = 'badge-shift-' + escapeHtml(item.shift);
+                const hasPhoto = item.photoUrl && item.photoUrl.trim() !== '';
+
+                html += `
+                    <tr>
+                        <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
+                        <td style="white-space:nowrap;font-weight:500;">
+                            <i class="fas fa-calendar-day me-1" style="color:#1a73e8;"></i>
+                            ${escapeHtml(item.date)}
+                        </td>
+                        <td>
+                            <span class="badge-shift ${shiftClass}">${escapeHtml(item.shift)}</span>
+                        </td>
+                        <td style="font-weight:600;">
+                            <i class="fas fa-user me-1" style="color:#555;"></i>
+                            ${escapeHtml(item.person)}
+                        </td>
+                        <td>
+                            <span class="description-text" title="${escapeHtml(item.description)}">
+                                ${escapeHtml(item.description)}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            ${hasPhoto ? `
+                                <img src="${escapeHtml(item.photoUrl)}" 
+                                     class="photo-thumb" 
+                                     alt="異常照片" 
+                                     onclick="viewPhoto('${escapeHtml(item.photoUrl)}')"
+                                     loading="lazy">
+                            ` : `
+                                <div class="photo-placeholder">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            `}
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${escapeHtml(item.id)}')" 
+                                    title="刪除記錄" style="border-radius:6px;padding:4px 10px;">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableBody.innerHTML = html;
+        }
+
+        // ============================================================
+        //  更新數據計數徽章
+        // ============================================================
+        function updateDataCountBadge(count) {
+            document.getElementById('dataCountBadge').textContent = count + ' 筆';
+        }
+
+        // ============================================================
+        //  顯示/隱藏載入動畫
+        // ============================================================
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            const tableWrapper = document.getElementById('dataTableWrapper');
+
+            if (show) {
+                spinner.style.display = 'flex';
+                tableWrapper.style.display = 'none';
+            } else {
+                spinner.style.display = 'none';
+                if (currentData && currentData.length > 0) {
+                    tableWrapper.style.display = 'block';
+                }
+            }
+        }
+
+        // ============================================================
+        //  打開新增模態框
+        // ============================================================
+        function openAddModal() {
+            initInputDefaults();
+            const modal = new bootstrap.Modal(document.getElementById('addModal'));
+            modal.show();
+        }
+
+        // ============================================================
+        //  照片預覽
+        // ============================================================
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 檢查文件大小（限制10MB）
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('error', '文件過大', '照片大小不能超過10MB');
+                document.getElementById('inputPhoto').value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                photoBase64 = e.target.result;
+                document.getElementById('photoPreview').src = photoBase64;
+                document.getElementById('photoPreviewContainer').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ============================================================
+        //  移除照片
+        // ============================================================
+        function removePhoto() {
+            photoBase64 = '';
+            uploadedPhotoUrl = '';
+            document.getElementById('inputPhoto').value = '';
+            document.getElementById('photoPreviewContainer').style.display = 'none';
+            document.getElementById('photoPreview').src = '';
+        }
+
+        // ============================================================
+        //  提交數據
+        // ============================================================
+        async function submitData() {
+            const date = document.getElementById('inputDate').value;
+            const shift = document.getElementById('inputShift').value;
+            const person = document.getElementById('inputPerson').value.trim();
+            const description = document.getElementById('inputDescription').value.trim();
+
+            // 表單驗證
+            if (!date || !shift || !person || !description) {
+                showToast('warning', '資料不完整', '請填寫所有必填欄位');
+                return;
+            }
+
+            // 顯示儲存中狀態
+            const saveBtn = document.querySelector('#addModal .btn-custom-primary');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> 儲存中...';
+
+            try {
+                let finalPhotoUrl = '';
+
+                // 如果有照片，先上傳照片
+                if (photoBase64) {
+                    const uploadResult = await uploadPhotoToGAS(photoBase64);
+                    if (uploadResult.success) {
+                        finalPhotoUrl = uploadResult.photoUrl;
+                    } else {
+                        showToast('error', '照片上傳失敗', uploadResult.message || '請重試');
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = originalText;
+                        return;
+                    }
+                }
+
+                // 添加數據
+                const dataPayload = {
+                    date: date,
+                    shift: shift,
+                    person: person,
+                    description: description,
+                    photoUrl: finalPhotoUrl
+                };
+
+                const addResult = await addDataToGAS(dataPayload);
+
+                if (addResult.success) {
+                    showToast('success', '新增成功', '異常記錄已保存');
+                    // 關閉模態框
+                    bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
+                    // 重置表單
+                    initInputDefaults();
+                    // 重新載入數據和統計
+                    await loadData();
+                    await loadStats();
+                } else {
+                    showToast('error', '新增失敗', addResult.message || '請重試');
+                }
+            } catch (error) {
+                console.error('提交數據錯誤:', error);
+                showToast('error', '網路錯誤', '無法連接到伺服器');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+        }
+
+        // ============================================================
+        //  上傳照片到GAS
+        // ============================================================
+        async function uploadPhotoToGAS(base64Data) {
+            try {
+                const response = await fetch(GAS_WEB_APP_URL + '?action=uploadPhoto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        base64: base64Data,
+                        fileName: 'photo_' + new Date().getTime() + '.jpg',
+                        mimeType: base64Data.split(';')[0].split(':')[1] || 'image/jpeg'
+                    })
+                });
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('上傳照片錯誤:', error);
+                return { success: false, message: '網路錯誤：' + error.message };
+            }
+        }
+
+        // ============================================================
+        //  添加數據到GAS
+        // ============================================================
+        async function addDataToGAS(data) {
+            try {
+                const response = await fetch(GAS_WEB_APP_URL + '?action=addData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('添加數據錯誤:', error);
+                return { success: false, message: '網路錯誤：' + error.message };
+            }
+        }
+
+        // ============================================================
+        //  刪除記錄
+        // ============================================================
+        async function deleteRecord(id) {
+            if (!confirm('確定要刪除這筆異常記錄嗎？此操作無法復原。')) {
+                return;
+            }
+
+            try {
+                const queryString = new URLSearchParams({
+                    action: 'deleteData',
+                    id: id
+                }).toString();
+
+                const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('success', '刪除成功', '記錄已刪除');
+                    await loadData();
+                    await loadStats();
+                } else {
+                    showToast('error', '刪除失敗', result.message || '請重試');
+                }
+            } catch (error) {
+                console.error('刪除記錄錯誤:', error);
+                showToast('error', '網路錯誤', '無法連接到伺服器');
+            }
+        }
+
+        // ============================================================
+        //  查看大圖
+        // ============================================================
+        function viewPhoto(url) {
+            document.getElementById('photoViewImage').src = url;
+            const modal = new bootstrap.Modal(document.getElementById('photoViewModal'));
+            modal.show();
+        }
+
+        // ============================================================
+        //  匯出CSV
+        // ============================================================
+        function exportCSV() {
+            if (!currentData || currentData.length === 0) {
+                showToast('warning', '無數據', '沒有可匯出的數據');
+                return;
+            }
+
+            const headers = ['序號', '異常日期', '異常班別', '異常人員', '異常描述', '照片URL'];
+            const rows = currentData.map((item, index) => [
+                index + 1,
+                item.date,
+                item.shift,
+                item.person,
+                item.description,
+                item.photoUrl || ''
+            ]);
+
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))
+            ].join('\n');
+
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const params = getFilterParams();
+            const fileName = `異常數據_${params.year || '全部'}_${params.month || '全部'}_${new Date().getTime()}.csv`;
+            link.download = fileName;
+            link.click();
+            URL.revokeObjectURL(link.href);
+
+            showToast('success', '匯出成功', 'CSV檔案已下載');
+        }
+
+        // ============================================================
+        //  HTML 轉義
+        // ============================================================
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ============================================================
+        //  Toast 通知
+        // ============================================================
+        function showToast(type, title, message) {
+            const container = document.getElementById('toastContainer');
+
+            const iconMap = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+
+            const colorMap = {
+                success: '#34a853',
+                error: '#ea4335',
+                warning: '#fbbc04',
+                info: '#1a73e8'
+            };
+
+            const toastId = 'toast_' + new Date().getTime();
+            const icon = iconMap[type] || iconMap.info;
+            const color = colorMap[type] || colorMap.info;
+
+            const toastHtml = `
+                <div id="${toastId}" class="toast toast-custom" role="alert" aria-live="assertive" aria-atomic="true" style="border-left: 5px solid ${color};">
+                    <div class="toast-header" style="background: #fff;">
+                        <i class="fas ${icon} me-2" style="color: ${color}; font-size: 1.2rem;"></i>
+                        <strong class="me-auto" style="color: #333;">${escapeHtml(title)}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body" style="background: #fff; color: #555;">
+                        ${escapeHtml(message)}
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', toastHtml);
+
+            const toastEl = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+            toast.show();
+
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastEl.remove();
+            });
+        }
+    </script>
 </body>
 </html>
