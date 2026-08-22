@@ -321,7 +321,7 @@
                         </select>
                     </div>
                     <div class="col-12 col-md-4 d-flex gap-2">
-                        <button class="btn btn-custom-primary flex-grow-1" onclick="loadData()">
+                        <button class="btn btn-custom-primary flex-grow-1" onclick="loadDataAndStats()">
                             <i class="fas fa-search"></i> 查詢
                         </button>
                         <button class="btn btn-custom-outline" onclick="resetFilters()" title="重置篩選">
@@ -344,7 +344,7 @@
                         <i class="fas fa-grip-vertical me-2"></i>
                         <i class="fas fa-chart-column"></i> 班別統計圖表
                     </span>
-                    <span class="badge bg-primary" id="chartTotalBadge">當月總計：0</span>
+                    <span class="badge bg-primary" id="chartTotalBadge">篩選總計：0</span>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
@@ -565,7 +565,7 @@
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
         // ============================================================
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxb1U8OyII88opWY-XawflT_nhqFf9EKNSZn-OkStrAGPgBPig91AiraBhYg-KqKoxy/exec';
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxtdzJKSxY_u4EfHHjGproi9-mLfnrfi8pC_2K-P_J02TxY6GNd6Z5iRI9q70_C2GGb/exec';
         // 例如：https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxx/exec
         // ============================================================
 
@@ -611,8 +611,7 @@
             const now = new Date();
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
-            loadData();
-            loadStats();
+            loadDataAndStats(); // 初始載入資料與統計
             initDashboardDragDrop(); // 初始化拖曳排序
         });
 
@@ -834,7 +833,7 @@
             }
         }
 
-        // ==================== 資料載入與統計 ====================
+        // ==================== 資料載入與統計（整合函式） ====================
         function getFilterParams() {
             return {
                 shift: document.getElementById('filterShift').value,
@@ -844,32 +843,31 @@
             };
         }
 
-        async function loadData() {
-            const params = getFilterParams();
+        async function loadDataAndStats() {
             showLoading(true);
+            const params = getFilterParams();
             try {
-                const queryString = new URLSearchParams({
-                    action: 'getData',
-                    shift: params.shift,
-                    year: params.year,
-                    month: params.month,
-                    date: params.date
-                }).toString();
+                // 同時取得數據與統計
+                const [dataResult, statsResult] = await Promise.all([
+                    fetchDataFromGAS(params),
+                    fetchStatsFromGAS(params)
+                ]);
 
-                const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
-                const result = await response.json();
-                if (result.success) {
-                    currentData = result.data;
+                // 處理數據列表
+                if (dataResult.success) {
+                    currentData = dataResult.data;
                     renderDataTable(currentData);
                     updateDataCountBadge(currentData.length);
                 } else {
-                    showToast('error', '載入失敗', result.message || '未知錯誤');
+                    showToast('error', '載入失敗', dataResult.message || '未知錯誤');
                     currentData = [];
                     renderDataTable([]);
                     updateDataCountBadge(0);
+                }
+
+                // 處理統計
+                if (statsResult.success) {
+                    updateStatsDisplay(statsResult.stats);
                 }
             } catch (error) {
                 console.error('載入數據錯誤:', error);
@@ -882,29 +880,38 @@
             }
         }
 
-        async function loadStats() {
-            const params = getFilterParams();
-            try {
-                const queryString = new URLSearchParams({
-                    action: 'getStats',
-                    year: params.year,
-                    month: params.month
-                }).toString();
-                const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
-                const result = await response.json();
-                if (result.success) {
-                    updateStatsDisplay(result.stats);
-                }
-            } catch (error) {
-                console.error('載入統計錯誤:', error);
-            }
+        async function fetchDataFromGAS(params) {
+            const queryString = new URLSearchParams({
+                action: 'getData',
+                shift: params.shift,
+                year: params.year,
+                month: params.month,
+                date: params.date
+            }).toString();
+            const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            return await response.json();
+        }
+
+        async function fetchStatsFromGAS(params) {
+            const queryString = new URLSearchParams({
+                action: 'getStats',
+                shift: params.shift,
+                year: params.year,
+                month: params.month,
+                date: params.date
+            }).toString();
+            const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            return await response.json();
         }
 
         function updateStatsDisplay(stats) {
-            document.getElementById('chartTotalBadge').textContent = '當月總計：' + (stats.total || 0);
+            document.getElementById('chartTotalBadge').textContent = '篩選總計：' + (stats.total || 0);
             updateShiftChart(stats.byShift || { S1: 0, S2: 0, S3: 0, S4: 0 });
             updatePersonStatsList(stats.byPerson || {});
             updateDescriptionStatsList(stats.byDescription || {});
@@ -1087,8 +1094,7 @@
                     showToast('success', '新增成功', '異常記錄已保存');
                     bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
                     initInputDefaults();
-                    await loadData();
-                    await loadStats();
+                    await loadDataAndStats(); // 重新載入所有區塊
                 } else {
                     showToast('error', '新增失敗', addResult.message || '請重試');
                 }
@@ -1136,8 +1142,7 @@
                 const result = await response.json();
                 if (result.success) {
                     showToast('success', '刪除成功', '記錄已刪除');
-                    await loadData();
-                    await loadStats();
+                    await loadDataAndStats(); // 重新載入所有區塊
                 } else {
                     showToast('error', '刪除失敗', result.message || '請重試');
                 }
@@ -1176,8 +1181,7 @@
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
             document.getElementById('filterDate').value = 'all';
-            loadData();
-            loadStats();
+            loadDataAndStats(); // 重新載入所有區塊
         }
 
         function escapeHtml(str) {
