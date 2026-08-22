@@ -10,8 +10,7 @@
     <!-- Font Awesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <style>
         :root {
@@ -26,9 +25,7 @@
             --transition: all 0.3s ease;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -37,13 +34,11 @@
             padding-bottom: 40px;
         }
 
-        /* 頂部導航 */
         .navbar-custom {
             background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             padding: 16px 0;
         }
-
         .navbar-custom .navbar-brand {
             font-size: 1.5rem;
             font-weight: 700;
@@ -52,14 +47,12 @@
             align-items: center;
             gap: 10px;
         }
-
         .navbar-custom .navbar-brand i {
             font-size: 1.8rem;
             background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             border-radius: 10px;
         }
-
         .navbar-custom .badge-date {
             background: rgba(255, 255, 255, 0.25);
             color: #fff;
@@ -69,7 +62,6 @@
             font-weight: 500;
         }
 
-        /* 卡片樣式 */
         .card-custom {
             background: #fff;
             border: none;
@@ -78,11 +70,9 @@
             transition: var(--transition);
             overflow: hidden;
         }
-
         .card-custom:hover {
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
         }
-
         .card-custom .card-header {
             background: #fff;
             border-bottom: 2px solid #e8ecf1;
@@ -94,16 +84,9 @@
             gap: 8px;
             color: #333;
         }
+        .card-custom .card-header i { color: var(--primary-color); }
+        .card-custom .card-body { padding: 20px; }
 
-        .card-custom .card-header i {
-            color: var(--primary-color);
-        }
-
-        .card-custom .card-body {
-            padding: 20px;
-        }
-
-        /* 統計卡片 */
         .stat-card {
             border-radius: var(--border-radius);
             padding: 18px 20px;
@@ -116,12 +99,10 @@
             flex-direction: column;
             justify-content: center;
         }
-
         .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
         }
-
         .stat-card .stat-icon {
             position: absolute;
             right: 15px;
@@ -129,44 +110,29 @@
             font-size: 2.5rem;
             opacity: 0.3;
         }
-
         .stat-card .stat-number {
             font-size: 2.2rem;
             font-weight: 800;
             line-height: 1;
         }
-
         .stat-card .stat-label {
             font-size: 0.9rem;
             opacity: 0.9;
             font-weight: 500;
             margin-top: 4px;
         }
+        .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-s1 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-s2 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-s3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .stat-s4 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
 
-        .stat-total {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .stat-s1 {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        .stat-s2 {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-        .stat-s3 {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
-        .stat-s4 {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        /* 查詢區域 */
         .filter-section .form-label {
             font-weight: 600;
             font-size: 0.85rem;
             color: #555;
             margin-bottom: 4px;
         }
-
         .filter-section .form-select,
         .filter-section .form-control {
             border-radius: 8px;
@@ -175,14 +141,12 @@
             font-size: 0.95rem;
             padding: 8px 12px;
         }
-
         .filter-section .form-select:focus,
         .filter-section .form-control:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
         }
 
-        /* 按鈕樣式 */
         .btn-custom-primary {
             background: var(--primary-color);
             color: #fff;
@@ -195,14 +159,12 @@
             align-items: center;
             gap: 6px;
         }
-
         .btn-custom-primary:hover {
             background: var(--primary-dark);
             color: #fff;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
         }
-
         .btn-custom-outline {
             background: #fff;
             color: var(--primary-color);
@@ -215,12 +177,10 @@
             align-items: center;
             gap: 6px;
         }
-
         .btn-custom-outline:hover {
             background: var(--primary-color);
             color: #fff;
         }
-
         .btn-custom-danger {
             background: #fff;
             color: var(--danger-color);
@@ -233,19 +193,12 @@
             align-items: center;
             gap: 6px;
         }
-
         .btn-custom-danger:hover {
             background: var(--danger-color);
             color: #fff;
         }
 
-        /* 表格樣式 */
-        .table-custom {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-        }
-
+        .table-custom { border-collapse: separate; border-spacing: 0; width: 100%; }
         .table-custom thead th {
             background: #f1f4f9;
             color: #333;
@@ -257,7 +210,6 @@
             border-bottom: 2px solid #dee2e6;
             white-space: nowrap;
         }
-
         .table-custom tbody td {
             padding: 12px 14px;
             vertical-align: middle;
@@ -265,18 +217,9 @@
             font-size: 0.9rem;
             color: #444;
         }
-
-        .table-custom tbody tr {
-            transition: var(--transition);
-        }
-
-        .table-custom tbody tr:hover {
-            background: #f8fafd;
-        }
-
-        .table-custom tbody tr:last-child td {
-            border-bottom: none;
-        }
+        .table-custom tbody tr { transition: var(--transition); }
+        .table-custom tbody tr:hover { background: #f8fafd; }
+        .table-custom tbody tr:last-child td { border-bottom: none; }
 
         .badge-shift {
             padding: 6px 12px;
@@ -288,23 +231,10 @@
             min-width: 40px;
             text-align: center;
         }
-
-        .badge-shift-S1 {
-            background: #fde8e8;
-            color: #c0392b;
-        }
-        .badge-shift-S2 {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-        .badge-shift-S3 {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-        .badge-shift-S4 {
-            background: #fff3e0;
-            color: #e65100;
-        }
+        .badge-shift-S1 { background: #fde8e8; color: #c0392b; }
+        .badge-shift-S2 { background: #e3f2fd; color: #1565c0; }
+        .badge-shift-S3 { background: #e8f5e9; color: #2e7d32; }
+        .badge-shift-S4 { background: #fff3e0; color: #e65100; }
 
         .photo-thumb {
             width: 56px;
@@ -315,13 +245,11 @@
             transition: var(--transition);
             border: 2px solid #e8ecf1;
         }
-
         .photo-thumb:hover {
             transform: scale(1.1);
             border-color: var(--primary-color);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-
         .photo-placeholder {
             width: 56px;
             height: 56px;
@@ -335,44 +263,27 @@
             border: 2px dashed #d0d7e2;
         }
 
-        /* 空狀態 */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #9aa5b1;
         }
+        .empty-state i { font-size: 4rem; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state h5 { font-weight: 600; color: #666; }
 
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        .empty-state h5 {
-            font-weight: 600;
-            color: #666;
-        }
-
-        /* 載入動畫 */
         .loading-spinner {
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 40px;
         }
+        .spinner-border { width: 3rem; height: 3rem; }
 
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
-
-        /* 照片預覽 */
         .photo-preview-container {
             position: relative;
             display: inline-block;
             margin-top: 8px;
         }
-
         .photo-preview-container img {
             max-width: 200px;
             max-height: 200px;
@@ -380,7 +291,6 @@
             border: 2px solid #dee2e6;
             object-fit: cover;
         }
-
         .photo-preview-container .btn-remove-photo {
             position: absolute;
             top: -10px;
@@ -398,20 +308,17 @@
             justify-content: center;
         }
 
-        /* 大圖查看模態框 */
         .modal-photo-view .modal-content {
             background: transparent;
             border: none;
             box-shadow: none;
         }
-
         .modal-photo-view .modal-body {
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0;
         }
-
         .modal-photo-view .modal-body img {
             max-width: 100%;
             max-height: 85vh;
@@ -419,7 +326,6 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
         }
 
-        /* 浮動添加按鈕 */
         .fab-add {
             position: fixed;
             bottom: 30px;
@@ -439,21 +345,18 @@
             align-items: center;
             justify-content: center;
         }
-
         .fab-add:hover {
             transform: scale(1.08);
             box-shadow: 0 8px 28px rgba(26, 115, 232, 0.55);
             background: var(--primary-dark);
         }
 
-        /* Toast 通知 */
         .toast-container-custom {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 9999;
         }
-
         .toast-custom {
             border-radius: 10px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
@@ -461,14 +364,8 @@
             overflow: hidden;
             min-width: 300px;
         }
+        .toast-custom .toast-header { border-bottom: none; padding: 12px 16px; font-weight: 600; }
 
-        .toast-custom .toast-header {
-            border-bottom: none;
-            padding: 12px 16px;
-            font-weight: 600;
-        }
-
-        /* 人員統計列表 */
         .person-stat-item {
             display: flex;
             align-items: center;
@@ -476,16 +373,8 @@
             padding: 8px 0;
             border-bottom: 1px solid #f0f2f5;
         }
-
-        .person-stat-item:last-child {
-            border-bottom: none;
-        }
-
-        .person-stat-name {
-            font-weight: 600;
-            color: #333;
-        }
-
+        .person-stat-item:last-child { border-bottom: none; }
+        .person-stat-name { font-weight: 600; color: #333; }
         .person-stat-count {
             background: var(--primary-color);
             color: #fff;
@@ -495,47 +384,16 @@
             font-size: 0.85rem;
         }
 
-        /* 響應式調整 */
         @media (max-width: 768px) {
-            .navbar-custom .navbar-brand {
-                font-size: 1.2rem;
-            }
-
-            .stat-card {
-                min-height: 80px;
-                padding: 14px 16px;
-            }
-
-            .stat-card .stat-number {
-                font-size: 1.6rem;
-            }
-
-            .table-custom thead th,
-            .table-custom tbody td {
-                padding: 8px 10px;
-                font-size: 0.8rem;
-            }
-
-            .photo-thumb {
-                width: 42px;
-                height: 42px;
-            }
-
-            .fab-add {
-                width: 50px;
-                height: 50px;
-                font-size: 1.4rem;
-                bottom: 20px;
-                right: 20px;
-            }
-
-            .filter-section .col-md-2,
-            .filter-section .col-md-3 {
-                margin-bottom: 10px;
-            }
+            .navbar-custom .navbar-brand { font-size: 1.2rem; }
+            .stat-card { min-height: 80px; padding: 14px 16px; }
+            .stat-card .stat-number { font-size: 1.6rem; }
+            .table-custom thead th, .table-custom tbody td { padding: 8px 10px; font-size: 0.8rem; }
+            .photo-thumb { width: 42px; height: 42px; }
+            .fab-add { width: 50px; height: 50px; font-size: 1.4rem; bottom: 20px; right: 20px; }
+            .filter-section .col-md-2, .filter-section .col-md-3 { margin-bottom: 10px; }
         }
 
-        /* 描述文字截斷 */
         .description-text {
             max-width: 280px;
             overflow: hidden;
@@ -544,14 +402,12 @@
             display: block;
             cursor: default;
         }
-
         .description-text:hover {
             white-space: normal;
             overflow: visible;
             word-break: break-all;
         }
 
-        /* 圖表容器 */
         .chart-container {
             position: relative;
             height: 220px;
@@ -561,7 +417,7 @@
 </head>
 <body>
 
-    <!-- ==================== 頂部導航 ==================== -->
+    <!-- 頂部導航 -->
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
             <a class="navbar-brand" href="#">
@@ -575,7 +431,6 @@
         </div>
     </nav>
 
-    <!-- ==================== 主要內容 ==================== -->
     <div class="container mt-4">
 
         <!-- 查詢篩選區域 -->
@@ -742,8 +597,7 @@
                                         <th style="width:80px;">操作</th>
                                     </tr>
                                 </thead>
-                                <tbody id="dataTableBody">
-                                </tbody>
+                                <tbody id="dataTableBody"></tbody>
                             </table>
                         </div>
                         <div id="emptyState" class="empty-state" style="display:none;">
@@ -757,12 +611,12 @@
         </div>
     </div>
 
-    <!-- ==================== 浮動添加按鈕 ==================== -->
+    <!-- 浮動添加按鈕 -->
     <button class="fab-add" onclick="openAddModal()" title="新增異常記錄">
         <i class="fas fa-plus"></i>
     </button>
 
-    <!-- ==================== 新增數據模態框 ==================== -->
+    <!-- 新增數據模態框 -->
     <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
@@ -773,7 +627,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form id="addForm" onsubmit="return submitData(event)">
+                    <form id="addForm">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">異常日期 <span class="text-danger">*</span></label>
@@ -824,7 +678,7 @@
         </div>
     </div>
 
-    <!-- ==================== 照片大圖查看模態框 ==================== -->
+    <!-- 照片大圖查看模態框 -->
     <div class="modal fade modal-photo-view" id="photoViewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
@@ -840,36 +694,30 @@
         </div>
     </div>
 
-    <!-- ==================== Toast 通知容器 ==================== -->
+    <!-- Toast 通知容器 -->
     <div class="toast-container-custom" id="toastContainer"></div>
 
-    <!-- ==================== Bootstrap 5 JS ==================== -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-    </script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
         // ============================================================
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx5YPNnN-YCqzitHlGl_S0b-y4ndkzzh1VJcEYUMdToIke-0beTFBJtiCjqs3jbJX9W/exec';
-        // 例如：https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzIqxLuAZJm6MtKo2z8tcjD9WfYghbkfxEGFeArheJ_HvWwpr3G7ym5sFqYAMN4h4Zl/exec';
+        // 例如：https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxx/exec
         // ============================================================
 
-        // 全域變數
         let currentData = [];
         let shiftChartInstance = null;
-        let uploadedPhotoUrl = ''; // 儲存已上傳的照片URL
-        let photoBase64 = ''; // 儲存照片的base64數據
+        let photoBase64 = '';
 
-        // ============================================================
-        //  初始化
-        // ============================================================
+        // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             initDateDisplay();
             initYearFilter();
             initDateFilter();
             initInputDefaults();
-            // 設置預設查詢為當前月份
             const now = new Date();
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
@@ -877,7 +725,6 @@
             loadStats();
         });
 
-        // 初始化日期顯示
         function initDateDisplay() {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
@@ -885,7 +732,6 @@
                 '<i class="fas fa-calendar-alt me-1"></i>' + now.toLocaleDateString('zh-TW', options);
         }
 
-        // 初始化年份篩選
         function initYearFilter() {
             const select = document.getElementById('filterYear');
             const currentYear = new Date().getFullYear();
@@ -897,7 +743,6 @@
             }
         }
 
-        // 初始化日期篩選
         function initDateFilter() {
             const select = document.getElementById('filterDate');
             for (let d = 1; d <= 31; d++) {
@@ -908,7 +753,6 @@
             }
         }
 
-        // 初始化輸入表單默認值
         function initInputDefaults() {
             const now = new Date();
             const dateStr = now.toISOString().split('T')[0];
@@ -916,33 +760,16 @@
             document.getElementById('inputShift').value = '';
             document.getElementById('inputPerson').value = '';
             document.getElementById('inputDescription').value = '';
-            uploadedPhotoUrl = '';
             photoBase64 = '';
             document.getElementById('photoPreviewContainer').style.display = 'none';
             document.getElementById('inputPhoto').value = '';
         }
 
-        // 監聽篩選變化
-        document.getElementById('filterShift').addEventListener('change', function() {
-            loadData();
-            loadStats();
-        });
-        document.getElementById('filterYear').addEventListener('change', function() {
-            loadData();
-            loadStats();
-        });
-        document.getElementById('filterMonth').addEventListener('change', function() {
-            loadData();
-            loadStats();
-        });
-        document.getElementById('filterDate').addEventListener('change', function() {
-            loadData();
-            loadStats();
-        });
+        document.getElementById('filterShift').addEventListener('change', function() { loadData(); loadStats(); });
+        document.getElementById('filterYear').addEventListener('change', function() { loadData(); loadStats(); });
+        document.getElementById('filterMonth').addEventListener('change', function() { loadData(); loadStats(); });
+        document.getElementById('filterDate').addEventListener('change', function() { loadData(); loadStats(); });
 
-        // ============================================================
-        //  重置篩選
-        // ============================================================
         function resetFilters() {
             document.getElementById('filterShift').value = 'all';
             const now = new Date();
@@ -953,9 +780,6 @@
             loadStats();
         }
 
-        // ============================================================
-        //  獲取當前篩選參數
-        // ============================================================
         function getFilterParams() {
             return {
                 shift: document.getElementById('filterShift').value,
@@ -965,13 +789,9 @@
             };
         }
 
-        // ============================================================
-        //  載入數據
-        // ============================================================
         async function loadData() {
             const params = getFilterParams();
             showLoading(true);
-
             try {
                 const queryString = new URLSearchParams({
                     action: 'getData',
@@ -985,9 +805,7 @@
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 });
-
                 const result = await response.json();
-
                 if (result.success) {
                     currentData = result.data;
                     renderDataTable(currentData);
@@ -1009,12 +827,8 @@
             }
         }
 
-        // ============================================================
-        //  載入統計數據
-        // ============================================================
         async function loadStats() {
             const params = getFilterParams();
-
             try {
                 const queryString = new URLSearchParams({
                     action: 'getStats',
@@ -1026,9 +840,7 @@
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 });
-
                 const result = await response.json();
-
                 if (result.success) {
                     updateStatsDisplay(result.stats);
                 }
@@ -1037,9 +849,6 @@
             }
         }
 
-        // ============================================================
-        //  更新統計顯示
-        // ============================================================
         function updateStatsDisplay(stats) {
             document.getElementById('statTotal').textContent = stats.total || 0;
             document.getElementById('statS1').textContent = (stats.byShift && stats.byShift.S1) || 0;
@@ -1050,35 +859,20 @@
             const personCount = stats.byPerson ? Object.keys(stats.byPerson).length : 0;
             document.getElementById('statPersons').textContent = personCount;
 
-            // 更新圖表
             updateShiftChart(stats.byShift || { S1: 0, S2: 0, S3: 0, S4: 0 });
-
-            // 更新人員統計列表
             updatePersonStatsList(stats.byPerson || {});
         }
 
-        // ============================================================
-        //  更新班別統計圖表
-        // ============================================================
         function updateShiftChart(byShift) {
             const ctx = document.getElementById('shiftChart').getContext('2d');
-
-            if (shiftChartInstance) {
-                shiftChartInstance.destroy();
-            }
-
+            if (shiftChartInstance) shiftChartInstance.destroy();
             shiftChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['S1', 'S2', 'S3', 'S4'],
                     datasets: [{
                         label: '異常次數',
-                        data: [
-                            byShift.S1 || 0,
-                            byShift.S2 || 0,
-                            byShift.S3 || 0,
-                            byShift.S4 || 0
-                        ],
+                        data: [byShift.S1 || 0, byShift.S2 || 0, byShift.S3 || 0, byShift.S4 || 0],
                         backgroundColor: [
                             'rgba(240, 147, 251, 0.85)',
                             'rgba(79, 172, 254, 0.85)',
@@ -1098,65 +892,32 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.parsed.y + ' 次異常';
-                                }
-                            }
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1, font: { size: 12 } },
-                            grid: { color: 'rgba(0,0,0,0.05)' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { size: 14, weight: 'bold' } }
-                        }
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
                     }
                 }
             });
         }
 
-        // ============================================================
-        //  更新人員統計列表
-        // ============================================================
         function updatePersonStatsList(byPerson) {
             const container = document.getElementById('personStatsContainer');
             const persons = Object.entries(byPerson).sort((a, b) => b[1] - a[1]);
-
             if (persons.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state py-3">
-                        <i class="fas fa-user-slash"></i>
-                        <p class="mb-0">尚無人員統計數據</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-user-slash"></i><p class="mb-0">尚無人員統計數據</p></div>`;
                 return;
             }
-
             let html = '';
             persons.forEach(([name, count]) => {
-                html += `
-                    <div class="person-stat-item">
-                        <span class="person-stat-name">
-                            <i class="fas fa-user-circle me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}
-                        </span>
-                        <span class="person-stat-count">${count} 次</span>
-                    </div>
-                `;
+                html += `<div class="person-stat-item">
+                            <span class="person-stat-name"><i class="fas fa-user-circle me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}</span>
+                            <span class="person-stat-count">${count} 次</span>
+                        </div>`;
             });
             container.innerHTML = html;
         }
 
-        // ============================================================
-        //  渲染數據表格
-        // ============================================================
         function renderDataTable(data) {
             const tableBody = document.getElementById('dataTableBody');
             const emptyState = document.getElementById('emptyState');
@@ -1176,100 +937,60 @@
             data.forEach((item, index) => {
                 const shiftClass = 'badge-shift-' + escapeHtml(item.shift);
                 const hasPhoto = item.photoUrl && item.photoUrl.trim() !== '';
+                const displayDate = formatTaipeiDate(item.date);
 
-                html += `
-                    <tr>
-                        <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
-                        <td style="white-space:nowrap;font-weight:500;">
-                            <i class="fas fa-calendar-day me-1" style="color:#1a73e8;"></i>
-                            ${escapeHtml(item.date)}
-                        </td>
-                        <td>
-                            <span class="badge-shift ${shiftClass}">${escapeHtml(item.shift)}</span>
-                        </td>
-                        <td style="font-weight:600;">
-                            <i class="fas fa-user me-1" style="color:#555;"></i>
-                            ${escapeHtml(item.person)}
-                        </td>
-                        <td>
-                            <span class="description-text" title="${escapeHtml(item.description)}">
-                                ${escapeHtml(item.description)}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            ${hasPhoto ? `
-                                <img src="${escapeHtml(item.photoUrl)}" 
-                                     class="photo-thumb" 
-                                     alt="異常照片" 
-                                     onclick="viewPhoto('${escapeHtml(item.photoUrl)}')"
-                                     loading="lazy">
-                            ` : `
-                                <div class="photo-placeholder">
-                                    <i class="fas fa-image"></i>
-                                </div>
-                            `}
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${escapeHtml(item.id)}')" 
-                                    title="刪除記錄" style="border-radius:6px;padding:4px 10px;">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
+                html += `<tr>
+                            <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
+                            <td style="white-space:nowrap;font-weight:500;">
+                                <i class="fas fa-calendar-day me-1" style="color:#1a73e8;"></i>
+                                ${escapeHtml(displayDate)}
+                            </td>
+                            <td><span class="badge-shift ${shiftClass}">${escapeHtml(item.shift)}</span></td>
+                            <td style="font-weight:600;"><i class="fas fa-user me-1" style="color:#555;"></i>${escapeHtml(item.person)}</td>
+                            <td><span class="description-text" title="${escapeHtml(item.description)}">${escapeHtml(item.description)}</span></td>
+                            <td class="text-center">
+                                ${hasPhoto ? `<img src="${escapeHtml(item.photoUrl)}" class="photo-thumb" alt="異常照片" onclick="viewPhoto('${escapeHtml(item.photoUrl)}')" loading="lazy">` : `<div class="photo-placeholder"><i class="fas fa-image"></i></div>`}
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${escapeHtml(item.id)}')" title="刪除記錄" style="border-radius:6px;padding:4px 10px;">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>`;
             });
-
             tableBody.innerHTML = html;
         }
 
-        // ============================================================
-        //  更新數據計數徽章
-        // ============================================================
         function updateDataCountBadge(count) {
             document.getElementById('dataCountBadge').textContent = count + ' 筆';
         }
 
-        // ============================================================
-        //  顯示/隱藏載入動畫
-        // ============================================================
         function showLoading(show) {
             const spinner = document.getElementById('loadingSpinner');
             const tableWrapper = document.getElementById('dataTableWrapper');
-
             if (show) {
                 spinner.style.display = 'flex';
                 tableWrapper.style.display = 'none';
             } else {
                 spinner.style.display = 'none';
-                if (currentData && currentData.length > 0) {
-                    tableWrapper.style.display = 'block';
-                }
+                if (currentData && currentData.length > 0) tableWrapper.style.display = 'block';
             }
         }
 
-        // ============================================================
-        //  打開新增模態框
-        // ============================================================
         function openAddModal() {
             initInputDefaults();
             const modal = new bootstrap.Modal(document.getElementById('addModal'));
             modal.show();
         }
 
-        // ============================================================
-        //  照片預覽
-        // ============================================================
         function previewPhoto(event) {
             const file = event.target.files[0];
             if (!file) return;
-
-            // 檢查文件大小（限制10MB）
             if (file.size > 10 * 1024 * 1024) {
                 showToast('error', '文件過大', '照片大小不能超過10MB');
                 document.getElementById('inputPhoto').value = '';
                 return;
             }
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 photoBase64 = e.target.result;
@@ -1279,33 +1000,24 @@
             reader.readAsDataURL(file);
         }
 
-        // ============================================================
-        //  移除照片
-        // ============================================================
         function removePhoto() {
             photoBase64 = '';
-            uploadedPhotoUrl = '';
             document.getElementById('inputPhoto').value = '';
             document.getElementById('photoPreviewContainer').style.display = 'none';
             document.getElementById('photoPreview').src = '';
         }
 
-        // ============================================================
-        //  提交數據
-        // ============================================================
         async function submitData() {
             const date = document.getElementById('inputDate').value;
             const shift = document.getElementById('inputShift').value;
             const person = document.getElementById('inputPerson').value.trim();
             const description = document.getElementById('inputDescription').value.trim();
 
-            // 表單驗證
             if (!date || !shift || !person || !description) {
                 showToast('warning', '資料不完整', '請填寫所有必填欄位');
                 return;
             }
 
-            // 顯示儲存中狀態
             const saveBtn = document.querySelector('#addModal .btn-custom-primary');
             const originalText = saveBtn.innerHTML;
             saveBtn.disabled = true;
@@ -1313,8 +1025,6 @@
 
             try {
                 let finalPhotoUrl = '';
-
-                // 如果有照片，先上傳照片
                 if (photoBase64) {
                     const uploadResult = await uploadPhotoToGAS(photoBase64);
                     if (uploadResult.success) {
@@ -1327,24 +1037,13 @@
                     }
                 }
 
-                // 添加數據
-                const dataPayload = {
-                    date: date,
-                    shift: shift,
-                    person: person,
-                    description: description,
-                    photoUrl: finalPhotoUrl
-                };
-
+                const dataPayload = { date, shift, person, description, photoUrl: finalPhotoUrl };
                 const addResult = await addDataToGAS(dataPayload);
 
                 if (addResult.success) {
                     showToast('success', '新增成功', '異常記錄已保存');
-                    // 關閉模態框
                     bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
-                    // 重置表單
                     initInputDefaults();
-                    // 重新載入數據和統計
                     await loadData();
                     await loadStats();
                 } else {
@@ -1359,75 +1058,47 @@
             }
         }
 
-        // ============================================================
-        //  上傳照片到GAS
-        // ============================================================
         async function uploadPhotoToGAS(base64Data) {
             try {
                 const response = await fetch(GAS_WEB_APP_URL + '?action=uploadPhoto', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8',
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({
                         base64: base64Data,
                         fileName: 'photo_' + new Date().getTime() + '.jpg',
                         mimeType: base64Data.split(';')[0].split(':')[1] || 'image/jpeg'
                     })
                 });
-
-                const result = await response.json();
-                return result;
+                return await response.json();
             } catch (error) {
                 console.error('上傳照片錯誤:', error);
                 return { success: false, message: '網路錯誤：' + error.message };
             }
         }
 
-        // ============================================================
-        //  添加數據到GAS
-        // ============================================================
         async function addDataToGAS(data) {
             try {
                 const response = await fetch(GAS_WEB_APP_URL + '?action=addData', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8',
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
-                const result = await response.json();
-                return result;
+                return await response.json();
             } catch (error) {
                 console.error('添加數據錯誤:', error);
                 return { success: false, message: '網路錯誤：' + error.message };
             }
         }
 
-        // ============================================================
-        //  刪除記錄
-        // ============================================================
         async function deleteRecord(id) {
-            if (!confirm('確定要刪除這筆異常記錄嗎？此操作無法復原。')) {
-                return;
-            }
-
+            if (!confirm('確定要刪除這筆異常記錄嗎？此操作無法復原。')) return;
             try {
-                const queryString = new URLSearchParams({
-                    action: 'deleteData',
-                    id: id
-                }).toString();
-
+                const queryString = new URLSearchParams({ action: 'deleteData', id: id }).toString();
                 const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
                     method: 'POST',
                     headers: { 'Accept': 'application/json' }
                 });
-
                 const result = await response.json();
-
                 if (result.success) {
                     showToast('success', '刪除成功', '記錄已刪除');
                     await loadData();
@@ -1441,39 +1112,28 @@
             }
         }
 
-        // ============================================================
-        //  查看大圖
-        // ============================================================
         function viewPhoto(url) {
-            document.getElementById('photoViewImage').src = url;
+            const largeUrl = url.replace('w1000', 'w2000');
+            document.getElementById('photoViewImage').src = largeUrl;
             const modal = new bootstrap.Modal(document.getElementById('photoViewModal'));
             modal.show();
         }
 
-        // ============================================================
-        //  匯出CSV
-        // ============================================================
         function exportCSV() {
             if (!currentData || currentData.length === 0) {
                 showToast('warning', '無數據', '沒有可匯出的數據');
                 return;
             }
-
             const headers = ['序號', '異常日期', '異常班別', '異常人員', '異常描述', '照片URL'];
             const rows = currentData.map((item, index) => [
                 index + 1,
-                item.date,
+                formatTaipeiDate(item.date),
                 item.shift,
                 item.person,
                 item.description,
                 item.photoUrl || ''
             ]);
-
-            const csvContent = [
-                headers.join(','),
-                ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))
-            ].join('\n');
-
+            const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))].join('\n');
             const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -1482,13 +1142,9 @@
             link.download = fileName;
             link.click();
             URL.revokeObjectURL(link.href);
-
             showToast('success', '匯出成功', 'CSV檔案已下載');
         }
 
-        // ============================================================
-        //  HTML 轉義
-        // ============================================================
         function escapeHtml(str) {
             if (str === null || str === undefined) return '';
             const div = document.createElement('div');
@@ -1496,52 +1152,57 @@
             return div.innerHTML;
         }
 
-        // ============================================================
-        //  Toast 通知
-        // ============================================================
+        // 將日期轉為台北時區 YYYY-MM-DD
+        function formatTaipeiDate(dateInput) {
+            if (!dateInput) return '';
+            let dateObj;
+            if (typeof dateInput === 'string' && dateInput.includes('T')) {
+                dateObj = new Date(dateInput);
+            } else if (dateInput instanceof Date) {
+                dateObj = dateInput;
+            } else {
+                return dateInput;
+            }
+            const taipeiStr = dateObj.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+            const parts = taipeiStr.split(' ')[0].split('/');
+            const year = parts[0];
+            const month = parts[1].padStart(2, '0');
+            const day = parts[2].padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         function showToast(type, title, message) {
             const container = document.getElementById('toastContainer');
-
             const iconMap = {
                 success: 'fa-check-circle',
                 error: 'fa-exclamation-circle',
                 warning: 'fa-exclamation-triangle',
                 info: 'fa-info-circle'
             };
-
             const colorMap = {
                 success: '#34a853',
                 error: '#ea4335',
                 warning: '#fbbc04',
                 info: '#1a73e8'
             };
-
             const toastId = 'toast_' + new Date().getTime();
             const icon = iconMap[type] || iconMap.info;
             const color = colorMap[type] || colorMap.info;
 
             const toastHtml = `
-                <div id="${toastId}" class="toast toast-custom" role="alert" aria-live="assertive" aria-atomic="true" style="border-left: 5px solid ${color};">
+                <div id="${toastId}" class="toast toast-custom" role="alert" style="border-left: 5px solid ${color};">
                     <div class="toast-header" style="background: #fff;">
                         <i class="fas ${icon} me-2" style="color: ${color}; font-size: 1.2rem;"></i>
                         <strong class="me-auto" style="color: #333;">${escapeHtml(title)}</strong>
                         <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
                     </div>
-                    <div class="toast-body" style="background: #fff; color: #555;">
-                        ${escapeHtml(message)}
-                    </div>
-                </div>
-            `;
-
+                    <div class="toast-body" style="background: #fff; color: #555;">${escapeHtml(message)}</div>
+                </div>`;
             container.insertAdjacentHTML('beforeend', toastHtml);
-
             const toastEl = document.getElementById(toastId);
             const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
             toast.show();
-
-            toastEl.addEventListener('hidden.bs.toast', function() {
-                toastEl.remove();
-            });
+            toastEl.addEventListener('hidden.bs.toast', function() { toastEl.remove(); });
         }
     </script>
 </body>
