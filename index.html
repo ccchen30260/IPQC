@@ -11,7 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- SortableJS (拖拽排序) -->
+    <!-- SortableJS -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <style>
@@ -85,7 +85,6 @@
         .card-custom .card-header i { color: var(--primary-color); }
         .card-custom .card-body { padding: 20px; }
 
-        /* 統計卡片：可拖拽排序 */
         .stat-card {
             border-radius: var(--border-radius);
             padding: 18px 20px;
@@ -97,8 +96,8 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            cursor: grab; /* 提示可拖曳 */
-            user-select: none; /* 避免拖曳時選取文字 */
+            cursor: grab;
+            user-select: none;
         }
         .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
         .stat-card:active { cursor: grabbing; }
@@ -111,14 +110,8 @@
         .stat-s3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
         .stat-s4 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
 
-        /* SortableJS 拖拽樣式 */
-        .sortable-ghost {
-            opacity: 0.4;
-            background: #ddd !important;
-        }
-        .sortable-chosen {
-            box-shadow: 0 0 20px rgba(0,0,0,0.3) !important;
-        }
+        .sortable-ghost { opacity: 0.4; background: #ddd !important; }
+        .sortable-chosen { box-shadow: 0 0 20px rgba(0,0,0,0.3) !important; }
 
         .filter-section .form-label { font-weight: 600; font-size: 0.85rem; color: #555; margin-bottom: 4px; }
         .filter-section .form-select, .filter-section .form-control {
@@ -217,13 +210,17 @@
         .toast-custom { border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); border: none; overflow: hidden; min-width: 300px; }
         .toast-custom .toast-header { border-bottom: none; padding: 12px 16px; font-weight: 600; }
 
-        .person-stat-item {
+        .person-stat-item,
+        .description-stat-item {
             display: flex; align-items: center; justify-content: space-between;
             padding: 8px 0; border-bottom: 1px solid #f0f2f5;
         }
-        .person-stat-item:last-child { border-bottom: none; }
-        .person-stat-name { font-weight: 600; color: #333; }
-        .person-stat-count {
+        .person-stat-item:last-child,
+        .description-stat-item:last-child { border-bottom: none; }
+        .person-stat-name,
+        .description-stat-name { font-weight: 600; color: #333; }
+        .person-stat-count,
+        .description-stat-count {
             background: var(--primary-color); color: #fff; padding: 4px 12px;
             border-radius: 20px; font-weight: 700; font-size: 0.85rem;
         }
@@ -288,6 +285,8 @@
                         <label class="form-label">年份</label>
                         <select class="form-select" id="filterYear">
                             <option value="all">全部年份</option>
+                            <option value="2026">2026年</option>
+                            <option value="2027">2027年</option>
                         </select>
                     </div>
                     <div class="col-6 col-md-2">
@@ -368,7 +367,7 @@
             </div>
         </div>
 
-        <!-- 圖表區域 -->
+        <!-- 圖表與人員統計區域 -->
         <div class="row g-3 mb-4">
             <div class="col-lg-7">
                 <div class="card card-custom h-100">
@@ -394,6 +393,19 @@
                             <p class="mb-0">尚無人員統計數據</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 異常原因統計表 -->
+        <div class="card card-custom mb-4">
+            <div class="card-header">
+                <i class="fas fa-list-alt"></i> 異常原因統計表
+            </div>
+            <div class="card-body" id="descriptionStatsContainer" style="max-height: 300px; overflow-y: auto;">
+                <div class="empty-state py-3">
+                    <i class="fas fa-chart-pie"></i>
+                    <p class="mb-0">尚無異常原因統計數據</p>
                 </div>
             </div>
         </div>
@@ -536,7 +548,7 @@
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
         // ============================================================
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxX4Gqh4vapwm0iCRT2zQK-i_yLJNe6m4wXF6-YToXSY1duyRzU1Wc2Yi9DEalDZij4/exec';
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyVDgKVC3j83t2yahMFxlyDJdz9LjhhhPrZHI4tJIjt7y2vOZxIfEF-Va9iyWqeWhfi/exec';
         // 例如：https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxx/exec
         // ============================================================
 
@@ -586,11 +598,11 @@
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             initDateDisplay();
-            initYearFilter();
+            initYearFilter(); // 已改為僅 2026、2027
             initDateFilter();
             initDescriptionOptions();
             initPersonDropdown();
-            initSortable(); // 初始化拖拽排序
+            initSortable();
             initInputDefaults();
             const now = new Date();
             document.getElementById('filterYear').value = now.getFullYear();
@@ -606,15 +618,18 @@
                 '<i class="fas fa-calendar-alt me-1"></i>' + now.toLocaleDateString('zh-TW', options);
         }
 
+        // 年份選項僅保留 2026、2027
         function initYearFilter() {
             const select = document.getElementById('filterYear');
-            const currentYear = new Date().getFullYear();
-            for (let y = currentYear + 1; y >= 2020; y--) {
+            // 保留第一個「全部年份」選項
+            select.innerHTML = '<option value="all">全部年份</option>';
+            const years = [2026, 2027];
+            years.forEach(y => {
                 const option = document.createElement('option');
                 option.value = y;
                 option.textContent = y + '年';
                 select.appendChild(option);
-            }
+            });
         }
 
         function initDateFilter() {
@@ -637,13 +652,11 @@
             });
         }
 
-        // 初始化人員下拉選單（預設顯示提示）
         function initPersonDropdown() {
             const select = document.getElementById('inputPerson');
             select.innerHTML = '<option value="">請先選擇班別</option>';
         }
 
-        // 根據異常班別更新人員選項
         function updatePersonOptions() {
             const shift = document.getElementById('inputShift').value;
             const select = document.getElementById('inputPerson');
@@ -665,7 +678,6 @@
             select.innerHTML = html;
         }
 
-        // 初始化拖拽排序
         function initSortable() {
             const statsRow = document.getElementById('statsRow');
             if (statsRow) {
@@ -673,9 +685,9 @@
                     animation: 150,
                     ghostClass: 'sortable-ghost',
                     chosenClass: 'sortable-chosen',
-                    handle: '.stat-card', // 整個卡片可拖曳
+                    handle: '.stat-card',
                     onEnd: function(evt) {
-                        // 可以在這裡加入儲存順序的程式碼（目前不儲存）
+                        // 可儲存順序（目前不儲存）
                     }
                 });
             }
@@ -686,7 +698,7 @@
             const dateStr = now.toISOString().split('T')[0];
             document.getElementById('inputDate').value = dateStr;
             document.getElementById('inputShift').value = '';
-            updatePersonOptions(); // 重置人員選單
+            updatePersonOptions();
             document.getElementById('inputDescription').selectedIndex = -1;
             photoBase64 = '';
             document.getElementById('photoPreviewContainer').style.display = 'none';
@@ -788,6 +800,7 @@
 
             updateShiftChart(stats.byShift || { S1: 0, S2: 0, S3: 0, S4: 0 });
             updatePersonStatsList(stats.byPerson || {});
+            updateDescriptionStatsList(stats.byDescription || {});
         }
 
         function updateShiftChart(byShift) {
@@ -849,6 +862,26 @@
             container.innerHTML = html;
         }
 
+        // 新增：更新異常原因統計列表
+        function updateDescriptionStatsList(byDescription) {
+            const container = document.getElementById('descriptionStatsContainer');
+            const descriptions = Object.entries(byDescription).sort((a, b) => b[1] - a[1]);
+            if (descriptions.length === 0) {
+                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-chart-pie"></i><p class="mb-0">尚無異常原因統計數據</p></div>`;
+                return;
+            }
+            let html = '';
+            descriptions.forEach(([desc, count]) => {
+                html += `<div class="description-stat-item">
+                            <span class="description-stat-name">
+                                <i class="fas fa-tag me-2" style="color:#1a73e8;"></i>${escapeHtml(desc)}
+                            </span>
+                            <span class="description-stat-count">${count} 次</span>
+                        </div>`;
+            });
+            container.innerHTML = html;
+        }
+
         function renderDataTable(data) {
             const tableBody = document.getElementById('dataTableBody');
             const emptyState = document.getElementById('emptyState');
@@ -868,9 +901,8 @@
             data.forEach((item, index) => {
                 const shiftClass = 'badge-shift-' + escapeHtml(item.shift);
                 const hasPhoto = item.photoUrl && item.photoUrl.trim() !== '';
-                const displayDate = item.date; // GAS 已回傳 YYYY-MM-DD
+                const displayDate = item.date;
 
-                // 判斷是否為加班：異常班別與人員所屬班別不同
                 const personShift = personShiftMap[item.person] || '';
                 const isOvertime = personShift && personShift !== item.shift;
                 const personStyle = isOvertime ? 'style="color:red; font-weight:600;"' : 'style="font-weight:600;"';
