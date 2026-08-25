@@ -31,6 +31,7 @@
             font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
             padding-bottom: 40px;
         }
+        body.viewer-mode .editor-only { display: none !important; }
 
         .navbar-custom {
             background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
@@ -195,12 +196,7 @@
             border-radius: 20px; font-weight: 700; font-size: 0.85rem;
         }
 
-        @media (max-width: 768px) {
-            .navbar-custom .navbar-brand { font-size: 1.2rem; }
-            .table-custom thead th, .table-custom tbody td { padding: 8px 10px; font-size: 0.8rem; }
-            .photo-thumb { width: 42px; height: 42px; }
-            .fab-add { width: 50px; height: 50px; font-size: 1.4rem; bottom: 20px; right: 20px; }
-        }
+        .chart-container { position: relative; height: 220px; width: 100%; }
 
         .description-text {
             max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -208,52 +204,85 @@
         }
         .description-text:hover { white-space: normal; overflow: visible; word-break: break-all; }
 
-        .chart-container { position: relative; height: 220px; width: 100%; }
-
         select[multiple] { height: auto; min-height: 120px; }
         select[multiple] option { padding: 4px 8px; }
 
-        /* 管理選項列表樣式 */
         .option-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f2f5;
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 0; border-bottom: 1px solid #f0f2f5;
         }
         .option-item input {
-            flex: 1;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 6px 10px;
+            flex: 1; border: 1px solid #dee2e6; border-radius: 6px; padding: 6px 10px;
             font-size: 0.9rem;
         }
-        .option-item .btn-sm {
-            white-space: nowrap;
-        }
+        .option-item .btn-sm { white-space: nowrap; }
 
-        /* ========== 拖曳排序相關樣式 ========== */
-        .dashboard-block {
-            transition: box-shadow 0.2s, transform 0.2s;
+        /* 拖曳排序相關樣式 */
+        .dashboard-block { transition: box-shadow 0.2s, transform 0.2s; }
+        .dashboard-block.dragging { opacity: 0.5; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transform: scale(0.98); }
+        .dashboard-block .drag-handle { cursor: grab; user-select: none; }
+        .dashboard-block .drag-handle:active { cursor: grabbing; }
+        .dashboard-block.drag-over { border-top: 4px solid var(--primary-color); }
+
+        /* 登入畫面樣式 */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
         }
-        .dashboard-block.dragging {
-            opacity: 0.5;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transform: scale(0.98);
+        .login-card {
+            background: #fff; border-radius: 20px; padding: 40px; width: 90%; max-width: 400px;
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        .dashboard-block .drag-handle {
-            cursor: grab;
-            user-select: none;
+        .login-card h3 { color: #1a73e8; font-weight: 700; margin-bottom: 10px; }
+        .login-card .role-btn {
+            display: block; width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px;
+            font-weight: 700; font-size: 1.1rem; border: 2px solid #1a73e8; background: #fff; color: #1a73e8;
+            transition: all 0.3s; cursor: pointer;
         }
-        .dashboard-block .drag-handle:active {
-            cursor: grabbing;
+        .login-card .role-btn:hover { background: #1a73e8; color: #fff; }
+        .login-card .role-btn.viewer { border-color: #6c757d; color: #6c757d; }
+        .login-card .role-btn.viewer:hover { background: #6c757d; color: #fff; }
+        .password-box { display: none; margin-top: 15px; }
+        .password-box input {
+            width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px;
+            text-align: center; margin-bottom: 10px;
         }
-        .dashboard-block.drag-over {
-            border-top: 4px solid var(--primary-color);
+        .password-box .btn-confirm {
+            background: #1a73e8; color: #fff; border: none; padding: 10px 20px;
+            border-radius: 8px; font-weight: 600; cursor: pointer;
         }
     </style>
 </head>
-<body>
+<body class="viewer-mode">
+
+    <!-- 登入畫面 -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <h3><i class="fas fa-lock me-2"></i>IPQC異常資料統計</h3>
+            <p class="text-muted mb-4">請選擇進入身分</p>
+            <button class="role-btn viewer" onclick="showViewerPasswordBox()">
+                <i class="fas fa-eye me-2"></i>以檢視者進入
+            </button>
+            <button class="role-btn" onclick="showEditorPasswordBox()">
+                <i class="fas fa-user-edit me-2"></i>以編輯者進入
+            </button>
+
+            <!-- 檢視者密碼輸入框 -->
+            <div id="viewerPasswordBox" class="password-box">
+                <input type="password" id="viewerPassword" placeholder="請輸入檢視者密碼">
+                <button class="btn-confirm" onclick="loginAsViewer()">確認</button>
+                <button class="btn btn-link" onclick="hideAllPasswordBoxes()">取消</button>
+            </div>
+
+            <!-- 編輯者密碼輸入框 -->
+            <div id="editorPasswordBox" class="password-box">
+                <input type="password" id="editorPassword" placeholder="請輸入編輯者密碼">
+                <button class="btn-confirm" onclick="loginAsEditor()">確認</button>
+                <button class="btn btn-link" onclick="hideAllPasswordBoxes()">取消</button>
+            </div>
+        </div>
+    </div>
 
     <!-- 頂部導航 -->
     <nav class="navbar navbar-expand-lg navbar-custom">
@@ -266,6 +295,10 @@
                 <i class="fas fa-calendar-alt me-1"></i>
                 載入中...
             </span>
+            <!-- 修改密碼按鈕（僅編輯者可見） -->
+            <button class="btn btn-outline-light btn-sm editor-only" onclick="openChangePasswordModal()" style="border-radius:20px; margin-left:10px;">
+                <i class="fas fa-key me-1"></i>修改密碼
+            </button>
         </div>
     </nav>
 
@@ -412,7 +445,7 @@
                                             <th>異常人員</th>
                                             <th>異常描述</th>
                                             <th>異常照片</th>
-                                            <th style="width:80px;">操作</th>
+                                            <th class="editor-only" style="width:80px;">操作</th>
                                         </tr>
                                     </thead>
                                     <tbody id="dataTableBody"></tbody>
@@ -430,8 +463,8 @@
         </div>
     </div>
 
-    <!-- 浮動添加按鈕 -->
-    <button class="fab-add" onclick="openAddModal()" title="新增異常記錄">
+    <!-- 浮動添加按鈕（僅編輯者可見） -->
+    <button class="fab-add editor-only" onclick="openAddModal()" title="新增異常記錄">
         <i class="fas fa-plus"></i>
     </button>
 
@@ -475,7 +508,7 @@
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="form-label fw-bold mb-0">異常描述 <span class="text-danger">*</span>（可複選，按住 Ctrl 鍵點選）</label>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="openDescriptionOptionsModal()" title="管理異常描述選項">
+                                    <button type="button" class="btn btn-sm btn-outline-primary editor-only" onclick="openDescriptionOptionsModal()" title="管理異常描述選項">
                                         <i class="fas fa-cog me-1"></i> 管理選項
                                     </button>
                                 </div>
@@ -517,7 +550,6 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <!-- 新增選項輸入區 -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">新增選項</label>
                         <div class="input-group">
@@ -527,7 +559,6 @@
                             </button>
                         </div>
                     </div>
-                    <!-- 選項列表 -->
                     <div id="descriptionOptionsList" style="max-height: 300px; overflow-y: auto;">
                         <!-- 動態渲染 -->
                     </div>
@@ -555,6 +586,43 @@
         </div>
     </div>
 
+    <!-- 修改密碼模態框 -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="border-radius:16px; border:none;">
+                <div class="modal-header" style="background:linear-gradient(135deg,#1a73e8,#0d47a1); color:#fff;">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-key me-2"></i>修改密碼</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label">選擇要修改的密碼</label>
+                        <select class="form-select" id="passwordTypeSelect">
+                            <option value="editor">編輯者密碼</option>
+                            <option value="viewer">檢視者密碼</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">舊密碼</label>
+                        <input type="password" class="form-control" id="oldPassword">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">新密碼（至少4位）</label>
+                        <input type="password" class="form-control" id="newPassword">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">確認新密碼</label>
+                        <input type="password" class="form-control" id="confirmNewPassword">
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #eef0f3;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="submitChangePassword()">確認修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast 通知容器 -->
     <div class="toast-container-custom" id="toastContainer"></div>
 
@@ -565,55 +633,148 @@
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
         // ============================================================
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxtdzJKSxY_u4EfHHjGproi9-mLfnrfi8pC_2K-P_J02TxY6GNd6Z5iRI9q70_C2GGb/exec';
-        // 例如：https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxx/exec
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyxwb6FeX71Y1cquTmnw6lAEt_SW1gydHGUHLPnNwmh8oBPn3FC6dMO083DZshAUGNt/exec';
         // ============================================================
 
-        // 原始班別人員名單
-        const S1_PERSONNEL = [
-            "方慎之","陳泰安","蔡南嘉","李珮菁","朱建穎","王泳淇","吳峻霖","黃詠綺",
-            "蘭狄","凱文","勞倫司","安東尼","明華","艾麥倫","邱立斯","拉特","羅內爾","艾佛森"
-        ];
-        const S2_PERSONNEL = [
-            "黃正忠","張韶眞","陳宥庠","黃威翔","羅翊禎","黃文靖","蔡易良","吳奇玲",
-            "詹姆士","達力","山博","羅傑","達路","童氏蓮","羅德","達布","安吉","羅蘭多"
-        ];
-        const S3_PERSONNEL = [
-            "陳文全","吳國隆","李茂玄","葉秀芬","王俊智","吳慧如","黃筱珊","吳明珠","蘇炫元",
-            "托弗","杰倫","艾諾","吳氏莊","納撒","格林","喬司華","喬丹","吉姆"
-        ];
-        const S4_PERSONNEL = [
-            "陳喬志","楊代億","廖曉彤","蔡靜儀","賴建亦","施榮傑","陰其德","黃譯鋒","楊雅婷","羅啟倫",
-            "埃爾默","拉斯特","雷伊","漢斯","達利斯","甘達","特拉多","達爾文"
-        ];
-
-        const personShiftMap = {};
-        S1_PERSONNEL.forEach(p => personShiftMap[p] = 'S1');
-        S2_PERSONNEL.forEach(p => personShiftMap[p] = 'S2');
-        S3_PERSONNEL.forEach(p => personShiftMap[p] = 'S3');
-        S4_PERSONNEL.forEach(p => personShiftMap[p] = 'S4');
-
-        const S1_S3_PERSONNEL = [...S1_PERSONNEL, ...S3_PERSONNEL];
-        const S2_S4_PERSONNEL = [...S2_PERSONNEL, ...S4_PERSONNEL];
-
-        let descriptionOptions = []; // 將從後端載入
+        let editorToken = null;
         let currentData = [];
         let shiftChartInstance = null;
         let photoBase64 = '';
+        let descriptionOptions = [];
 
-        document.addEventListener('DOMContentLoaded', async function() {
+        // ==================== 登入相關 ====================
+        function showViewerPasswordBox() {
+            hideAllPasswordBoxes();
+            document.getElementById('viewerPasswordBox').style.display = 'block';
+        }
+        function showEditorPasswordBox() {
+            hideAllPasswordBoxes();
+            document.getElementById('editorPasswordBox').style.display = 'block';
+        }
+        function hideAllPasswordBoxes() {
+            document.getElementById('viewerPasswordBox').style.display = 'none';
+            document.getElementById('editorPasswordBox').style.display = 'none';
+            document.getElementById('viewerPassword').value = '';
+            document.getElementById('editorPassword').value = '';
+        }
+
+        async function loginAsViewer() {
+            const password = document.getElementById('viewerPassword').value.trim();
+            if (!password) { showToast('warning', '請輸入密碼', '密碼不可空白'); return; }
+            try {
+                const response = await fetch(GAS_WEB_APP_URL + '?action=loginAsViewer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    editorToken = null;
+                    document.body.classList.add('viewer-mode');
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    showToast('success', '檢視者登入成功', '歡迎檢視異常資料');
+                    initApp();
+                } else {
+                    showToast('error', '登入失敗', result.message || '密碼錯誤');
+                    document.getElementById('viewerPassword').value = '';
+                }
+            } catch (error) {
+                console.error('登入錯誤:', error);
+                showToast('error', '網路錯誤', '無法連接到伺服器');
+            }
+        }
+
+        async function loginAsEditor() {
+            const password = document.getElementById('editorPassword').value.trim();
+            if (!password) { showToast('warning', '請輸入密碼', '密碼不可空白'); return; }
+            try {
+                const response = await fetch(GAS_WEB_APP_URL + '?action=loginAsEditor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    editorToken = result.token;
+                    document.body.classList.remove('viewer-mode');
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    showToast('success', '登入成功', '歡迎，編輯者');
+                    initApp();
+                } else {
+                    showToast('error', '登入失敗', result.message || '密碼錯誤');
+                    document.getElementById('editorPassword').value = '';
+                }
+            } catch (error) {
+                console.error('登入錯誤:', error);
+                showToast('error', '網路錯誤', '無法連接到伺服器');
+            }
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
+        }
+
+        async function submitChangePassword() {
+            const type = document.getElementById('passwordTypeSelect').value;
+            const oldPassword = document.getElementById('oldPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value.trim();
+
+            if (!oldPassword || !newPassword || !confirmNewPassword) {
+                showToast('warning', '資料不完整', '請填寫所有欄位');
+                return;
+            }
+            if (newPassword !== confirmNewPassword) {
+                showToast('warning', '密碼不一致', '新密碼與確認密碼不符');
+                return;
+            }
+            if (newPassword.length < 4) {
+                showToast('warning', '密碼太短', '新密碼至少需要4位');
+                return;
+            }
+
+            try {
+                const url = GAS_WEB_APP_URL + '?action=changePassword&token=' + encodeURIComponent(editorToken || '');
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
+                    body: JSON.stringify({ type: type, oldPassword: oldPassword, newPassword: newPassword })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('success', '修改成功', '密碼已更新');
+                    bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                    if (type === 'editor') {
+                        editorToken = null;
+                        document.body.classList.add('viewer-mode');
+                        document.getElementById('loginOverlay').style.display = 'flex';
+                    }
+                } else {
+                    showToast('error', '修改失敗', result.message || '請重試');
+                }
+            } catch (error) {
+                console.error('修改密碼錯誤:', error);
+                showToast('error', '網路錯誤', '無法連接到伺服器');
+            }
+        }
+
+        // ==================== 初始化應用 ====================
+        async function initApp() {
             initDateDisplay();
             initYearFilter();
             initDateFilter();
             initPersonDropdown();
             initInputDefaults();
-            await loadDescriptionOptions(); // 先載入選項，再填充下拉
+            await loadDescriptionOptions();
             const now = new Date();
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
-            loadDataAndStats(); // 初始載入資料與統計
-            initDashboardDragDrop(); // 初始化拖曳排序
-        });
+            loadDataAndStats();
+            initDashboardDragDrop();
+        }
 
         function initDateDisplay() {
             const now = new Date();
@@ -635,6 +796,7 @@
 
         function initDateFilter() {
             const select = document.getElementById('filterDate');
+            select.innerHTML = '<option value="all">全部日期</option>';
             for (let d = 1; d <= 31; d++) {
                 const option = document.createElement('option');
                 option.value = d;
@@ -646,6 +808,30 @@
         function initPersonDropdown() {
             document.getElementById('inputPerson').innerHTML = '<option value="">請先選擇班別</option>';
         }
+
+        const S1_PERSONNEL = [
+            "方慎之","陳泰安","蔡南嘉","李珮菁","朱建穎","王泳淇","吳峻霖","黃詠綺",
+            "蘭狄","凱文","勞倫司","安東尼","明華","艾麥倫","邱立斯","拉特","羅內爾","艾佛森"
+        ];
+        const S2_PERSONNEL = [
+            "黃正忠","張韶眞","陳宥庠","黃威翔","羅翊禎","黃文靖","蔡易良","吳奇玲",
+            "詹姆士","達力","山博","羅傑","達路","童氏蓮","羅德","達布","安吉","羅蘭多"
+        ];
+        const S3_PERSONNEL = [
+            "陳文全","吳國隆","李茂玄","葉秀芬","王俊智","吳慧如","黃筱珊","吳明珠","蘇炫元",
+            "托弗","杰倫","艾諾","吳氏莊","納撒","格林","喬司華","喬丹","吉姆"
+        ];
+        const S4_PERSONNEL = [
+            "陳喬志","楊代億","廖曉彤","蔡靜儀","賴建亦","施榮傑","陰其德","黃譯鋒","楊雅婷","羅啟倫",
+            "埃爾默","拉斯特","雷伊","漢斯","達利斯","甘達","特拉多","達爾文"
+        ];
+        const personShiftMap = {};
+        S1_PERSONNEL.forEach(p => personShiftMap[p] = 'S1');
+        S2_PERSONNEL.forEach(p => personShiftMap[p] = 'S2');
+        S3_PERSONNEL.forEach(p => personShiftMap[p] = 'S3');
+        S4_PERSONNEL.forEach(p => personShiftMap[p] = 'S4');
+        const S1_S3_PERSONNEL = [...S1_PERSONNEL, ...S3_PERSONNEL];
+        const S2_S4_PERSONNEL = [...S2_PERSONNEL, ...S4_PERSONNEL];
 
         function updatePersonOptions() {
             const shift = document.getElementById('inputShift').value;
@@ -684,23 +870,12 @@
                 if (result.success && Array.isArray(result.options)) {
                     descriptionOptions = result.options;
                 } else {
-                    showToast('warning', '載入選項', result.message || '載入失敗，使用預設值');
-                    // 預設值
-                    descriptionOptions = [
-                        "JR黑頭","極柄撞歪","接頭未剔除","插單過流","隔離紙未端過流",
-                        "極柄角度異常","極柄數量異常","JR撞(夾)傷","極柄彎折","極片皺摺",
-                        "極柄膠帶貼覆異常","中心孔異常","JR抽頭(尾)","極柄歪斜","封止膠帶貼覆異常",
-                        "極片破損","雙正極柄重疊寬度異常","極片接頭(M1)","中心孔皺摺","迴轉點異常",
-                        "雙正極柄合焊異常","封止膠帶超出JR","極柄反折","負極柄壓花異常",
-                        "JR異物","極柄長度異常","極柄裁切異常","隔離紙抽絲"
-                    ];
+                    descriptionOptions = [];
                 }
             } catch (error) {
                 console.error('載入描述選項錯誤:', error);
-                showToast('error', '網路錯誤', '無法載入異常描述選項');
                 descriptionOptions = [];
             }
-            // 填充下拉選單
             const select = document.getElementById('inputDescription');
             select.innerHTML = '';
             descriptionOptions.forEach(desc => {
@@ -713,8 +888,7 @@
 
         function openDescriptionOptionsModal() {
             renderDescriptionOptionsList();
-            const modal = new bootstrap.Modal(document.getElementById('descriptionOptionsModal'));
-            modal.show();
+            new bootstrap.Modal(document.getElementById('descriptionOptionsModal')).show();
         }
 
         function renderDescriptionOptionsList() {
@@ -740,20 +914,22 @@
             container.innerHTML = html;
         }
 
+        function buildUrlWithToken(action, extraParams = {}) {
+            const params = new URLSearchParams({ action: action, ...extraParams });
+            if (editorToken) params.append('token', editorToken);
+            return GAS_WEB_APP_URL + '?' + params.toString();
+        }
+
         async function addDescriptionOption() {
             const input = document.getElementById('newOptionInput');
             const newOpt = input.value.trim();
-            if (!newOpt) {
-                showToast('warning', '輸入錯誤', '請輸入新選項名稱');
-                return;
-            }
+            if (!newOpt) { showToast('warning', '輸入錯誤', '請輸入新選項名稱'); return; }
             if (descriptionOptions.includes(newOpt)) {
                 showToast('warning', '重複選項', '此選項已存在');
                 return;
             }
-
             try {
-                const response = await fetch(GAS_WEB_APP_URL + '?action=addDescriptionOption', {
+                const response = await fetch(buildUrlWithToken('addDescriptionOption'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ option: newOpt })
@@ -762,8 +938,8 @@
                 if (result.success) {
                     showToast('success', '新增成功', `已新增選項「${newOpt}」`);
                     input.value = '';
-                    await loadDescriptionOptions(); // 重新載入並更新下拉
-                    renderDescriptionOptionsList(); // 更新管理列表
+                    await loadDescriptionOptions();
+                    renderDescriptionOptionsList();
                 } else {
                     showToast('error', '新增失敗', result.message || '請重試');
                 }
@@ -777,21 +953,14 @@
             const input = document.getElementById(`optionInput_${index}`);
             const newOpt = input.value.trim();
             const oldOpt = descriptionOptions[index];
-            if (!newOpt) {
-                showToast('warning', '輸入錯誤', '選項名稱不可空白');
-                return;
-            }
-            if (newOpt === oldOpt) {
-                showToast('info', '未變更', '選項名稱未修改');
-                return;
-            }
+            if (!newOpt) { showToast('warning', '輸入錯誤', '選項名稱不可空白'); return; }
+            if (newOpt === oldOpt) return;
             if (descriptionOptions.includes(newOpt)) {
                 showToast('warning', '重複選項', '此選項已存在');
                 return;
             }
-
             try {
-                const response = await fetch(GAS_WEB_APP_URL + '?action=updateDescriptionOption', {
+                const response = await fetch(buildUrlWithToken('updateDescriptionOption'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ oldOption: oldOpt, newOption: newOpt })
@@ -814,7 +983,7 @@
             const opt = descriptionOptions[index];
             if (!confirm(`確定要刪除選項「${opt}」嗎？`)) return;
             try {
-                const response = await fetch(GAS_WEB_APP_URL + '?action=deleteDescriptionOption', {
+                const response = await fetch(buildUrlWithToken('deleteDescriptionOption'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ option: opt })
@@ -833,7 +1002,7 @@
             }
         }
 
-        // ==================== 資料載入與統計（整合函式） ====================
+        // ==================== 資料載入與統計 ====================
         function getFilterParams() {
             return {
                 shift: document.getElementById('filterShift').value,
@@ -847,13 +1016,10 @@
             showLoading(true);
             const params = getFilterParams();
             try {
-                // 同時取得數據與統計
                 const [dataResult, statsResult] = await Promise.all([
                     fetchDataFromGAS(params),
                     fetchStatsFromGAS(params)
                 ]);
-
-                // 處理數據列表
                 if (dataResult.success) {
                     currentData = dataResult.data;
                     renderDataTable(currentData);
@@ -864,8 +1030,6 @@
                     renderDataTable([]);
                     updateDataCountBadge(0);
                 }
-
-                // 處理統計
                 if (statsResult.success) {
                     updateStatsDisplay(statsResult.stats);
                 }
@@ -1008,7 +1172,7 @@
                             <td ${personStyle}><i class="fas fa-user me-1" style="color:#555;"></i>${escapeHtml(item.person)}</td>
                             <td><span class="description-text" title="${escapeHtml(item.description)}">${escapeHtml(item.description)}</span></td>
                             <td class="text-center">${hasPhoto ? `<img src="${escapeHtml(item.photoUrl)}" class="photo-thumb" alt="異常照片" onclick="viewPhoto('${escapeHtml(item.photoUrl)}')" loading="lazy">` : `<div class="photo-placeholder"><i class="fas fa-image"></i></div>`}</td>
-                            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${escapeHtml(item.id)}')" title="刪除記錄" style="border-radius:6px;padding:4px 10px;"><i class="fas fa-trash-alt"></i></button></td>
+                            <td class="text-center editor-only"><button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${escapeHtml(item.id)}')" title="刪除記錄" style="border-radius:6px;padding:4px 10px;"><i class="fas fa-trash-alt"></i></button></td>
                         </tr>`;
             });
             tableBody.innerHTML = html;
@@ -1032,8 +1196,7 @@
 
         function openAddModal() {
             initInputDefaults();
-            const modal = new bootstrap.Modal(document.getElementById('addModal'));
-            modal.show();
+            new bootstrap.Modal(document.getElementById('addModal')).show();
         }
 
         function previewPhoto(event) {
@@ -1094,7 +1257,7 @@
                     showToast('success', '新增成功', '異常記錄已保存');
                     bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
                     initInputDefaults();
-                    await loadDataAndStats(); // 重新載入所有區塊
+                    await loadDataAndStats();
                 } else {
                     showToast('error', '新增失敗', addResult.message || '請重試');
                 }
@@ -1109,7 +1272,7 @@
 
         async function uploadPhotoToGAS(base64Data) {
             try {
-                const response = await fetch(GAS_WEB_APP_URL + '?action=uploadPhoto', {
+                const response = await fetch(buildUrlWithToken('uploadPhoto'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ base64: base64Data, fileName: 'photo_' + new Date().getTime() + '.jpg', mimeType: base64Data.split(';')[0].split(':')[1] || 'image/jpeg' })
@@ -1123,7 +1286,7 @@
 
         async function addDataToGAS(data) {
             try {
-                const response = await fetch(GAS_WEB_APP_URL + '?action=addData', {
+                const response = await fetch(buildUrlWithToken('addData'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify(data)
@@ -1138,11 +1301,14 @@
         async function deleteRecord(id) {
             if (!confirm('確定要刪除這筆異常記錄嗎？此操作無法復原。')) return;
             try {
-                const response = await fetch(GAS_WEB_APP_URL + '?action=deleteData&id=' + encodeURIComponent(id), { method: 'POST', headers: { 'Accept': 'application/json' } });
+                const response = await fetch(buildUrlWithToken('deleteData', { id: id }), {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' }
+                });
                 const result = await response.json();
                 if (result.success) {
                     showToast('success', '刪除成功', '記錄已刪除');
-                    await loadDataAndStats(); // 重新載入所有區塊
+                    await loadDataAndStats();
                 } else {
                     showToast('error', '刪除失敗', result.message || '請重試');
                 }
@@ -1181,7 +1347,7 @@
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
             document.getElementById('filterDate').value = 'all';
-            loadDataAndStats(); // 重新載入所有區塊
+            loadDataAndStats();
         }
 
         function escapeHtml(str) {
@@ -1220,7 +1386,6 @@
             const blocks = container.querySelectorAll('.dashboard-block');
             let draggedBlock = null;
 
-            // 讀取 localStorage 中儲存的順序
             const savedOrder = JSON.parse(localStorage.getItem('dashboardOrder') || '[]');
             if (savedOrder.length === blocks.length) {
                 savedOrder.forEach(blockId => {
@@ -1231,19 +1396,10 @@
 
             blocks.forEach(block => {
                 const handle = block.querySelector('.drag-handle');
-                handle.addEventListener('mousedown', () => {
-                    block.draggable = true;
-                });
-                handle.addEventListener('mouseup', () => {
-                    block.draggable = false;
-                });
-                // 觸控支援
-                handle.addEventListener('touchstart', () => {
-                    block.draggable = true;
-                }, { passive: true });
-                handle.addEventListener('touchend', () => {
-                    block.draggable = false;
-                });
+                handle.addEventListener('mousedown', () => { block.draggable = true; });
+                handle.addEventListener('mouseup', () => { block.draggable = false; });
+                handle.addEventListener('touchstart', () => { block.draggable = true; }, { passive: true });
+                handle.addEventListener('touchend', () => { block.draggable = false; });
 
                 block.addEventListener('dragstart', (e) => {
                     draggedBlock = block;
