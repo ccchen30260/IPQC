@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IPQC異常資料統計</title>
+    <title data-i18n="appTitle">IPQC異常資料統計</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -232,7 +232,7 @@
         }
         .login-card {
             background: #fff; border-radius: 20px; padding: 40px; width: 90%; max-width: 400px;
-            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;
         }
         .login-card h3 { color: #1a73e8; font-weight: 700; margin-bottom: 10px; }
         .login-card .role-btn {
@@ -252,6 +252,10 @@
             background: #1a73e8; color: #fff; border: none; padding: 10px 20px;
             border-radius: 8px; font-weight: 600; cursor: pointer;
         }
+        .login-lang-btn {
+            position: absolute; top: 15px; right: 20px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600; padding: 4px 12px;
+        }
     </style>
 </head>
 <body class="viewer-mode">
@@ -259,46 +263,56 @@
     <!-- 登入畫面 -->
     <div id="loginOverlay" class="login-overlay">
         <div class="login-card">
-            <h3><i class="fas fa-lock me-2"></i>IPQC異常資料統計</h3>
-            <p class="text-muted mb-4">請選擇進入身分</p>
+            <!-- 登入頁面的語言切換按鈕 -->
+            <button class="btn btn-outline-primary btn-sm login-lang-btn" onclick="toggleLanguage()">
+                <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
+            </button>
+            <h3><i class="fas fa-lock me-2"></i><span data-i18n="loginTitle">IPQC異常資料統計</span></h3>
+            <p class="text-muted mb-4" data-i18n="selectRole">請選擇進入身分</p>
             <button class="role-btn viewer" onclick="showViewerPasswordBox()">
-                <i class="fas fa-eye me-2"></i>以檢視者進入
+                <i class="fas fa-eye me-2"></i><span data-i18n="loginViewer">以檢視者進入</span>
             </button>
             <button class="role-btn" onclick="showEditorPasswordBox()">
-                <i class="fas fa-user-edit me-2"></i>以編輯者進入
+                <i class="fas fa-user-edit me-2"></i><span data-i18n="loginEditor">以編輯者進入</span>
             </button>
 
             <!-- 檢視者密碼輸入框 -->
             <div id="viewerPasswordBox" class="password-box">
-                <input type="password" id="viewerPassword" placeholder="請輸入檢視者密碼">
-                <button class="btn-confirm" onclick="loginAsViewer()">確認</button>
-                <button class="btn btn-link" onclick="hideAllPasswordBoxes()">取消</button>
+                <input type="password" id="viewerPassword" data-i18n-placeholder="inputViewerPass" placeholder="請輸入檢視者密碼">
+                <button class="btn-confirm" onclick="loginAsViewer()" data-i18n="confirm">確認</button>
+                <button class="btn btn-link" onclick="hideAllPasswordBoxes()" data-i18n="cancel">取消</button>
             </div>
 
             <!-- 編輯者密碼輸入框 -->
             <div id="editorPasswordBox" class="password-box">
-                <input type="password" id="editorPassword" placeholder="請輸入編輯者密碼">
-                <button class="btn-confirm" onclick="loginAsEditor()">確認</button>
-                <button class="btn btn-link" onclick="hideAllPasswordBoxes()">取消</button>
+                <input type="password" id="editorPassword" data-i18n-placeholder="inputEditorPass" placeholder="請輸入編輯者密碼">
+                <button class="btn-confirm" onclick="loginAsEditor()" data-i18n="confirm">確認</button>
+                <button class="btn btn-link" onclick="hideAllPasswordBoxes()" data-i18n="cancel">取消</button>
             </div>
         </div>
     </div>
 
     <!-- 頂部導航 -->
     <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container">
+        <div class="container d-flex justify-content-between align-items-center">
             <a class="navbar-brand" href="#">
                 <i class="fas fa-clipboard-list"></i>
-                IPQC異常資料統計
+                <span data-i18n="appTitle">IPQC異常資料統計</span>
             </a>
-            <span class="badge-date" id="currentDateDisplay">
-                <i class="fas fa-calendar-alt me-1"></i>
-                載入中...
-            </span>
-            <!-- 修改密碼按鈕（僅編輯者可見） -->
-            <button class="btn btn-outline-light btn-sm editor-only" onclick="openChangePasswordModal()" style="border-radius:20px; margin-left:10px;">
-                <i class="fas fa-key me-1"></i>修改密碼
-            </button>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge-date d-none d-md-inline-block" id="currentDateDisplay">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    載入中...
+                </span>
+                <!-- 主介面語言切換按鈕 -->
+                <button class="btn btn-outline-light btn-sm" onclick="toggleLanguage()" style="border-radius:20px;">
+                    <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
+                </button>
+                <!-- 修改密碼按鈕（僅編輯者可見） -->
+                <button class="btn btn-outline-light btn-sm editor-only" onclick="openChangePasswordModal()" style="border-radius:20px;">
+                    <i class="fas fa-key me-1"></i><span data-i18n="changePassword">修改密碼</span>
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -307,14 +321,14 @@
         <!-- 查詢篩選區域 -->
         <div class="card card-custom mb-4">
             <div class="card-header">
-                <i class="fas fa-filter"></i> 查詢篩選
+                <i class="fas fa-filter"></i> <span data-i18n="filterHeader">查詢篩選</span>
             </div>
             <div class="card-body filter-section">
                 <div class="row g-3 align-items-end">
                     <div class="col-6 col-md-2">
-                        <label class="form-label">班別</label>
+                        <label class="form-label" data-i18n="shift">班別</label>
                         <select class="form-select" id="filterShift">
-                            <option value="all">全部班別</option>
+                            <option value="all" data-i18n="allShifts">全部班別</option>
                             <option value="S1">S1</option>
                             <option value="S2">S2</option>
                             <option value="S3">S3</option>
@@ -322,17 +336,17 @@
                         </select>
                     </div>
                     <div class="col-6 col-md-2">
-                        <label class="form-label">年份</label>
+                        <label class="form-label" data-i18n="year">年份</label>
                         <select class="form-select" id="filterYear">
-                            <option value="all">全部年份</option>
+                            <option value="all" data-i18n="allYears">全部年份</option>
                             <option value="2026">2026年</option>
                             <option value="2027">2027年</option>
                         </select>
                     </div>
                     <div class="col-6 col-md-2">
-                        <label class="form-label">月份</label>
+                        <label class="form-label" data-i18n="month">月份</label>
                         <select class="form-select" id="filterMonth">
-                            <option value="all">全部月份</option>
+                            <option value="all" data-i18n="allMonths">全部月份</option>
                             <option value="1">1月</option>
                             <option value="2">2月</option>
                             <option value="3">3月</option>
@@ -348,14 +362,14 @@
                         </select>
                     </div>
                     <div class="col-6 col-md-2">
-                        <label class="form-label">日期</label>
+                        <label class="form-label" data-i18n="date">日期</label>
                         <select class="form-select" id="filterDate">
-                            <option value="all">全部日期</option>
+                            <option value="all" data-i18n="allDates">全部日期</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-4 d-flex gap-2">
                         <button class="btn btn-custom-primary flex-grow-1" onclick="loadDataAndStats()">
-                            <i class="fas fa-search"></i> 查詢
+                            <i class="fas fa-search"></i> <span data-i18n="search">查詢</span>
                         </button>
                         <button class="btn btn-custom-outline" onclick="resetFilters()" title="重置篩選">
                             <i class="fas fa-undo"></i>
@@ -375,7 +389,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
-                        <i class="fas fa-chart-column"></i> 班別統計圖表
+                        <i class="fas fa-chart-column"></i> <span data-i18n="chartBlockTitle">班別統計圖表</span>
                     </span>
                     <span class="badge bg-primary" id="chartTotalBadge">篩選總計：0</span>
                 </div>
@@ -391,13 +405,13 @@
                 <div class="card-header">
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
-                        <i class="fas fa-user-tag"></i> 人員異常統計
+                        <i class="fas fa-user-tag"></i> <span data-i18n="personBlockTitle">人員異常統計</span>
                     </span>
                 </div>
                 <div class="card-body" id="personStatsContainer" style="max-height: 280px; overflow-y: auto;">
                     <div class="empty-state py-3">
                         <i class="fas fa-user-slash"></i>
-                        <p class="mb-0">尚無人員統計數據</p>
+                        <p class="mb-0" data-i18n="noPersonData">尚無人員統計數據</p>
                     </div>
                 </div>
             </div>
@@ -407,13 +421,13 @@
                 <div class="card-header">
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
-                        <i class="fas fa-list-alt"></i> 異常原因統計表
+                        <i class="fas fa-list-alt"></i> <span data-i18n="descBlockTitle">異常原因統計表</span>
                     </span>
                 </div>
                 <div class="card-body" id="descriptionStatsContainer" style="max-height: 300px; overflow-y: auto;">
                     <div class="empty-state py-3">
                         <i class="fas fa-chart-pie"></i>
-                        <p class="mb-0">尚無異常原因統計數據</p>
+                        <p class="mb-0" data-i18n="noDescData">尚無異常原因統計數據</p>
                     </div>
                 </div>
             </div>
@@ -423,7 +437,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
-                        <i class="fas fa-list"></i> 異常數據列表
+                        <i class="fas fa-list"></i> <span data-i18n="listBlockTitle">異常數據列表</span>
                     </span>
                     <span class="badge bg-primary" id="dataCountBadge">0 筆</span>
                 </div>
@@ -439,13 +453,13 @@
                                 <table class="table table-custom mb-0">
                                     <thead>
                                         <tr>
-                                            <th style="width:50px;">序號</th>
-                                            <th>異常日期</th>
-                                            <th>異常班別</th>
-                                            <th>異常人員</th>
-                                            <th>異常描述</th>
-                                            <th>異常照片</th>
-                                            <th class="editor-only" style="width:80px;">操作</th>
+                                            <th style="width:50px;" data-i18n="seq">序號</th>
+                                            <th data-i18n="abnormalDate">異常日期</th>
+                                            <th data-i18n="abnormalShift">異常班別</th>
+                                            <th data-i18n="abnormalPerson">異常人員</th>
+                                            <th data-i18n="abnormalDesc">異常描述</th>
+                                            <th data-i18n="abnormalPhoto">異常照片</th>
+                                            <th class="editor-only" style="width:80px;" data-i18n="actions">操作</th>
                                         </tr>
                                     </thead>
                                     <tbody id="dataTableBody"></tbody>
@@ -453,8 +467,8 @@
                             </div>
                             <div id="emptyState" class="empty-state" style="display:none;">
                                 <i class="fas fa-inbox"></i>
-                                <h5>暫無異常數據</h5>
-                                <p class="text-muted">點擊右下角 + 按鈕新增異常記錄</p>
+                                <h5 data-i18n="noDataTitle">暫無異常數據</h5>
+                                <p class="text-muted" data-i18n="noDataSub">點擊右下角 + 按鈕新增異常記錄</p>
                             </div>
                         </div>
                     </div>
@@ -474,7 +488,7 @@
             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
                 <div class="modal-header" style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: #fff; border-radius: 16px 16px 0 0; padding: 18px 24px;">
                     <h5 class="modal-title fw-bold">
-                        <i class="fas fa-plus-circle me-2"></i>新增異常記錄
+                        <i class="fas fa-plus-circle me-2"></i><span data-i18n="addRecordTitle">新增異常記錄</span>
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -482,13 +496,13 @@
                     <form id="addForm">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">異常日期 <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold"><span data-i18n="abnormalDate">異常日期</span> <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="inputDate" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">異常班別 <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold"><span data-i18n="abnormalShift">異常班別</span> <span class="text-danger">*</span></label>
                                 <select class="form-select" id="inputShift" required onchange="updatePersonOptions()">
-                                    <option value="">請選擇班別</option>
+                                    <option value="" data-i18n="selectShift">請選擇班別</option>
                                     <option value="S1">S1</option>
                                     <option value="S2">S2</option>
                                     <option value="S3">S3</option>
@@ -496,20 +510,20 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">異常人員 <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold"><span data-i18n="abnormalPerson">異常人員</span> <span class="text-danger">*</span></label>
                                 <select class="form-select" id="inputPerson" required>
-                                    <option value="">請先選擇班別</option>
+                                    <option value="" data-i18n="selectPerson">請先選擇班別</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">異常照片</label>
+                                <label class="form-label fw-bold" data-i18n="abnormalPhoto">異常照片</label>
                                 <input type="file" class="form-control" id="inputPhoto" accept="image/*" onchange="previewPhoto(event)">
                             </div>
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <label class="form-label fw-bold mb-0">異常描述 <span class="text-danger">*</span>（可複選，按住 Ctrl 鍵點選）</label>
+                                    <label class="form-label fw-bold mb-0"><span data-i18n="descLabel">異常描述（可複選，按住 Ctrl 鍵點選）</span> <span class="text-danger">*</span></label>
                                     <button type="button" class="btn btn-sm btn-outline-primary editor-only" onclick="openDescriptionOptionsModal()" title="管理異常描述選項">
-                                        <i class="fas fa-cog me-1"></i> 管理選項
+                                        <i class="fas fa-cog me-1"></i> <span data-i18n="manageOptions">管理選項</span>
                                     </button>
                                 </div>
                                 <select class="form-select" id="inputDescription" multiple size="6" required>
@@ -529,10 +543,10 @@
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #eef0f3; padding: 16px 24px;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:8px;">
-                        <i class="fas fa-times me-1"></i> 取消
+                        <i class="fas fa-times me-1"></i> <span data-i18n="cancel">取消</span>
                     </button>
                     <button type="button" class="btn btn-custom-primary" onclick="submitData()">
-                        <i class="fas fa-save me-1"></i> 儲存
+                        <i class="fas fa-save me-1"></i> <span data-i18n="save">儲存</span>
                     </button>
                 </div>
             </div>
@@ -545,7 +559,7 @@
             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
                 <div class="modal-header" style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: #fff; border-radius: 16px 16px 0 0; padding: 16px 20px;">
                     <h5 class="modal-title fw-bold">
-                        <i class="fas fa-cog me-2"></i>管理異常描述選項
+                        <i class="fas fa-cog me-2"></i><span data-i18n="manageOptions">管理異常描述選項</span>
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -564,7 +578,7 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #eef0f3; padding: 12px 20px;">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:8px;">關閉</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:8px;" data-i18n="cancel">關閉</button>
                 </div>
             </div>
         </div>
@@ -591,7 +605,7 @@
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content" style="border-radius:16px; border:none;">
                 <div class="modal-header" style="background:linear-gradient(135deg,#1a73e8,#0d47a1); color:#fff;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-key me-2"></i>修改密碼</h5>
+                    <h5 class="modal-title fw-bold"><i class="fas fa-key me-2"></i><span data-i18n="changePassword">修改密碼</span></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
@@ -616,8 +630,8 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top:1px solid #eef0f3;">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" onclick="submitChangePassword()">確認修改</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="submitChangePassword()" data-i18n="confirm">確認修改</button>
                 </div>
             </div>
         </div>
@@ -633,7 +647,7 @@
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
         // ============================================================
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxV2Sa8-kNsO1RZ1QkSCbLaqJTejOHpbwrdnP35UMyyug6tjd60knd3SUAhwgtfMyS2/exec';
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz_y3HBYr38XEIvRMuk693nypyzXfuh4ppX9EkC4OlgoGksWmeOEjxGJKXNNkpbHi3a/exec';
         // ============================================================
 
         let editorToken = null;
@@ -641,6 +655,200 @@
         let shiftChartInstance = null;
         let photoBase64 = '';
         let descriptionOptions = [];
+
+        // ==================== 多國語言與異常描述翻譯配置 ====================
+        let currentLang = localStorage.getItem('appLang') || 'zh';
+
+        const descriptionTranslations = {
+            "JR黑頭": "JR Black Head",
+            "極柄撞歪": "Tab Bent",
+            "接頭未剔除": "Joint Not Rejected",
+            "插單過流": "Manual Order Overcurrent",
+            "隔離紙未端過流": "Separator End Overcurrent",
+            "極柄角度異常": "Tab Angle Abnormal",
+            "極柄數量異常": "Tab Quantity Abnormal",
+            "JR撞(夾)傷": "JR Damaged/Pinch",
+            "極柄彎折": "Tab Folded",
+            "極片皺摺": "Electrode Wrinkled",
+            "極柄膠帶貼覆異常": "Tab Tape Abnormal",
+            "中心孔異常": "Center Hole Abnormal",
+            "JR抽頭(尾)": "JR Head/Tail Pull",
+            "極柄歪斜": "Tab Misaligned",
+            "封止膠帶貼覆異常": "Sealing Tape Abnormal",
+            "極片破損": "Electrode Broken",
+            "雙正極柄重疊寬度異常": "Dual Anode Tab Overlap Width Abnormal",
+            "極片接頭(M1)": "Electrode Joint (M1)",
+            "中心孔皺摺": "Center Hole Wrinkled",
+            "迴轉點異常": "Rotation Point Abnormal",
+            "雙正極柄合焊異常": "Dual Anode Tab Welding Abnormal",
+            "封止膠帶超出JR": "Sealing Tape Exceeds JR",
+            "極柄反折": "Tab Reverse Fold",
+            "負極柄壓花異常": "Cathode Tab Embossing Abnormal",
+            "JR異物": "JR Foreign Material",
+            "極柄長度異常": "Tab Length Abnormal",
+            "極柄裁切異常": "Tab Cutting Abnormal",
+            "隔離紙抽絲": "Separator Threading",
+            "覆蓋膠帶貼覆異常": "Cover Tape Abnormal",
+            "隔離紙末端未剔除": "Separator End Not Rejected",
+            "隔離紙異常": "Separator Abnormal",
+            "負極柄壓花位置異常": "Cathode Tab Embossing Position Abnormal",
+            "極片來料異常": "Incoming Electrode Abnormal",
+            "隔離紙錯位": "Separator Misaligned",
+            "覆蓋膠帶貼覆不良": "Cover Tape Application Defect"
+        };
+
+        const translations = {
+            zh: {
+                appTitle: "IPQC異常資料統計",
+                loginTitle: "IPQC異常資料統計",
+                selectRole: "請選擇進入身分",
+                loginViewer: "以檢視者進入",
+                loginEditor: "以編輯者進入",
+                inputViewerPass: "請輸入檢視者密碼",
+                inputEditorPass: "請輸入編輯者密碼",
+                confirm: "確認",
+                cancel: "取消",
+                changePassword: "修改密碼",
+                filterHeader: "查詢篩選",
+                shift: "班別",
+                allShifts: "全部班別",
+                year: "年份",
+                allYears: "全部年份",
+                month: "月份",
+                allMonths: "全部月份",
+                date: "日期",
+                allDates: "全部日期",
+                search: "查詢",
+                reset: "重置",
+                export: "匯出CSV",
+                chartBlockTitle: "班別統計圖表",
+                personBlockTitle: "人員異常統計",
+                descBlockTitle: "異常原因統計表",
+                listBlockTitle: "異常數據列表",
+                totalPrefix: "篩選總計：",
+                noPersonData: "尚無人員統計數據",
+                noDescData: "尚無異常原因統計數據",
+                seq: "序號",
+                abnormalDate: "異常日期",
+                abnormalShift: "異常班別",
+                abnormalPerson: "異常人員",
+                abnormalDesc: "異常描述",
+                abnormalPhoto: "異常照片",
+                actions: "操作",
+                noDataTitle: "暫無異常數據",
+                noDataSub: "點擊右下角 + 按鈕新增異常記錄",
+                addRecordTitle: "新增異常記錄",
+                selectShift: "請選擇班別",
+                selectPerson: "請先選擇班別",
+                selectPersonDefault: "請選擇人員",
+                descLabel: "異常描述（可複選，按住 Ctrl 鍵點選）",
+                manageOptions: "管理選項",
+                save: "儲存",
+                times: "次",
+                records: "筆",
+                chartLabel: "異常次數"
+            },
+            en: {
+                appTitle: "IPQC Abnormal Data Statistics",
+                loginTitle: "IPQC Statistics System",
+                selectRole: "Select Access Role",
+                loginViewer: "Enter as Viewer",
+                loginEditor: "Enter as Editor",
+                inputViewerPass: "Enter Viewer Password",
+                inputEditorPass: "Enter Editor Password",
+                confirm: "Confirm",
+                cancel: "Cancel",
+                changePassword: "Change Password",
+                filterHeader: "Filter Search",
+                shift: "Shift",
+                allShifts: "All Shifts",
+                year: "Year",
+                allYears: "All Years",
+                month: "Month",
+                allMonths: "All Months",
+                date: "Date",
+                allDates: "All Dates",
+                search: "Search",
+                reset: "Reset",
+                export: "Export CSV",
+                chartBlockTitle: "Shift Statistics Chart",
+                personBlockTitle: "Personnel Statistics",
+                descBlockTitle: "Defect Reason Statistics",
+                listBlockTitle: "Abnormal Data List",
+                totalPrefix: "Filtered Total: ",
+                noPersonData: "No personnel data available",
+                noDescData: "No defect reason data available",
+                seq: "No.",
+                abnormalDate: "Date",
+                abnormalShift: "Shift",
+                abnormalPerson: "Personnel",
+                abnormalDesc: "Description",
+                abnormalPhoto: "Photo",
+                actions: "Actions",
+                noDataTitle: "No Data Found",
+                noDataSub: "Click + at bottom right to add a record",
+                addRecordTitle: "Add Abnormal Record",
+                selectShift: "Select Shift",
+                selectPerson: "Please select shift first",
+                selectPersonDefault: "Select Personnel",
+                descLabel: "Description (Multi-select with Ctrl)",
+                manageOptions: "Manage Options",
+                save: "Save",
+                times: "times",
+                records: "records",
+                chartLabel: "Abnormal Count"
+            }
+        };
+
+        // 將單個或組合的異常描述翻譯為目標語言
+        function translateDesc(desc) {
+            if (!desc) return '';
+            if (currentLang === 'zh') return desc;
+            
+            const items = desc.split('、');
+            const translatedItems = items.map(item => {
+                const trimmed = item.trim();
+                return descriptionTranslations[trimmed] || trimmed;
+            });
+            return translatedItems.join(', ');
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            localStorage.setItem('appLang', currentLang);
+            updateInterfaceLanguage();
+        }
+
+        function updateInterfaceLanguage() {
+            document.querySelectorAll('.langToggleBtnText').forEach(el => {
+                el.textContent = currentLang === 'zh' ? 'EN' : '中文';
+            });
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang] && translations[currentLang][key]) {
+                    el.textContent = translations[currentLang][key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang] && translations[currentLang][key]) {
+                    el.placeholder = translations[currentLang][key];
+                }
+            });
+
+            initDateDisplay();
+            renderDescriptionSelectOptions();
+            if (currentData) {
+                loadDataAndStats();
+            }
+        }
+
+        // 頁面初次載入時執行語系更新
+        document.addEventListener('DOMContentLoaded', () => {
+            updateInterfaceLanguage();
+        });
 
         // ==================== 登入相關 ====================
         function showViewerPasswordBox() {
@@ -763,7 +971,7 @@
 
         // ==================== 初始化應用 ====================
         async function initApp() {
-            initDateDisplay();
+            updateInterfaceLanguage();
             initYearFilter();
             initDateFilter();
             initPersonDropdown();
@@ -778,35 +986,36 @@
 
         function initDateDisplay() {
             const now = new Date();
+            const locale = currentLang === 'en' ? 'en-US' : 'zh-TW';
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             document.getElementById('currentDateDisplay').innerHTML =
-                '<i class="fas fa-calendar-alt me-1"></i>' + now.toLocaleDateString('zh-TW', options);
+                '<i class="fas fa-calendar-alt me-1"></i>' + now.toLocaleDateString(locale, options);
         }
 
         function initYearFilter() {
             const select = document.getElementById('filterYear');
-            select.innerHTML = '<option value="all">全部年份</option>';
+            select.innerHTML = `<option value="all">${translations[currentLang].allYears}</option>`;
             [2026, 2027].forEach(y => {
                 const option = document.createElement('option');
                 option.value = y;
-                option.textContent = y + '年';
+                option.textContent = y + (currentLang === 'zh' ? '年' : '');
                 select.appendChild(option);
             });
         }
 
         function initDateFilter() {
             const select = document.getElementById('filterDate');
-            select.innerHTML = '<option value="all">全部日期</option>';
+            select.innerHTML = `<option value="all">${translations[currentLang].allDates}</option>`;
             for (let d = 1; d <= 31; d++) {
                 const option = document.createElement('option');
                 option.value = d;
-                option.textContent = d + '日';
+                option.textContent = d + (currentLang === 'zh' ? '日' : '');
                 select.appendChild(option);
             }
         }
 
         function initPersonDropdown() {
-            document.getElementById('inputPerson').innerHTML = '<option value="">請先選擇班別</option>';
+            document.getElementById('inputPerson').innerHTML = `<option value="">${translations[currentLang].selectPerson}</option>`;
         }
 
         const S1_PERSONNEL = [
@@ -840,10 +1049,10 @@
             if (shift === 'S1' || shift === 'S3') list = S1_S3_PERSONNEL;
             else if (shift === 'S2' || shift === 'S4') list = S2_S4_PERSONNEL;
             else {
-                select.innerHTML = '<option value="">請先選擇班別</option>';
+                select.innerHTML = `<option value="">${translations[currentLang].selectPerson}</option>`;
                 return;
             }
-            let html = '<option value="">請選擇人員</option>';
+            let html = `<option value="">${translations[currentLang].selectPersonDefault}</option>`;
             list.forEach(name => html += `<option value="${name}">${name}</option>`);
             select.innerHTML = html;
         }
@@ -876,12 +1085,16 @@
                 console.error('載入描述選項錯誤:', error);
                 descriptionOptions = [];
             }
+            renderDescriptionSelectOptions();
+        }
+
+        function renderDescriptionSelectOptions() {
             const select = document.getElementById('inputDescription');
             select.innerHTML = '';
             descriptionOptions.forEach(desc => {
                 const option = document.createElement('option');
-                option.value = desc;
-                option.textContent = desc;
+                option.value = desc; // value維持中文以正確存入資料庫
+                option.textContent = translateDesc(desc);
                 select.appendChild(option);
             });
         }
@@ -1075,7 +1288,7 @@
         }
 
         function updateStatsDisplay(stats) {
-            document.getElementById('chartTotalBadge').textContent = '篩選總計：' + (stats.total || 0);
+            document.getElementById('chartTotalBadge').textContent = translations[currentLang].totalPrefix + (stats.total || 0);
             updateShiftChart(stats.byShift || { S1: 0, S2: 0, S3: 0, S4: 0 });
             updatePersonStatsList(stats.byPerson || {});
             updateDescriptionStatsList(stats.byDescription || {});
@@ -1089,7 +1302,7 @@
                 data: {
                     labels: ['S1', 'S2', 'S3', 'S4'],
                     datasets: [{
-                        label: '異常次數',
+                        label: translations[currentLang].chartLabel,
                         data: [byShift.S1 || 0, byShift.S2 || 0, byShift.S3 || 0, byShift.S4 || 0],
                         backgroundColor: ['rgba(240,147,251,0.85)', 'rgba(79,172,254,0.85)', 'rgba(67,233,123,0.85)', 'rgba(250,112,154,0.85)'],
                         borderColor: ['rgba(240,147,251,1)', 'rgba(79,172,254,1)', 'rgba(67,233,123,1)', 'rgba(250,112,154,1)'],
@@ -1113,7 +1326,7 @@
             const container = document.getElementById('personStatsContainer');
             const persons = Object.entries(byPerson).sort((a, b) => b[1] - a[1]);
             if (!persons.length) {
-                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-user-slash"></i><p class="mb-0">尚無人員統計數據</p></div>`;
+                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-user-slash"></i><p class="mb-0">${translations[currentLang].noPersonData}</p></div>`;
                 return;
             }
             let html = '';
@@ -1122,7 +1335,7 @@
                 const shiftText = shift ? `(${shift})` : '';
                 html += `<div class="person-stat-item">
                             <span class="person-stat-name"><i class="fas fa-user-circle me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}${shiftText}</span>
-                            <span class="person-stat-count">${count} 次</span>
+                            <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
                         </div>`;
             });
             container.innerHTML = html;
@@ -1132,14 +1345,15 @@
             const container = document.getElementById('descriptionStatsContainer');
             const descriptions = Object.entries(byDescription).sort((a, b) => b[1] - a[1]);
             if (!descriptions.length) {
-                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-chart-pie"></i><p class="mb-0">尚無異常原因統計數據</p></div>`;
+                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-chart-pie"></i><p class="mb-0">${translations[currentLang].noDescData}</p></div>`;
                 return;
             }
             let html = '';
             descriptions.forEach(([desc, count]) => {
+                const translatedDescName = translateDesc(desc);
                 html += `<div class="description-stat-item">
-                            <span class="description-stat-name"><i class="fas fa-tag me-2" style="color:#1a73e8;"></i>${escapeHtml(desc)}</span>
-                            <span class="description-stat-count">${count} 次</span>
+                            <span class="description-stat-name"><i class="fas fa-tag me-2" style="color:#1a73e8;"></i>${escapeHtml(translatedDescName)}</span>
+                            <span class="description-stat-count">${count} ${translations[currentLang].times}</span>
                         </div>`;
             });
             container.innerHTML = html;
@@ -1165,12 +1379,13 @@
                 const personShift = personShiftMap[item.person] || '';
                 const isOvertime = personShift && personShift !== item.shift;
                 const personStyle = isOvertime ? 'style="color:red; font-weight:600;"' : 'style="font-weight:600;"';
+                const translatedDescription = translateDesc(item.description);
                 html += `<tr>
                             <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
                             <td style="white-space:nowrap;font-weight:500;"><i class="fas fa-calendar-day me-1" style="color:#1a73e8;"></i>${escapeHtml(displayDate)}</td>
                             <td><span class="badge-shift ${shiftClass}">${escapeHtml(item.shift)}</span></td>
                             <td ${personStyle}><i class="fas fa-user me-1" style="color:#555;"></i>${escapeHtml(item.person)}</td>
-                            <td><span class="description-text" title="${escapeHtml(item.description)}">${escapeHtml(item.description)}</span></td>
+                            <td><span class="description-text" title="${escapeHtml(translatedDescription)}">${escapeHtml(translatedDescription)}</span></td>
                             <td class="text-center">${hasPhoto ? `<img src="${escapeHtml(item.photoUrl)}" class="photo-thumb" alt="異常照片" onclick="viewPhoto('${escapeHtml(item.photoUrl)}')" loading="lazy">` : `<div class="photo-placeholder"><i class="fas fa-image"></i></div>`}</td>
                             <td class="text-center editor-only"><button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${escapeHtml(item.id)}')" title="刪除記錄" style="border-radius:6px;padding:4px 10px;"><i class="fas fa-trash-alt"></i></button></td>
                         </tr>`;
@@ -1179,7 +1394,7 @@
         }
 
         function updateDataCountBadge(count) {
-            document.getElementById('dataCountBadge').textContent = count + ' 筆';
+            document.getElementById('dataCountBadge').textContent = count + ' ' + translations[currentLang].records;
         }
 
         function showLoading(show) {
@@ -1328,8 +1543,20 @@
                 showToast('warning', '無數據', '沒有可匯出的數據');
                 return;
             }
-            const headers = ['序號', '異常日期', '異常班別', '異常人員', '異常描述', '照片URL'];
-            const rows = currentData.map((item, index) => [index + 1, item.date, item.shift, item.person, item.description, item.photoUrl || '']);
+            const isEn = currentLang === 'en';
+            const headers = isEn ? 
+                ['Seq', 'Date', 'Shift', 'Personnel', 'Description', 'Photo URL'] :
+                ['序號', '異常日期', '異常班別', '異常人員', '異常描述', '照片URL'];
+                
+            const rows = currentData.map((item, index) => [
+                index + 1, 
+                item.date, 
+                item.shift, 
+                item.person, 
+                translateDesc(item.description), 
+                item.photoUrl || ''
+            ]);
+            
             const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))].join('\n');
             const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
