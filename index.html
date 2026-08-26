@@ -646,7 +646,8 @@
     <script>
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
-        // ====https://script.google.com/macros/s/AKfycbwjNDCDtGl46xtOj4lRkOtxHeBkBu1gUfQ66dMlS1C5zkfGyf5r6EcGD3ByIoaBP3Y/exec';
+        // ============================================================
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyKTbhyeaJ-h67N-Ex0Cok-vJnVZQfOdnXpwkn3uaIiwpOirobGFGQWUK8sBXwcy3lH/exec';
         // ============================================================
 
         let editorToken = null;
@@ -654,28 +655,6 @@
         let shiftChartInstance = null;
         let photoBase64 = '';
         let descriptionOptions = [];
-
-        // ==================== [核心修正] 自動重試連線函式 ====================
-        // Google 伺服器有時會短暫無回應或回傳 502/503 錯誤網頁，此函式可攔截並自動重試 3 次
-        async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
-            options.redirect = 'follow'; // 強制跟隨 GAS 重新導向
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    const text = await response.text();
-                    try {
-                        return JSON.parse(text); // 嘗試解析為 JSON
-                    } catch (e) {
-                        // 若回傳的不是 JSON，代表 GAS 伺服器發生 HTML 錯誤畫面
-                        throw new Error('伺服器回傳格式異常 (Google 伺服器短暫塞車)');
-                    }
-                } catch (error) {
-                    if (i === retries - 1) throw error; // 最後一次依然失敗則拋出錯誤
-                    console.warn(`[網路連線不穩] 將在 ${backoff/1000} 秒後進行第 ${i + 1} 次重試...`, error);
-                    await new Promise(resolve => setTimeout(resolve, backoff));
-                }
-            }
-        }
 
         // ==================== 多國語言與異常描述翻譯配置 ====================
         let currentLang = localStorage.getItem('appLang') || 'zh';
@@ -709,13 +688,11 @@
             "極柄長度異常": "Tab Length Abnormal",
             "極柄裁切異常": "Tab Cutting Abnormal",
             "隔離紙抽絲": "Separator Threading",
+            // 補齊新增的4項
             "覆蓋膠帶貼覆異常": "Cover Tape Abnormal",
             "隔離紙末端未剔除": "Separator End Not Rejected",
             "隔離紙異常": "Separator Abnormal",
-            "負極柄壓花位置異常": "Cathode Tab Embossing Position Abnormal",
-            "極片來料異常": "Incoming Electrode Abnormal",
-            "隔離紙錯位": "Separator Misaligned",
-            "覆蓋膠帶貼覆不良": "Cover Tape Application Defect"
+            "負極柄壓花位置異常": "Cathode Tab Embossing Position Abnormal"
         };
 
         const translations = {
@@ -821,6 +798,7 @@
             }
         };
 
+        // 將單個或組合的異常描述翻譯為目標語言
         function translateDesc(desc) {
             if (!desc) return '';
             if (currentLang === 'zh') return desc;
@@ -865,6 +843,7 @@
             }
         }
 
+        // 頁面初次載入時先執行一次語系更新（確保登入頁面即支援中英文）
         document.addEventListener('DOMContentLoaded', () => {
             updateInterfaceLanguage();
         });
@@ -889,11 +868,12 @@
             const password = document.getElementById('viewerPassword').value.trim();
             if (!password) { showToast('warning', '請輸入密碼', '密碼不可空白'); return; }
             try {
-                const result = await fetchWithRetry(GAS_WEB_APP_URL + '?action=loginAsViewer', {
+                const response = await fetch(GAS_WEB_APP_URL + '?action=loginAsViewer', {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ password: password })
                 });
+                const result = await response.json();
                 if (result.success) {
                     editorToken = null;
                     document.body.classList.add('viewer-mode');
@@ -906,7 +886,7 @@
                 }
             } catch (error) {
                 console.error('登入錯誤:', error);
-                showToast('error', '網路連線不穩', 'Google 伺服器暫時無回應，請稍後重試');
+                showToast('error', '網路錯誤', '無法連接到伺服器');
             }
         }
 
@@ -914,11 +894,12 @@
             const password = document.getElementById('editorPassword').value.trim();
             if (!password) { showToast('warning', '請輸入密碼', '密碼不可空白'); return; }
             try {
-                const result = await fetchWithRetry(GAS_WEB_APP_URL + '?action=loginAsEditor', {
+                const response = await fetch(GAS_WEB_APP_URL + '?action=loginAsEditor', {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ password: password })
                 });
+                const result = await response.json();
                 if (result.success) {
                     editorToken = result.token;
                     document.body.classList.remove('viewer-mode');
@@ -931,7 +912,7 @@
                 }
             } catch (error) {
                 console.error('登入錯誤:', error);
-                showToast('error', '網路連線不穩', 'Google 伺服器暫時無回應，請稍後重試');
+                showToast('error', '網路錯誤', '無法連接到伺服器');
             }
         }
 
@@ -963,11 +944,12 @@
 
             try {
                 const url = GAS_WEB_APP_URL + '?action=changePassword&token=' + encodeURIComponent(editorToken || '');
-                const result = await fetchWithRetry(url, {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ type: type, oldPassword: oldPassword, newPassword: newPassword })
                 });
+                const result = await response.json();
                 if (result.success) {
                     showToast('success', '修改成功', '密碼已更新');
                     bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
@@ -981,65 +963,23 @@
                 }
             } catch (error) {
                 console.error('修改密碼錯誤:', error);
-                showToast('error', '網路連線不穩', 'Google 伺服器暫時無回應，請稍後重試');
+                showToast('error', '網路錯誤', '無法連接到伺服器');
             }
         }
 
-        // ==================== 初始化應用（整合快取請求） ====================
+        // ==================== 初始化應用 ====================
         async function initApp() {
             updateInterfaceLanguage();
             initYearFilter();
             initDateFilter();
             initPersonDropdown();
             initInputDefaults();
-            
+            await loadDescriptionOptions();
             const now = new Date();
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
-            
-            await initDashboardData();
+            loadDataAndStats();
             initDashboardDragDrop();
-        }
-
-        async function initDashboardData() {
-            showLoading(true);
-            const params = getFilterParams();
-            const queryString = new URLSearchParams({
-                action: 'initDashboard',
-                shift: params.shift,
-                year: params.year,
-                month: params.month,
-                date: params.date
-            }).toString();
-
-            try {
-                const result = await fetchWithRetry(GAS_WEB_APP_URL + '?' + queryString, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                if (result.success) {
-                    if (Array.isArray(result.options)) {
-                        descriptionOptions = result.options;
-                        renderDescriptionSelectOptions();
-                    }
-                    if (result.data) {
-                        currentData = result.data;
-                        renderDataTable(currentData);
-                        updateDataCountBadge(currentData.length);
-                    }
-                    if (result.stats) {
-                        updateStatsDisplay(result.stats);
-                    }
-                } else {
-                    showToast('error', '初始化失敗', result.message || '無法取得伺服器數據');
-                }
-            } catch (error) {
-                console.error('初始化連線錯誤:', error);
-                showToast('error', '網路連線不穩', '無法連接至 Google 伺服器，已自動重試但仍失敗，請稍後再試');
-            } finally {
-                showLoading(false);
-            }
         }
 
         function initDateDisplay() {
@@ -1127,12 +1067,31 @@
         }
 
         // ==================== 異常描述選項管理 ====================
+        async function loadDescriptionOptions() {
+            try {
+                const response = await fetch(GAS_WEB_APP_URL + '?action=getDescriptionOptions', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const result = await response.json();
+                if (result.success && Array.isArray(result.options)) {
+                    descriptionOptions = result.options;
+                } else {
+                    descriptionOptions = [];
+                }
+            } catch (error) {
+                console.error('載入描述選項錯誤:', error);
+                descriptionOptions = [];
+            }
+            renderDescriptionSelectOptions();
+        }
+
         function renderDescriptionSelectOptions() {
             const select = document.getElementById('inputDescription');
             select.innerHTML = '';
             descriptionOptions.forEach(desc => {
                 const option = document.createElement('option');
-                option.value = desc;
+                option.value = desc; // value維持中文以正確存入資料庫
                 option.textContent = translateDesc(desc);
                 select.appendChild(option);
             });
@@ -1181,23 +1140,23 @@
                 return;
             }
             try {
-                const result = await fetchWithRetry(buildUrlWithToken('addDescriptionOption'), {
+                const response = await fetch(buildUrlWithToken('addDescriptionOption'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ option: newOpt })
                 });
+                const result = await response.json();
                 if (result.success) {
                     showToast('success', '新增成功', `已新增選項「${newOpt}」`);
                     input.value = '';
-                    descriptionOptions.push(newOpt);
-                    renderDescriptionSelectOptions();
+                    await loadDescriptionOptions();
                     renderDescriptionOptionsList();
                 } else {
                     showToast('error', '新增失敗', result.message || '請重試');
                 }
             } catch (error) {
                 console.error('新增選項錯誤:', error);
-                showToast('error', '網路連線不穩', 'Google 伺服器暫時無回應，請稍後重試');
+                showToast('error', '網路錯誤', '無法連接到伺服器');
             }
         }
 
@@ -1212,22 +1171,22 @@
                 return;
             }
             try {
-                const result = await fetchWithRetry(buildUrlWithToken('updateDescriptionOption'), {
+                const response = await fetch(buildUrlWithToken('updateDescriptionOption'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ oldOption: oldOpt, newOption: newOpt })
                 });
+                const result = await response.json();
                 if (result.success) {
                     showToast('success', '修改成功', `已更新為「${newOpt}」`);
-                    descriptionOptions[index] = newOpt;
-                    renderDescriptionSelectOptions();
+                    await loadDescriptionOptions();
                     renderDescriptionOptionsList();
                 } else {
                     showToast('error', '修改失敗', result.message || '請重試');
                 }
             } catch (error) {
                 console.error('修改選項錯誤:', error);
-                showToast('error', '網路連線不穩', 'Google 伺服器暫時無回應，請稍後重試');
+                showToast('error', '網路錯誤', '無法連接到伺服器');
             }
         }
 
@@ -1235,22 +1194,22 @@
             const opt = descriptionOptions[index];
             if (!confirm(`確定要刪除選項「${opt}」嗎？`)) return;
             try {
-                const result = await fetchWithRetry(buildUrlWithToken('deleteDescriptionOption'), {
+                const response = await fetch(buildUrlWithToken('deleteDescriptionOption'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ option: opt })
                 });
+                const result = await response.json();
                 if (result.success) {
                     showToast('success', '刪除成功', `已刪除選項「${opt}」`);
-                    descriptionOptions.splice(index, 1);
-                    renderDescriptionSelectOptions();
+                    await loadDescriptionOptions();
                     renderDescriptionOptionsList();
                 } else {
                     showToast('error', '刪除失敗', result.message || '請重試');
                 }
             } catch (error) {
                 console.error('刪除選項錯誤:', error);
-                showToast('error', '網路連線不穩', 'Google 伺服器暫時無回應，請稍後重試');
+                showToast('error', '網路錯誤', '無法連接到伺服器');
             }
         }
 
@@ -1264,8 +1223,66 @@
             };
         }
 
-        function loadDataAndStats() {
-            initDashboardData();
+        async function loadDataAndStats() {
+            showLoading(true);
+            const params = getFilterParams();
+            try {
+                const [dataResult, statsResult] = await Promise.all([
+                    fetchDataFromGAS(params),
+                    fetchStatsFromGAS(params)
+                ]);
+                if (dataResult.success) {
+                    currentData = dataResult.data;
+                    renderDataTable(currentData);
+                    updateDataCountBadge(currentData.length);
+                } else {
+                    showToast('error', '載入失敗', dataResult.message || '未知錯誤');
+                    currentData = [];
+                    renderDataTable([]);
+                    updateDataCountBadge(0);
+                }
+                if (statsResult.success) {
+                    updateStatsDisplay(statsResult.stats);
+                }
+            } catch (error) {
+                console.error('載入數據錯誤:', error);
+                showToast('error', '網路錯誤', '無法連接到伺服器，請檢查GAS URL設定');
+                currentData = [];
+                renderDataTable([]);
+                updateDataCountBadge(0);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function fetchDataFromGAS(params) {
+            const queryString = new URLSearchParams({
+                action: 'getData',
+                shift: params.shift,
+                year: params.year,
+                month: params.month,
+                date: params.date
+            }).toString();
+            const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            return await response.json();
+        }
+
+        async function fetchStatsFromGAS(params) {
+            const queryString = new URLSearchParams({
+                action: 'getStats',
+                shift: params.shift,
+                year: params.year,
+                month: params.month,
+                date: params.date
+            }).toString();
+            const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            return await response.json();
         }
 
         function updateStatsDisplay(stats) {
@@ -1453,13 +1470,13 @@
                     showToast('success', '新增成功', '異常記錄已保存');
                     bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
                     initInputDefaults();
-                    await initDashboardData();
+                    await loadDataAndStats();
                 } else {
                     showToast('error', '新增失敗', addResult.message || '請重試');
                 }
             } catch (error) {
                 console.error('提交數據錯誤:', error);
-                showToast('error', '網路連線不穩', 'Google 伺服器暫時無回應，請稍後重試');
+                showToast('error', '網路錯誤', '無法連接到伺服器');
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.innerHTML = originalText;
@@ -1468,48 +1485,49 @@
 
         async function uploadPhotoToGAS(base64Data) {
             try {
-                const result = await fetchWithRetry(buildUrlWithToken('uploadPhoto'), {
+                const response = await fetch(buildUrlWithToken('uploadPhoto'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify({ base64: base64Data, fileName: 'photo_' + new Date().getTime() + '.jpg', mimeType: base64Data.split(';')[0].split(':')[1] || 'image/jpeg' })
                 });
-                return result;
+                return await response.json();
             } catch (error) {
                 console.error('上傳照片錯誤:', error);
-                return { success: false, message: '網路連線不穩' };
+                return { success: false, message: '網路錯誤：' + error.message };
             }
         }
 
         async function addDataToGAS(data) {
             try {
-                const result = await fetchWithRetry(buildUrlWithToken('addData'), {
+                const response = await fetch(buildUrlWithToken('addData'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                return result;
+                return await response.json();
             } catch (error) {
                 console.error('添加數據錯誤:', error);
-                return { success: false, message: '網路連線不穩' };
+                return { success: false, message: '網路錯誤：' + error.message };
             }
         }
 
         async function deleteRecord(id) {
             if (!confirm('確定要刪除這筆異常記錄嗎？此操作無法復原。')) return;
             try {
-                const result = await fetchWithRetry(buildUrlWithToken('deleteData', { id: id }), {
+                const response = await fetch(buildUrlWithToken('deleteData', { id: id }), {
                     method: 'POST',
                     headers: { 'Accept': 'application/json' }
                 });
+                const result = await response.json();
                 if (result.success) {
                     showToast('success', '刪除成功', '記錄已刪除');
-                    await initDashboardData();
+                    await loadDataAndStats();
                 } else {
                     showToast('error', '刪除失敗', result.message || '請重試');
                 }
             } catch (error) {
                 console.error('刪除記錄錯誤:', error);
-                showToast('error', '網路連線不穩', 'Google 伺服器暫時無回應，請稍後重試');
+                showToast('error', '網路錯誤', '無法連接到伺服器');
             }
         }
 
@@ -1554,7 +1572,7 @@
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
             document.getElementById('filterDate').value = 'all';
-            initDashboardData();
+            loadDataAndStats();
         }
 
         function escapeHtml(str) {
