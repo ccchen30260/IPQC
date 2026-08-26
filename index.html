@@ -647,7 +647,7 @@
         // ============================================================
         //  ★★★ 配置區域：請在這裡填入您的 Google Apps Script Web App URL ★★★
         // ============================================================
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzvmg_H2uHN-t_4QNAZES_3mUIZIcgqrmBRpILKFgNmFXPSQa4cS0r4FL6_8lVU7Yqf/exec';
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzWgCfIGzGPHFnD1JiV9nZC9jdEkRcrQsxS41oaS3_TPu2pCCcPNe5-GWZ0qOAo3-Pp/exec';
         // ============================================================
 
         let editorToken = null;
@@ -800,7 +800,6 @@
             }
         };
 
-        // 將單個或組合的異常描述翻譯為目標語言
         function translateDesc(desc) {
             if (!desc) return '';
             if (currentLang === 'zh') return desc;
@@ -845,7 +844,6 @@
             }
         }
 
-        // 頁面初次載入時執行語系更新
         document.addEventListener('DOMContentLoaded', () => {
             updateInterfaceLanguage();
         });
@@ -969,19 +967,62 @@
             }
         }
 
-        // ==================== 初始化應用 ====================
+        // ==================== 初始化應用（整合快取請求） ====================
         async function initApp() {
             updateInterfaceLanguage();
             initYearFilter();
             initDateFilter();
             initPersonDropdown();
             initInputDefaults();
-            await loadDescriptionOptions();
+            
             const now = new Date();
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
-            loadDataAndStats();
+            
+            await initDashboardData();
             initDashboardDragDrop();
+        }
+
+        async function initDashboardData() {
+            showLoading(true);
+            const params = getFilterParams();
+            const queryString = new URLSearchParams({
+                action: 'initDashboard',
+                shift: params.shift,
+                year: params.year,
+                month: params.month,
+                date: params.date
+            }).toString();
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    if (Array.isArray(result.options)) {
+                        descriptionOptions = result.options;
+                        renderDescriptionSelectOptions();
+                    }
+                    if (result.data) {
+                        currentData = result.data;
+                        renderDataTable(currentData);
+                        updateDataCountBadge(currentData.length);
+                    }
+                    if (result.stats) {
+                        updateStatsDisplay(result.stats);
+                    }
+                } else {
+                    showToast('error', '初始化失敗', result.message || '無法取得伺服器數據');
+                }
+            } catch (error) {
+                console.error('初始化連線錯誤:', error);
+                showToast('error', '網路錯誤', '無法連接至 Google Apps Script');
+            } finally {
+                showLoading(false);
+            }
         }
 
         function initDateDisplay() {
@@ -1069,31 +1110,12 @@
         }
 
         // ==================== 異常描述選項管理 ====================
-        async function loadDescriptionOptions() {
-            try {
-                const response = await fetch(GAS_WEB_APP_URL + '?action=getDescriptionOptions', {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
-                const result = await response.json();
-                if (result.success && Array.isArray(result.options)) {
-                    descriptionOptions = result.options;
-                } else {
-                    descriptionOptions = [];
-                }
-            } catch (error) {
-                console.error('載入描述選項錯誤:', error);
-                descriptionOptions = [];
-            }
-            renderDescriptionSelectOptions();
-        }
-
         function renderDescriptionSelectOptions() {
             const select = document.getElementById('inputDescription');
             select.innerHTML = '';
             descriptionOptions.forEach(desc => {
                 const option = document.createElement('option');
-                option.value = desc; // value維持中文以正確存入資料庫
+                option.value = desc;
                 option.textContent = translateDesc(desc);
                 select.appendChild(option);
             });
@@ -1151,7 +1173,8 @@
                 if (result.success) {
                     showToast('success', '新增成功', `已新增選項「${newOpt}」`);
                     input.value = '';
-                    await loadDescriptionOptions();
+                    descriptionOptions.push(newOpt);
+                    renderDescriptionSelectOptions();
                     renderDescriptionOptionsList();
                 } else {
                     showToast('error', '新增失敗', result.message || '請重試');
@@ -1181,7 +1204,8 @@
                 const result = await response.json();
                 if (result.success) {
                     showToast('success', '修改成功', `已更新為「${newOpt}」`);
-                    await loadDescriptionOptions();
+                    descriptionOptions[index] = newOpt;
+                    renderDescriptionSelectOptions();
                     renderDescriptionOptionsList();
                 } else {
                     showToast('error', '修改失敗', result.message || '請重試');
@@ -1204,7 +1228,8 @@
                 const result = await response.json();
                 if (result.success) {
                     showToast('success', '刪除成功', `已刪除選項「${opt}」`);
-                    await loadDescriptionOptions();
+                    descriptionOptions.splice(index, 1);
+                    renderDescriptionSelectOptions();
                     renderDescriptionOptionsList();
                 } else {
                     showToast('error', '刪除失敗', result.message || '請重試');
@@ -1225,66 +1250,8 @@
             };
         }
 
-        async function loadDataAndStats() {
-            showLoading(true);
-            const params = getFilterParams();
-            try {
-                const [dataResult, statsResult] = await Promise.all([
-                    fetchDataFromGAS(params),
-                    fetchStatsFromGAS(params)
-                ]);
-                if (dataResult.success) {
-                    currentData = dataResult.data;
-                    renderDataTable(currentData);
-                    updateDataCountBadge(currentData.length);
-                } else {
-                    showToast('error', '載入失敗', dataResult.message || '未知錯誤');
-                    currentData = [];
-                    renderDataTable([]);
-                    updateDataCountBadge(0);
-                }
-                if (statsResult.success) {
-                    updateStatsDisplay(statsResult.stats);
-                }
-            } catch (error) {
-                console.error('載入數據錯誤:', error);
-                showToast('error', '網路錯誤', '無法連接到伺服器，請檢查GAS URL設定');
-                currentData = [];
-                renderDataTable([]);
-                updateDataCountBadge(0);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        async function fetchDataFromGAS(params) {
-            const queryString = new URLSearchParams({
-                action: 'getData',
-                shift: params.shift,
-                year: params.year,
-                month: params.month,
-                date: params.date
-            }).toString();
-            const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            return await response.json();
-        }
-
-        async function fetchStatsFromGAS(params) {
-            const queryString = new URLSearchParams({
-                action: 'getStats',
-                shift: params.shift,
-                year: params.year,
-                month: params.month,
-                date: params.date
-            }).toString();
-            const response = await fetch(GAS_WEB_APP_URL + '?' + queryString, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            return await response.json();
+        function loadDataAndStats() {
+            initDashboardData();
         }
 
         function updateStatsDisplay(stats) {
@@ -1472,7 +1439,7 @@
                     showToast('success', '新增成功', '異常記錄已保存');
                     bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
                     initInputDefaults();
-                    await loadDataAndStats();
+                    await initDashboardData();
                 } else {
                     showToast('error', '新增失敗', addResult.message || '請重試');
                 }
@@ -1523,7 +1490,7 @@
                 const result = await response.json();
                 if (result.success) {
                     showToast('success', '刪除成功', '記錄已刪除');
-                    await loadDataAndStats();
+                    await initDashboardData();
                 } else {
                     showToast('error', '刪除失敗', result.message || '請重試');
                 }
@@ -1564,7 +1531,7 @@
             const params = getFilterParams();
             link.download = `IPQC異常資料_${params.year || '全部'}_${params.month || '全部'}_${new Date().getTime()}.csv`;
             link.click();
-            URL.revokeObjectURL(link.href);
+            URL.revokeObjectURL(link.click());
             showToast('success', '匯出成功', 'CSV檔案已下載');
         }
 
@@ -1574,7 +1541,7 @@
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
             document.getElementById('filterDate').value = 'all';
-            loadDataAndStats();
+            initDashboardData();
         }
 
         function escapeHtml(str) {
