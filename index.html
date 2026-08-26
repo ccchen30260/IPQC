@@ -232,7 +232,7 @@
         }
         .login-card {
             background: #fff; border-radius: 20px; padding: 40px; width: 90%; max-width: 400px;
-            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;
         }
         .login-card h3 { color: #1a73e8; font-weight: 700; margin-bottom: 10px; }
         .login-card .role-btn {
@@ -252,6 +252,10 @@
             background: #1a73e8; color: #fff; border: none; padding: 10px 20px;
             border-radius: 8px; font-weight: 600; cursor: pointer;
         }
+        .login-lang-btn {
+            position: absolute; top: 15px; right: 20px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600; padding: 4px 12px;
+        }
     </style>
 </head>
 <body class="viewer-mode">
@@ -259,6 +263,10 @@
     <!-- 登入畫面 -->
     <div id="loginOverlay" class="login-overlay">
         <div class="login-card">
+            <!-- 登入頁面的語言切換按鈕 -->
+            <button class="btn btn-outline-primary btn-sm login-lang-btn" onclick="toggleLanguage()">
+                <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
+            </button>
             <h3><i class="fas fa-lock me-2"></i><span data-i18n="loginTitle">IPQC異常資料統計</span></h3>
             <p class="text-muted mb-4" data-i18n="selectRole">請選擇進入身分</p>
             <button class="role-btn viewer" onclick="showViewerPasswordBox()">
@@ -296,9 +304,9 @@
                     <i class="fas fa-calendar-alt me-1"></i>
                     載入中...
                 </span>
-                <!-- 語言切換按鈕 -->
+                <!-- 主介面語言切換按鈕 -->
                 <button class="btn btn-outline-light btn-sm" onclick="toggleLanguage()" style="border-radius:20px;">
-                    <i class="fas fa-globe me-1"></i><span id="langToggleBtnText">EN</span>
+                    <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
                 </button>
                 <!-- 修改密碼按鈕（僅編輯者可見） -->
                 <button class="btn btn-outline-light btn-sm editor-only" onclick="openChangePasswordModal()" style="border-radius:20px;">
@@ -679,7 +687,12 @@
             "JR異物": "JR Foreign Material",
             "極柄長度異常": "Tab Length Abnormal",
             "極柄裁切異常": "Tab Cutting Abnormal",
-            "隔離紙抽絲": "Separator Threading"
+            "隔離紙抽絲": "Separator Threading",
+            // 補齊新增的4項
+            "覆蓋膠帶貼覆異常": "Cover Tape Abnormal",
+            "隔離紙末端未剔除": "Separator End Not Rejected",
+            "隔離紙異常": "Separator Abnormal",
+            "負極柄壓花位置異常": "Cathode Tab Embossing Position Abnormal"
         };
 
         const translations = {
@@ -805,8 +818,9 @@
         }
 
         function updateInterfaceLanguage() {
-            const langBtnText = document.getElementById('langToggleBtnText');
-            if (langBtnText) langBtnText.textContent = currentLang === 'zh' ? 'EN' : '中文';
+            document.querySelectorAll('.langToggleBtnText').forEach(el => {
+                el.textContent = currentLang === 'zh' ? 'EN' : '中文';
+            });
 
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -828,6 +842,11 @@
                 loadDataAndStats();
             }
         }
+
+        // 頁面初次載入時先執行一次語系更新（確保登入頁面即支援中英文）
+        document.addEventListener('DOMContentLoaded', () => {
+            updateInterfaceLanguage();
+        });
 
         // ==================== 登入相關 ====================
         function showViewerPasswordBox() {
