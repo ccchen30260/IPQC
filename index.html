@@ -648,8 +648,39 @@
         let photoBase64 = '';
         let descriptionOptions = [];
 
-        // ==================== 多國語言配置 (i18n) ====================
+        // ==================== 多國語言與異常描述翻譯配置 ====================
         let currentLang = localStorage.getItem('appLang') || 'zh';
+
+        const descriptionTranslations = {
+            "JR黑頭": "JR Black Head",
+            "極柄撞歪": "Tab Bent",
+            "接頭未剔除": "Joint Not Rejected",
+            "插單過流": "Manual Order Overcurrent",
+            "隔離紙未端過流": "Separator End Overcurrent",
+            "極柄角度異常": "Tab Angle Abnormal",
+            "極柄數量異常": "Tab Quantity Abnormal",
+            "JR撞(夾)傷": "JR Damaged/Pinch",
+            "極柄彎折": "Tab Folded",
+            "極片皺摺": "Electrode Wrinkled",
+            "極柄膠帶貼覆異常": "Tab Tape Abnormal",
+            "中心孔異常": "Center Hole Abnormal",
+            "JR抽頭(尾)": "JR Head/Tail Pull",
+            "極柄歪斜": "Tab Misaligned",
+            "封止膠帶貼覆異常": "Sealing Tape Abnormal",
+            "極片破損": "Electrode Broken",
+            "雙正極柄重疊寬度異常": "Dual Anode Tab Overlap Width Abnormal",
+            "極片接頭(M1)": "Electrode Joint (M1)",
+            "中心孔皺摺": "Center Hole Wrinkled",
+            "迴轉點異常": "Rotation Point Abnormal",
+            "雙正極柄合焊異常": "Dual Anode Tab Welding Abnormal",
+            "封止膠帶超出JR": "Sealing Tape Exceeds JR",
+            "極柄反折": "Tab Reverse Fold",
+            "負極柄壓花異常": "Cathode Tab Embossing Abnormal",
+            "JR異物": "JR Foreign Material",
+            "極柄長度異常": "Tab Length Abnormal",
+            "極柄裁切異常": "Tab Cutting Abnormal",
+            "隔離紙抽絲": "Separator Threading"
+        };
 
         const translations = {
             zh: {
@@ -754,6 +785,19 @@
             }
         };
 
+        // 將單個或組合的異常描述翻譯為目標語言
+        function translateDesc(desc) {
+            if (!desc) return '';
+            if (currentLang === 'zh') return desc;
+            
+            const items = desc.split('、');
+            const translatedItems = items.map(item => {
+                const trimmed = item.trim();
+                return descriptionTranslations[trimmed] || trimmed;
+            });
+            return translatedItems.join(', ');
+        }
+
         function toggleLanguage() {
             currentLang = currentLang === 'zh' ? 'en' : 'zh';
             localStorage.setItem('appLang', currentLang);
@@ -779,6 +823,7 @@
             });
 
             initDateDisplay();
+            renderDescriptionSelectOptions();
             if (currentData) {
                 loadDataAndStats();
             }
@@ -1019,12 +1064,16 @@
                 console.error('載入描述選項錯誤:', error);
                 descriptionOptions = [];
             }
+            renderDescriptionSelectOptions();
+        }
+
+        function renderDescriptionSelectOptions() {
             const select = document.getElementById('inputDescription');
             select.innerHTML = '';
             descriptionOptions.forEach(desc => {
                 const option = document.createElement('option');
-                option.value = desc;
-                option.textContent = desc;
+                option.value = desc; // value維持中文以正確存入資料庫
+                option.textContent = translateDesc(desc);
                 select.appendChild(option);
             });
         }
@@ -1280,8 +1329,9 @@
             }
             let html = '';
             descriptions.forEach(([desc, count]) => {
+                const translatedDescName = translateDesc(desc);
                 html += `<div class="description-stat-item">
-                            <span class="description-stat-name"><i class="fas fa-tag me-2" style="color:#1a73e8;"></i>${escapeHtml(desc)}</span>
+                            <span class="description-stat-name"><i class="fas fa-tag me-2" style="color:#1a73e8;"></i>${escapeHtml(translatedDescName)}</span>
                             <span class="description-stat-count">${count} ${translations[currentLang].times}</span>
                         </div>`;
             });
@@ -1308,12 +1358,13 @@
                 const personShift = personShiftMap[item.person] || '';
                 const isOvertime = personShift && personShift !== item.shift;
                 const personStyle = isOvertime ? 'style="color:red; font-weight:600;"' : 'style="font-weight:600;"';
+                const translatedDescription = translateDesc(item.description);
                 html += `<tr>
                             <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
                             <td style="white-space:nowrap;font-weight:500;"><i class="fas fa-calendar-day me-1" style="color:#1a73e8;"></i>${escapeHtml(displayDate)}</td>
                             <td><span class="badge-shift ${shiftClass}">${escapeHtml(item.shift)}</span></td>
                             <td ${personStyle}><i class="fas fa-user me-1" style="color:#555;"></i>${escapeHtml(item.person)}</td>
-                            <td><span class="description-text" title="${escapeHtml(item.description)}">${escapeHtml(item.description)}</span></td>
+                            <td><span class="description-text" title="${escapeHtml(translatedDescription)}">${escapeHtml(translatedDescription)}</span></td>
                             <td class="text-center">${hasPhoto ? `<img src="${escapeHtml(item.photoUrl)}" class="photo-thumb" alt="異常照片" onclick="viewPhoto('${escapeHtml(item.photoUrl)}')" loading="lazy">` : `<div class="photo-placeholder"><i class="fas fa-image"></i></div>`}</td>
                             <td class="text-center editor-only"><button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${escapeHtml(item.id)}')" title="刪除記錄" style="border-radius:6px;padding:4px 10px;"><i class="fas fa-trash-alt"></i></button></td>
                         </tr>`;
@@ -1471,8 +1522,20 @@
                 showToast('warning', '無數據', '沒有可匯出的數據');
                 return;
             }
-            const headers = ['序號', '異常日期', '異常班別', '異常人員', '異常描述', '照片URL'];
-            const rows = currentData.map((item, index) => [index + 1, item.date, item.shift, item.person, item.description, item.photoUrl || '']);
+            const isEn = currentLang === 'en';
+            const headers = isEn ? 
+                ['Seq', 'Date', 'Shift', 'Personnel', 'Description', 'Photo URL'] :
+                ['序號', '異常日期', '異常班別', '異常人員', '異常描述', '照片URL'];
+                
+            const rows = currentData.map((item, index) => [
+                index + 1, 
+                item.date, 
+                item.shift, 
+                item.person, 
+                translateDesc(item.description), 
+                item.photoUrl || ''
+            ]);
+            
             const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))].join('\n');
             const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
