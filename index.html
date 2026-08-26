@@ -52,14 +52,13 @@
             padding: 10px;
             border-radius: 10px;
         }
-        .navbar-custom .badge-date, .navbar-custom .badge-views {
+        .navbar-custom .badge-date {
             background: rgba(255, 255, 255, 0.25);
             color: #fff;
-            font-size: 0.85rem;
-            padding: 6px 12px;
+            font-size: 0.9rem;
+            padding: 8px 14px;
             border-radius: 20px;
             font-weight: 500;
-            white-space: nowrap;
         }
 
         .card-custom {
@@ -301,12 +300,6 @@
                 <span data-i18n="appTitle">IPQC異常資料統計</span>
             </a>
             <div class="d-flex align-items-center gap-2">
-                <!-- 瀏覽人數計數器 -->
-                <span class="badge-views d-none d-lg-inline-block">
-                    <i class="fas fa-eye me-1"></i>
-                    <span data-i18n="todayViews">今日</span>: <span id="todayViewsCount">0</span> | 
-                    <span data-i18n="totalViews">累積</span>: <span id="totalViewsCount">0</span>
-                </span>
                 <span class="badge-date d-none d-md-inline-block" id="currentDateDisplay">
                     <i class="fas fa-calendar-alt me-1"></i>
                     載入中...
@@ -699,7 +692,6 @@
             "隔離紙末端未剔除": "Separator End Not Rejected",
             "隔離紙異常": "Separator Abnormal",
             "負極柄壓花位置異常": "Cathode Tab Embossing Position Abnormal",
-            // 補齊新增的3項
             "極片來料異常": "Incoming Electrode Abnormal",
             "隔離紙錯位": "Separator Misaligned",
             "覆蓋膠帶貼覆不良": "Cover Tape Application Defect"
@@ -754,9 +746,7 @@
                 save: "儲存",
                 times: "次",
                 records: "筆",
-                chartLabel: "異常次數",
-                todayViews: "今日",
-                totalViews: "累積"
+                chartLabel: "異常次數"
             },
             en: {
                 appTitle: "IPQC Abnormal Data Statistics",
@@ -806,9 +796,7 @@
                 save: "Save",
                 times: "times",
                 records: "records",
-                chartLabel: "Abnormal Count",
-                todayViews: "Today",
-                totalViews: "Total"
+                chartLabel: "Abnormal Count"
             }
         };
 
@@ -857,33 +845,9 @@
             }
         }
 
-        // ==================== 瀏覽人數計數器機制 ====================
-        function initViewCounter() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const lastVisitDate = localStorage.getItem('view_counter_last_date');
-            
-            let todayViews = parseInt(localStorage.getItem('view_counter_today') || '0', 10);
-            let totalViews = parseInt(localStorage.getItem('view_counter_total') || '128', 10); // 預設基礎值
-
-            if (lastVisitDate !== todayStr) {
-                todayViews = 1;
-                localStorage.setItem('view_counter_last_date', todayStr);
-            } else {
-                todayViews += 1;
-            }
-            totalViews += 1;
-
-            localStorage.setItem('view_counter_today', todayViews);
-            localStorage.setItem('view_counter_total', totalViews);
-
-            document.getElementById('todayViewsCount').textContent = todayViews;
-            document.getElementById('totalViewsCount').textContent = totalViews;
-        }
-
-        // 頁面初次載入時先執行語系與計數器
+        // 頁面初次載入時執行語系更新
         document.addEventListener('DOMContentLoaded', () => {
             updateInterfaceLanguage();
-            initViewCounter();
         });
 
         // ==================== 登入相關 ====================
