@@ -10,7 +10,8 @@
     <!-- Font Awesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
 
     <style>
         :root {
@@ -23,7 +24,9 @@
             --transition: all 0.3s ease;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -31,7 +34,9 @@
             font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
             padding-bottom: 40px;
         }
-        body.viewer-mode .editor-only { display: none !important; }
+        body.viewer-mode .editor-only {
+            display: none !important;
+        }
 
         .navbar-custom {
             background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
@@ -69,7 +74,9 @@
             transition: var(--transition);
             overflow: hidden;
         }
-        .card-custom:hover { box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12); }
+        .card-custom:hover {
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        }
         .card-custom .card-header {
             background: #fff;
             border-bottom: 2px solid #e8ecf1;
@@ -81,180 +88,493 @@
             gap: 8px;
             color: #333;
         }
-        .card-custom .card-header i { color: var(--primary-color); }
-        .card-custom .card-body { padding: 20px; }
-
-        .filter-section .form-label { font-weight: 600; font-size: 0.85rem; color: #555; margin-bottom: 4px; }
-        .filter-section .form-select, .filter-section .form-control {
-            border-radius: 8px; border: 1.5px solid #dee2e6; transition: var(--transition);
-            font-size: 0.95rem; padding: 8px 12px;
+        .card-custom .card-header i {
+            color: var(--primary-color);
         }
-        .filter-section .form-select:focus, .filter-section .form-control:focus {
-            border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
+        .card-custom .card-body {
+            padding: 20px;
+        }
+
+        .filter-section .form-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .filter-section .form-select,
+        .filter-section .form-control {
+            border-radius: 8px;
+            border: 1.5px solid #dee2e6;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            padding: 8px 12px;
+        }
+        .filter-section .form-select:focus,
+        .filter-section .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
         }
 
         .btn-custom-primary {
-            background: var(--primary-color); color: #fff; border: none; border-radius: 8px;
-            padding: 10px 20px; font-weight: 600; transition: var(--transition);
-            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        .btn-custom-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-custom-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
         .btn-custom-outline {
-            background: #fff; color: var(--primary-color); border: 2px solid var(--primary-color);
-            border-radius: 8px; padding: 8px 16px; font-weight: 600; transition: var(--transition);
-            display: inline-flex; align-items: center; gap: 6px;
+            background: #fff;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        .btn-custom-outline:hover { background: var(--primary-color); color: #fff; }
+        .btn-custom-outline:hover {
+            background: var(--primary-color);
+            color: #fff;
+        }
         .btn-custom-danger {
-            background: #fff; color: var(--danger-color); border: 2px solid var(--danger-color);
-            border-radius: 8px; padding: 8px 16px; font-weight: 600; transition: var(--transition);
-            display: inline-flex; align-items: center; gap: 6px;
+            background: #fff;
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        .btn-custom-danger:hover { background: var(--danger-color); color: #fff; }
+        .btn-custom-danger:hover {
+            background: var(--danger-color);
+            color: #fff;
+        }
 
-        .table-custom { border-collapse: separate; border-spacing: 0; width: 100%; }
+        .table-custom {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
         .table-custom thead th {
-            background: #f1f4f9; color: #333; font-weight: 700; font-size: 0.85rem;
-            text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 14px;
-            border-bottom: 2px solid #dee2e6; white-space: nowrap;
+            background: #f1f4f9;
+            color: #333;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 14px;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         .table-custom tbody td {
-            padding: 12px 14px; vertical-align: middle; border-bottom: 1px solid #eef0f3;
-            font-size: 0.9rem; color: #444;
+            padding: 12px 14px;
+            vertical-align: middle;
+            border-bottom: 1px solid #eef0f3;
+            font-size: 0.9rem;
+            color: #444;
         }
-        .table-custom tbody tr { transition: var(--transition); }
-        .table-custom tbody tr:hover { background: #f8fafd; }
-        .table-custom tbody tr:last-child td { border-bottom: none; }
+        .table-custom tbody tr {
+            transition: var(--transition);
+        }
+        .table-custom tbody tr:hover {
+            background: #f8fafd;
+        }
+        .table-custom tbody tr:last-child td {
+            border-bottom: none;
+        }
 
         .badge-shift {
-            padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;
-            letter-spacing: 0.5px; display: inline-block; min-width: 40px; text-align: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            min-width: 40px;
+            text-align: center;
         }
-        .badge-shift-S1 { background: #fde8e8; color: #c0392b; }
-        .badge-shift-S2 { background: #e3f2fd; color: #1565c0; }
-        .badge-shift-S3 { background: #e8f5e9; color: #2e7d32; }
-        .badge-shift-S4 { background: #fff3e0; color: #e65100; }
+        .badge-shift-S1 {
+            background: #fde8e8;
+            color: #c0392b;
+        }
+        .badge-shift-S2 {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        .badge-shift-S3 {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .badge-shift-S4 {
+            background: #fff3e0;
+            color: #e65100;
+        }
 
         .photo-thumb {
-            width: 56px; height: 56px; object-fit: cover; border-radius: 8px; cursor: pointer;
-            transition: var(--transition); border: 2px solid #e8ecf1;
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid #e8ecf1;
         }
-        .photo-thumb:hover { transform: scale(1.1); border-color: var(--primary-color); }
+        .photo-thumb:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-color);
+        }
         .photo-placeholder {
-            width: 56px; height: 56px; border-radius: 8px; background: #f1f4f9;
-            display: flex; align-items: center; justify-content: center; color: #b0b8c4;
-            font-size: 1.3rem; border: 2px dashed #d0d7e2;
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            background: #f1f4f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #b0b8c4;
+            font-size: 1.3rem;
+            border: 2px dashed #d0d7e2;
         }
 
-        .empty-state { text-align: center; padding: 60px 20px; color: #9aa5b1; }
-        .empty-state i { font-size: 4rem; margin-bottom: 16px; opacity: 0.5; }
-        .empty-state h5 { font-weight: 600; color: #666; }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9aa5b1;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .empty-state h5 {
+            font-weight: 600;
+            color: #666;
+        }
 
-        .loading-spinner { display: flex; align-items: center; justify-content: center; padding: 40px; }
-        .spinner-border { width: 3rem; height: 3rem; }
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
 
-        .photo-preview-container { position: relative; display: inline-block; margin-top: 8px; }
+        .photo-preview-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 8px;
+        }
         .photo-preview-container img {
-            max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #dee2e6; object-fit: cover;
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            object-fit: cover;
         }
         .photo-preview-container .btn-remove-photo {
-            position: absolute; top: -10px; right: -10px; background: var(--danger-color);
-            color: #fff; border: none; border-radius: 50%; width: 26px; height: 26px;
-            font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--danger-color);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .modal-photo-view .modal-content { background: transparent; border: none; box-shadow: none; }
-        .modal-photo-view .modal-body { display: flex; align-items: center; justify-content: center; padding: 0; }
+        .modal-photo-view .modal-content {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+        .modal-photo-view .modal-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
         .modal-photo-view .modal-body img {
-            max-width: 100%; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
         }
 
         .fab-add {
-            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%;
-            background: var(--primary-color); color: #fff; border: none; font-size: 1.8rem;
-            box-shadow: 0 6px 20px rgba(26,115,232,0.4); cursor: pointer; transition: var(--transition);
-            z-index: 1000; display: flex; align-items: center; justify-content: center;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            font-size: 1.8rem;
+            box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .fab-add:hover { transform: scale(1.08); background: var(--primary-dark); }
+        .fab-add:hover {
+            transform: scale(1.08);
+            background: var(--primary-dark);
+        }
 
-        .toast-container-custom { position: fixed; top: 20px; right: 20px; z-index: 9999; }
-        .toast-custom { border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); border: none; overflow: hidden; min-width: 300px; }
-        .toast-custom .toast-header { border-bottom: none; padding: 12px 16px; font-weight: 600; }
+        .toast-container-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        .toast-custom {
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border: none;
+            overflow: hidden;
+            min-width: 300px;
+        }
+        .toast-custom .toast-header {
+            border-bottom: none;
+            padding: 12px 16px;
+            font-weight: 600;
+        }
 
         .person-stat-item,
         .description-stat-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 0; border-bottom: 1px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f2f5;
         }
         .person-stat-item:last-child,
-        .description-stat-item:last-child { border-bottom: none; }
+        .description-stat-item:last-child {
+            border-bottom: none;
+        }
         .person-stat-name,
-        .description-stat-name { font-weight: 600; color: #333; }
+        .description-stat-name {
+            font-weight: 600;
+            color: #333;
+        }
         .person-stat-count,
         .description-stat-count {
-            background: var(--primary-color); color: #fff; padding: 4px 12px;
-            border-radius: 20px; font-weight: 700; font-size: 0.85rem;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
         }
 
-        .chart-container { position: relative; height: 220px; width: 100%; }
+        .chart-container {
+            position: relative;
+            height: 220px;
+            width: 100%;
+        }
 
         .description-text {
-            max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-            display: block; cursor: default;
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            cursor: default;
         }
-        .description-text:hover { white-space: normal; overflow: visible; word-break: break-all; }
+        .description-text:hover {
+            white-space: normal;
+            overflow: visible;
+            word-break: break-all;
+        }
 
-        select[multiple] { height: auto; min-height: 120px; }
-        select[multiple] option { padding: 4px 8px; }
+        select[multiple] {
+            height: auto;
+            min-height: 120px;
+        }
+        select[multiple] option {
+            padding: 4px 8px;
+        }
 
         .option-item {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 0; border-bottom: 1px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f2f5;
         }
         .option-item input {
-            flex: 1; border: 1px solid #dee2e6; border-radius: 6px; padding: 6px 10px;
+            flex: 1;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 6px 10px;
             font-size: 0.9rem;
         }
-        .option-item .btn-sm { white-space: nowrap; }
+        .option-item .btn-sm {
+            white-space: nowrap;
+        }
 
         /* 拖曳排序相關樣式 */
-        .dashboard-block { transition: box-shadow 0.2s, transform 0.2s; }
-        .dashboard-block.dragging { opacity: 0.5; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transform: scale(0.98); }
-        .dashboard-block .drag-handle { cursor: grab; user-select: none; }
-        .dashboard-block .drag-handle:active { cursor: grabbing; }
-        .dashboard-block.drag-over { border-top: 4px solid var(--primary-color); }
+        .dashboard-block {
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .dashboard-block.dragging {
+            opacity: 0.5;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.98);
+        }
+        .dashboard-block .drag-handle {
+            cursor: grab;
+            user-select: none;
+        }
+        .dashboard-block .drag-handle:active {
+            cursor: grabbing;
+        }
+        .dashboard-block.drag-over {
+            border-top: 4px solid var(--primary-color);
+        }
 
         /* 登入畫面樣式 */
         .login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-            z-index: 9999; display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .login-card {
-            background: #fff; border-radius: 20px; padding: 40px; width: 90%; max-width: 400px;
-            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
-        .login-card h3 { color: #1a73e8; font-weight: 700; margin-bottom: 10px; }
+        .login-card h3 {
+            color: #1a73e8;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
         .login-card .role-btn {
-            display: block; width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px;
-            font-weight: 700; font-size: 1.1rem; border: 2px solid #1a73e8; background: #fff; color: #1a73e8;
-            transition: all 0.3s; cursor: pointer;
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: 2px solid #1a73e8;
+            background: #fff;
+            color: #1a73e8;
+            transition: all 0.3s;
+            cursor: pointer;
         }
-        .login-card .role-btn:hover { background: #1a73e8; color: #fff; }
-        .login-card .role-btn.viewer { border-color: #6c757d; color: #6c757d; }
-        .login-card .role-btn.viewer:hover { background: #6c757d; color: #fff; }
-        .password-box { display: none; margin-top: 15px; }
+        .login-card .role-btn:hover {
+            background: #1a73e8;
+            color: #fff;
+        }
+        .login-card .role-btn.viewer {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+        .login-card .role-btn.viewer:hover {
+            background: #6c757d;
+            color: #fff;
+        }
+        .password-box {
+            display: none;
+            margin-top: 15px;
+        }
         .password-box input {
-            width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px;
-            text-align: center; margin-bottom: 10px;
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 10px;
         }
         .password-box .btn-confirm {
-            background: #1a73e8; color: #fff; border: none; padding: 10px 20px;
-            border-radius: 8px; font-weight: 600; cursor: pointer;
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
         }
         .login-lang-btn {
-            position: absolute; top: 15px; right: 20px; border-radius: 20px;
-            font-size: 0.85rem; font-weight: 600; padding: 4px 12px;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 4px 12px;
+        }
+
+        /* 篩選期間標籤樣式 */
+        .filter-period-badge {
+            background: #e8f0fe;
+            color: #1a73e8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 16px;
+            margin-left: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .filter-period-badge i {
+            font-size: 0.7rem;
+            color: #1a73e8;
+        }
+
+        /* 數據列表捲動容器 */
+        .table-scroll-container {
+            max-height: 450px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+        }
+        .table-scroll-container .table-responsive {
+            overflow-x: auto;
         }
     </style>
 </head>
@@ -263,7 +583,6 @@
     <!-- 登入畫面 -->
     <div id="loginOverlay" class="login-overlay">
         <div class="login-card">
-            <!-- 登入頁面的語言切換按鈕 -->
             <button class="btn btn-outline-primary btn-sm login-lang-btn" onclick="toggleLanguage()">
                 <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
             </button>
@@ -276,14 +595,12 @@
                 <i class="fas fa-user-edit me-2"></i><span data-i18n="loginEditor">以編輯者進入</span>
             </button>
 
-            <!-- 檢視者密碼輸入框 -->
             <div id="viewerPasswordBox" class="password-box">
                 <input type="password" id="viewerPassword" data-i18n-placeholder="inputViewerPass" placeholder="請輸入檢視者密碼">
                 <button class="btn-confirm" onclick="loginAsViewer()" data-i18n="confirm">確認</button>
                 <button class="btn btn-link" onclick="hideAllPasswordBoxes()" data-i18n="cancel">取消</button>
             </div>
 
-            <!-- 編輯者密碼輸入框 -->
             <div id="editorPasswordBox" class="password-box">
                 <input type="password" id="editorPassword" data-i18n-placeholder="inputEditorPass" placeholder="請輸入編輯者密碼">
                 <button class="btn-confirm" onclick="loginAsEditor()" data-i18n="confirm">確認</button>
@@ -304,11 +621,9 @@
                     <i class="fas fa-calendar-alt me-1"></i>
                     載入中...
                 </span>
-                <!-- 主介面語言切換按鈕 -->
                 <button class="btn btn-outline-light btn-sm" onclick="toggleLanguage()" style="border-radius:20px;">
                     <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
                 </button>
-                <!-- 修改密碼按鈕（僅編輯者可見） -->
                 <button class="btn btn-outline-light btn-sm editor-only" onclick="openChangePasswordModal()" style="border-radius:20px;">
                     <i class="fas fa-key me-1"></i><span data-i18n="changePassword">修改密碼</span>
                 </button>
@@ -390,6 +705,9 @@
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
                         <i class="fas fa-chart-column"></i> <span data-i18n="chartBlockTitle">班別統計圖表</span>
+                        <span class="filter-period-badge" id="filterPeriodBadge_chart">
+                            <i class="fas fa-calendar"></i> <span class="fp-text">全部</span>
+                        </span>
                     </span>
                     <span class="badge bg-primary" id="chartTotalBadge">篩選總計：0</span>
                 </div>
@@ -406,6 +724,9 @@
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
                         <i class="fas fa-user-tag"></i> <span data-i18n="personBlockTitle">人員異常統計</span>
+                        <span class="filter-period-badge" id="filterPeriodBadge_person">
+                            <i class="fas fa-calendar"></i> <span class="fp-text">全部</span>
+                        </span>
                     </span>
                 </div>
                 <div class="card-body" id="personStatsContainer" style="max-height: 280px; overflow-y: auto;">
@@ -422,6 +743,9 @@
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
                         <i class="fas fa-list-alt"></i> <span data-i18n="descBlockTitle">異常原因統計表</span>
+                        <span class="filter-period-badge" id="filterPeriodBadge_desc">
+                            <i class="fas fa-calendar"></i> <span class="fp-text">全部</span>
+                        </span>
                     </span>
                 </div>
                 <div class="card-body" id="descriptionStatsContainer" style="max-height: 300px; overflow-y: auto;">
@@ -438,6 +762,9 @@
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
                         <i class="fas fa-list"></i> <span data-i18n="listBlockTitle">異常數據列表</span>
+                        <span class="filter-period-badge" id="filterPeriodBadge_list">
+                            <i class="fas fa-calendar"></i> <span class="fp-text">全部</span>
+                        </span>
                     </span>
                     <span class="badge bg-primary" id="dataCountBadge">0 筆</span>
                 </div>
@@ -449,21 +776,23 @@
                             </div>
                         </div>
                         <div id="dataTableWrapper" style="display:none;">
-                            <div class="table-responsive">
-                                <table class="table table-custom mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:50px;" data-i18n="seq">序號</th>
-                                            <th data-i18n="abnormalDate">異常日期</th>
-                                            <th data-i18n="abnormalShift">異常班別</th>
-                                            <th data-i18n="abnormalPerson">異常人員</th>
-                                            <th data-i18n="abnormalDesc">異常描述</th>
-                                            <th data-i18n="abnormalPhoto">異常照片</th>
-                                            <th class="editor-only" style="width:80px;" data-i18n="actions">操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="dataTableBody"></tbody>
-                                </table>
+                            <div class="table-scroll-container">
+                                <div class="table-responsive">
+                                    <table class="table table-custom mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:50px;" data-i18n="seq">序號</th>
+                                                <th data-i18n="abnormalDate">異常日期</th>
+                                                <th data-i18n="abnormalShift">異常班別</th>
+                                                <th data-i18n="abnormalPerson">異常人員</th>
+                                                <th data-i18n="abnormalDesc">異常描述</th>
+                                                <th data-i18n="abnormalPhoto">異常照片</th>
+                                                <th class="editor-only" style="width:80px;" data-i18n="actions">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dataTableBody"></tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div id="emptyState" class="empty-state" style="display:none;">
                                 <i class="fas fa-inbox"></i>
@@ -527,7 +856,6 @@
                                     </button>
                                 </div>
                                 <select class="form-select" id="inputDescription" multiple size="6" required>
-                                    <!-- 選項由 JavaScript 從後端載入 -->
                                 </select>
                             </div>
                             <div class="col-12" id="photoPreviewContainer" style="display:none;">
@@ -574,7 +902,6 @@
                         </div>
                     </div>
                     <div id="descriptionOptionsList" style="max-height: 300px; overflow-y: auto;">
-                        <!-- 動態渲染 -->
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #eef0f3; padding: 12px 20px;">
@@ -641,7 +968,8 @@
     <div class="toast-container-custom" id="toastContainer"></div>
 
     <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
 
     <script>
         // ============================================================
@@ -746,7 +1074,10 @@
                 save: "儲存",
                 times: "次",
                 records: "筆",
-                chartLabel: "異常次數"
+                chartLabel: "異常次數",
+                filterPeriodAll: "全部期間",
+                filterPeriodYear: "年",
+                filterPeriodMonth: "月"
             },
             en: {
                 appTitle: "IPQC Abnormal Data Statistics",
@@ -796,15 +1127,19 @@
                 save: "Save",
                 times: "times",
                 records: "records",
-                chartLabel: "Abnormal Count"
+                chartLabel: "Abnormal Count",
+                filterPeriodAll: "All Periods",
+                filterPeriodYear: "",
+                filterPeriodMonth: ""
             }
         };
 
-        // 將單個或組合的異常描述翻譯為目標語言
+        // 月份英文縮寫
+        const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
         function translateDesc(desc) {
             if (!desc) return '';
             if (currentLang === 'zh') return desc;
-            
             const items = desc.split('、');
             const translatedItems = items.map(item => {
                 const trimmed = item.trim();
@@ -823,29 +1158,63 @@
             document.querySelectorAll('.langToggleBtnText').forEach(el => {
                 el.textContent = currentLang === 'zh' ? 'EN' : '中文';
             });
-
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[currentLang] && translations[currentLang][key]) {
                     el.textContent = translations[currentLang][key];
                 }
             });
-
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 const key = el.getAttribute('data-i18n-placeholder');
                 if (translations[currentLang] && translations[currentLang][key]) {
                     el.placeholder = translations[currentLang][key];
                 }
             });
-
             initDateDisplay();
+            updateFilterPeriodBadges();
             renderDescriptionSelectOptions();
-            if (currentData) {
-                loadDataAndStats();
+            if (currentData && currentData.length > 0) {
+                renderDataTable(currentData);
+                updateDataCountBadge(currentData.length);
+            } else if (currentData && currentData.length === 0) {
+                updateDataCountBadge(0);
+            }
+            if (shiftChartInstance) {
+                shiftChartInstance.options.plugins.legend.labels.boxWidth = 0;
+                shiftChartInstance.update();
             }
         }
 
-        // 頁面初次載入時先執行一次語系更新（確保登入頁面即支援中英文）
+        // ==================== 更新篩選期間標籤 ====================
+        function updateFilterPeriodBadges() {
+            const year = document.getElementById('filterYear').value;
+            const month = document.getElementById('filterMonth').value;
+            let text = '';
+            const isEn = currentLang === 'en';
+
+            if (year === 'all' && month === 'all') {
+                text = isEn ? translations.en.filterPeriodAll : translations.zh.filterPeriodAll;
+            } else if (year !== 'all' && month === 'all') {
+                text = isEn ? year : year + translations.zh.filterPeriodYear;
+            } else if (year === 'all' && month !== 'all') {
+                if (isEn) {
+                    text = monthNamesEn[parseInt(month) - 1] || month;
+                } else {
+                    text = month + translations.zh.filterPeriodMonth;
+                }
+            } else {
+                if (isEn) {
+                    text = (monthNamesEn[parseInt(month) - 1] || month) + ' ' + year;
+                } else {
+                    text = year + translations.zh.filterPeriodYear + month + translations.zh.filterPeriodMonth;
+                }
+            }
+
+            document.querySelectorAll('.filter-period-badge .fp-text').forEach(el => {
+                el.textContent = text;
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             updateInterfaceLanguage();
         });
@@ -855,10 +1224,12 @@
             hideAllPasswordBoxes();
             document.getElementById('viewerPasswordBox').style.display = 'block';
         }
+
         function showEditorPasswordBox() {
             hideAllPasswordBoxes();
             document.getElementById('editorPasswordBox').style.display = 'block';
         }
+
         function hideAllPasswordBoxes() {
             document.getElementById('viewerPasswordBox').style.display = 'none';
             document.getElementById('editorPasswordBox').style.display = 'none';
@@ -930,7 +1301,6 @@
             const oldPassword = document.getElementById('oldPassword').value.trim();
             const newPassword = document.getElementById('newPassword').value.trim();
             const confirmNewPassword = document.getElementById('confirmNewPassword').value.trim();
-
             if (!oldPassword || !newPassword || !confirmNewPassword) {
                 showToast('warning', '資料不完整', '請填寫所有欄位');
                 return;
@@ -943,7 +1313,6 @@
                 showToast('warning', '密碼太短', '新密碼至少需要4位');
                 return;
             }
-
             try {
                 const url = GAS_WEB_APP_URL + '?action=changePassword&token=' + encodeURIComponent(editorToken || '');
                 const response = await fetch(url, {
@@ -980,6 +1349,7 @@
             const now = new Date();
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
+            updateFilterPeriodBadges();
             loadDataAndStats();
             initDashboardDragDrop();
         }
@@ -1015,24 +1385,25 @@
         }
 
         function initPersonDropdown() {
-            document.getElementById('inputPerson').innerHTML = `<option value="">${translations[currentLang].selectPerson}</option>`;
+            document.getElementById('inputPerson').innerHTML =
+                `<option value="">${translations[currentLang].selectPerson}</option>`;
         }
 
         const S1_PERSONNEL = [
-            "方慎之","陳泰安","蔡南嘉","李珮菁","朱建穎","王泳淇","吳峻霖","黃詠綺",
-            "蘭狄","凱文","勞倫司","安東尼","明華","艾麥倫","邱立斯","拉特","羅內爾","艾佛森"
+            "方慎之", "陳泰安", "蔡南嘉", "李珮菁", "朱建穎", "王泳淇", "吳峻霖", "黃詠綺",
+            "蘭狄", "凱文", "勞倫司", "安東尼", "明華", "艾麥倫", "邱立斯", "拉特", "羅內爾", "艾佛森"
         ];
         const S2_PERSONNEL = [
-            "黃正忠","張韶眞","陳宥庠","黃威翔","羅翊禎","黃文靖","蔡易良","吳奇玲",
-            "詹姆士","達力","山博","羅傑","達路","童氏蓮","羅德","達布","安吉","羅蘭多"
+            "黃正忠", "張韶眞", "陳宥庠", "黃威翔", "羅翊禎", "黃文靖", "蔡易良", "吳奇玲",
+            "詹姆士", "達力", "山博", "羅傑", "達路", "童氏蓮", "羅德", "達布", "安吉", "羅蘭多"
         ];
         const S3_PERSONNEL = [
-            "陳文全","吳國隆","李茂玄","葉秀芬","王俊智","吳慧如","黃筱珊","吳明珠","蘇炫元",
-            "托弗","杰倫","艾諾","吳氏莊","納撒","格林","喬司華","喬丹","吉姆"
+            "陳文全", "吳國隆", "李茂玄", "葉秀芬", "王俊智", "吳慧如", "黃筱珊", "吳明珠", "蘇炫元",
+            "托弗", "杰倫", "艾諾", "吳氏莊", "納撒", "格林", "喬司華", "喬丹", "吉姆"
         ];
         const S4_PERSONNEL = [
-            "陳喬志","楊代億","廖曉彤","蔡靜儀","賴建亦","施榮傑","陰其德","黃譯鋒","楊雅婷","羅啟倫",
-            "埃爾默","拉斯特","雷伊","漢斯","達利斯","甘達","特拉多","達爾文"
+            "陳喬志", "楊代億", "廖曉彤", "蔡靜儀", "賴建亦", "施榮傑", "陰其德", "黃譯鋒", "楊雅婷", "羅啟倫",
+            "埃爾默", "拉斯特", "雷伊", "漢斯", "達利斯", "甘達", "特拉多", "達爾文"
         ];
         const personShiftMap = {};
         S1_PERSONNEL.forEach(p => personShiftMap[p] = 'S1');
@@ -1093,7 +1464,7 @@
             select.innerHTML = '';
             descriptionOptions.forEach(desc => {
                 const option = document.createElement('option');
-                option.value = desc; // value維持中文以正確存入資料庫
+                option.value = desc;
                 option.textContent = translateDesc(desc);
                 select.appendChild(option);
             });
@@ -1227,6 +1598,7 @@
 
         async function loadDataAndStats() {
             showLoading(true);
+            updateFilterPeriodBadges();
             const params = getFilterParams();
             try {
                 const [dataResult, statsResult] = await Promise.all([
@@ -1288,11 +1660,35 @@
         }
 
         function updateStatsDisplay(stats) {
-            document.getElementById('chartTotalBadge').textContent = translations[currentLang].totalPrefix + (stats.total || 0);
+            document.getElementById('chartTotalBadge').textContent =
+                translations[currentLang].totalPrefix + (stats.total || 0);
             updateShiftChart(stats.byShift || { S1: 0, S2: 0, S3: 0, S4: 0 });
             updatePersonStatsList(stats.byPerson || {});
             updateDescriptionStatsList(stats.byDescription || {});
         }
+
+        // 在 bar 上顯示數值的 plugin
+        const barValuePlugin = {
+            id: 'barValueLabels',
+            afterDatasetsDraw(chart) {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    meta.data.forEach((bar, index) => {
+                        const value = dataset.data[index];
+                        if (value > 0) {
+                            ctx.save();
+                            ctx.fillStyle = '#1a237e';
+                            ctx.font = 'bold 16px "Segoe UI", "Microsoft JhengHei", sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+                            ctx.fillText(value, bar.x, bar.y - 4);
+                            ctx.restore();
+                        }
+                    });
+                });
+            }
+        };
 
         function updateShiftChart(byShift) {
             const ctx = document.getElementById('shiftChart').getContext('2d');
@@ -1304,8 +1700,12 @@
                     datasets: [{
                         label: translations[currentLang].chartLabel,
                         data: [byShift.S1 || 0, byShift.S2 || 0, byShift.S3 || 0, byShift.S4 || 0],
-                        backgroundColor: ['rgba(240,147,251,0.85)', 'rgba(79,172,254,0.85)', 'rgba(67,233,123,0.85)', 'rgba(250,112,154,0.85)'],
-                        borderColor: ['rgba(240,147,251,1)', 'rgba(79,172,254,1)', 'rgba(67,233,123,1)', 'rgba(250,112,154,1)'],
+                        backgroundColor: ['rgba(240,147,251,0.85)', 'rgba(79,172,254,0.85)',
+                            'rgba(67,233,123,0.85)', 'rgba(250,112,154,0.85)'
+                        ],
+                        borderColor: ['rgba(240,147,251,1)', 'rgba(79,172,254,1)',
+                            'rgba(67,233,123,1)', 'rgba(250,112,154,1)'
+                        ],
                         borderWidth: 2,
                         borderRadius: 6
                     }]
@@ -1313,12 +1713,15 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: { display: false },
+                    },
                     scales: {
                         y: { beginAtZero: true, ticks: { stepSize: 1 } },
                         x: { grid: { display: false } }
                     }
-                }
+                },
+                plugins: [barValuePlugin]
             });
         }
 
@@ -1326,7 +1729,8 @@
             const container = document.getElementById('personStatsContainer');
             const persons = Object.entries(byPerson).sort((a, b) => b[1] - a[1]);
             if (!persons.length) {
-                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-user-slash"></i><p class="mb-0">${translations[currentLang].noPersonData}</p></div>`;
+                container.innerHTML =
+                    `<div class="empty-state py-3"><i class="fas fa-user-slash"></i><p class="mb-0">${translations[currentLang].noPersonData}</p></div>`;
                 return;
             }
             let html = '';
@@ -1345,7 +1749,8 @@
             const container = document.getElementById('descriptionStatsContainer');
             const descriptions = Object.entries(byDescription).sort((a, b) => b[1] - a[1]);
             if (!descriptions.length) {
-                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-chart-pie"></i><p class="mb-0">${translations[currentLang].noDescData}</p></div>`;
+                container.innerHTML =
+                    `<div class="empty-state py-3"><i class="fas fa-chart-pie"></i><p class="mb-0">${translations[currentLang].noDescData}</p></div>`;
                 return;
             }
             let html = '';
@@ -1378,7 +1783,8 @@
                 const displayDate = item.date;
                 const personShift = personShiftMap[item.person] || '';
                 const isOvertime = personShift && personShift !== item.shift;
-                const personStyle = isOvertime ? 'style="color:red; font-weight:600;"' : 'style="font-weight:600;"';
+                const personStyle = isOvertime ? 'style="color:red; font-weight:600;"' :
+                    'style="font-weight:600;"';
                 const translatedDescription = translateDesc(item.description);
                 html += `<tr>
                             <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
@@ -1406,6 +1812,7 @@
             } else {
                 spinner.style.display = 'none';
                 if (currentData && currentData.length > 0) tableWrapper.style.display = 'block';
+                else if (currentData && currentData.length === 0) tableWrapper.style.display = 'block';
             }
         }
 
@@ -1490,7 +1897,8 @@
                 const response = await fetch(buildUrlWithToken('uploadPhoto'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8', 'Accept': 'application/json' },
-                    body: JSON.stringify({ base64: base64Data, fileName: 'photo_' + new Date().getTime() + '.jpg', mimeType: base64Data.split(';')[0].split(':')[1] || 'image/jpeg' })
+                    body: JSON.stringify({ base64: base64Data, fileName: 'photo_' + new Date().getTime() +
+                            '.jpg', mimeType: base64Data.split(';')[0].split(':')[1] || 'image/jpeg' })
                 });
                 return await response.json();
             } catch (error) {
@@ -1544,25 +1952,25 @@
                 return;
             }
             const isEn = currentLang === 'en';
-            const headers = isEn ? 
+            const headers = isEn ?
                 ['Seq', 'Date', 'Shift', 'Personnel', 'Description', 'Photo URL'] :
                 ['序號', '異常日期', '異常班別', '異常人員', '異常描述', '照片URL'];
-                
             const rows = currentData.map((item, index) => [
-                index + 1, 
-                item.date, 
-                item.shift, 
-                item.person, 
-                translateDesc(item.description), 
+                index + 1,
+                item.date,
+                item.shift,
+                item.person,
+                translateDesc(item.description),
                 item.photoUrl || ''
             ]);
-            
-            const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))].join('\n');
+            const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(
+                /"/g, '""') + '"').join(','))].join('\n');
             const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             const params = getFilterParams();
-            link.download = `IPQC異常資料_${params.year || '全部'}_${params.month || '全部'}_${new Date().getTime()}.csv`;
+            link.download =
+                `IPQC異常資料_${params.year || '全部'}_${params.month || '全部'}_${new Date().getTime()}.csv`;
             link.click();
             URL.revokeObjectURL(link.href);
             showToast('success', '匯出成功', 'CSV檔案已下載');
@@ -1574,6 +1982,7 @@
             document.getElementById('filterYear').value = now.getFullYear();
             document.getElementById('filterMonth').value = now.getMonth() + 1;
             document.getElementById('filterDate').value = 'all';
+            updateFilterPeriodBadges();
             loadDataAndStats();
         }
 
@@ -1586,7 +1995,8 @@
 
         function showToast(type, title, message) {
             const container = document.getElementById('toastContainer');
-            const iconMap = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+            const iconMap = { success: 'fa-check-circle', error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
             const colorMap = { success: '#34a853', error: '#ea4335', warning: '#fbbc04', info: '#1a73e8' };
             const toastId = 'toast_' + new Date().getTime();
             const icon = iconMap[type] || iconMap.info;
@@ -1612,7 +2022,6 @@
             const container = document.getElementById('dashboardContainer');
             const blocks = container.querySelectorAll('.dashboard-block');
             let draggedBlock = null;
-
             const savedOrder = JSON.parse(localStorage.getItem('dashboardOrder') || '[]');
             if (savedOrder.length === blocks.length) {
                 savedOrder.forEach(blockId => {
@@ -1620,37 +2029,31 @@
                     if (block) container.appendChild(block);
                 });
             }
-
             blocks.forEach(block => {
                 const handle = block.querySelector('.drag-handle');
                 handle.addEventListener('mousedown', () => { block.draggable = true; });
                 handle.addEventListener('mouseup', () => { block.draggable = false; });
                 handle.addEventListener('touchstart', () => { block.draggable = true; }, { passive: true });
                 handle.addEventListener('touchend', () => { block.draggable = false; });
-
                 block.addEventListener('dragstart', (e) => {
                     draggedBlock = block;
                     block.classList.add('dragging');
                     e.dataTransfer.effectAllowed = 'move';
                     e.dataTransfer.setData('text/plain', block.dataset.block);
                 });
-
                 block.addEventListener('dragend', () => {
                     block.classList.remove('dragging');
                     draggedBlock = null;
                     saveDashboardOrder();
                 });
-
                 block.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
                     block.classList.add('drag-over');
                 });
-
                 block.addEventListener('dragleave', () => {
                     block.classList.remove('drag-over');
                 });
-
                 block.addEventListener('drop', (e) => {
                     e.preventDefault();
                     block.classList.remove('drag-over');
@@ -1672,6 +2075,10 @@
                 localStorage.setItem('dashboardOrder', JSON.stringify(order));
             }
         }
+
+        // ==================== 監聽篩選變更以即時更新標籤 ====================
+        document.getElementById('filterYear').addEventListener('change', updateFilterPeriodBadges);
+        document.getElementById('filterMonth').addEventListener('change', updateFilterPeriodBadges);
     </script>
 </body>
 </html>
