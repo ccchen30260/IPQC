@@ -1,0 +1,29 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # 每 3 天的凌晨 0 點 (UTC 時間) 自動執行一次
+    - cron: '0 0 */3 * *'
+  # 允許在 GitHub Actions 頁面上手動點擊按鈕觸發測試
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          
+          echo "Supabase Response Status Code: $STATUS"
+          
+          if [ "$STATUS" -eq 200 ] || [ "$STATUS" -eq 204 ]; then
+            echo "Ping 成功！Supabase 資料庫正常回應。"
+            exit 0
+          else
+            echo "Ping 失敗，HTTP 狀態碼為 $STATUS"
+            exit 1
+          fi
