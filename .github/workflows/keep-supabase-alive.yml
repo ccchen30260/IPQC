@@ -2,9 +2,7 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    # 每 3 天的凌晨 0 點 (UTC 時間) 自動執行一次
     - cron: '0 0 */3 * *'
-  # 允許在 GitHub Actions 頁面上手動點擊按鈕觸發測試
   workflow_dispatch:
 
 jobs:
@@ -13,6 +11,7 @@ jobs:
     steps:
       - name: Ping Supabase REST API
         run: |
+          # 存取 Supabase REST API 根目錄或公共 Endpoint
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
@@ -20,8 +19,9 @@ jobs:
           
           echo "Supabase Response Status Code: $STATUS"
           
-          if [ "$STATUS" -eq 200 ] || [ "$STATUS" -eq 204 ]; then
-            echo "Ping 成功！Supabase 資料庫正常回應。"
+          # 只要回傳 200、204 或 404 (代表有觸發到 API Gateway 且金鑰通過) 都算連線成功
+          if [ "$STATUS" -eq 200 ] || [ "$STATUS" -eq 204 ] || [ "$STATUS" -eq 404 ]; then
+            echo "Ping 成功！已成功觸發 Supabase 服務。"
             exit 0
           else
             echo "Ping 失敗，HTTP 狀態碼為 $STATUS"
