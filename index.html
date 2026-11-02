@@ -178,23 +178,34 @@
         }
         .fab-add:hover { transform: scale(1.08); background: var(--primary-dark); }
 
-        .toast-container-custom { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        .toast-container-custom { position: fixed; top: 20px; right: 20px; z-index: 10000; }
         .toast-custom { border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); border: none; overflow: hidden; min-width: 300px; }
         .toast-custom .toast-header { border-bottom: none; padding: 12px 16px; font-weight: 600; }
 
         .person-stat-item,
         .description-stat-item {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 0; border-bottom: 1px solid #f0f2f5;
+            padding: 8px 12px; border-bottom: 1px solid #f0f2f5; border-radius: 6px;
+            transition: var(--transition);
         }
         .person-stat-item:last-child,
         .description-stat-item:last-child { border-bottom: none; }
+        
+        /* 點擊清單項目效果 */
+        .clickable-stat-item {
+            cursor: pointer;
+        }
+        .clickable-stat-item:hover {
+            background-color: #f0f8ff;
+            transform: translateX(4px);
+        }
+
         .person-stat-name,
-        .description-stat-name { font-weight: 600; color: #333; }
+        .description-stat-name { font-weight: 600; color: #333; pointer-events: none; }
         .person-stat-count,
         .description-stat-count {
             background: var(--primary-color); color: #fff; padding: 4px 12px;
-            border-radius: 20px; font-weight: 700; font-size: 0.85rem;
+            border-radius: 20px; font-weight: 700; font-size: 0.85rem; pointer-events: none;
         }
 
         .chart-container { position: relative; height: 220px; width: 100%; }
@@ -421,6 +432,8 @@
                             <i class="fas fa-calendar"></i> <span class="fp-text">全部</span>
                         </span>
                     </span>
+                    <!-- 提示文字 -->
+                    <small class="text-muted ms-auto" style="font-weight:normal; font-size:0.8rem;" data-i18n="clickForDetail">點擊項目可看明細</small>
                 </div>
                 <div class="card-body" id="personStatsContainer" style="max-height: 280px; overflow-y: auto;">
                     <div class="empty-state py-3">
@@ -440,6 +453,8 @@
                             <i class="fas fa-calendar"></i> <span class="fp-text">全部</span>
                         </span>
                     </span>
+                    <!-- 提示文字 -->
+                    <small class="text-muted ms-auto" style="font-weight:normal; font-size:0.8rem;" data-i18n="clickForDetail">點擊項目可看明細</small>
                 </div>
                 <div class="card-body" id="descriptionStatsContainer" style="max-height: 300px; overflow-y: auto;">
                     <div class="empty-state py-3">
@@ -575,6 +590,42 @@
         </div>
     </div>
 
+    <!-- 異常明細視窗 Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+                <div class="modal-header" style="background: linear-gradient(135deg, #0d47a1 0%, #1a73e8 100%); color: #fff; border-radius: 16px 16px 0 0; padding: 18px 24px;">
+                    <h5 class="modal-title fw-bold" id="detailModalTitle">
+                        <i class="fas fa-search-plus me-2"></i><span>異常明細</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-scroll-container" style="max-height: 60vh;">
+                        <div class="table-responsive">
+                            <table class="table table-custom mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width:50px;" data-i18n="seq">序號</th>
+                                        <th data-i18n="abnormalDate">異常日期</th>
+                                        <th data-i18n="abnormalShift">異常班別</th>
+                                        <th data-i18n="abnormalPerson">異常人員</th>
+                                        <th data-i18n="abnormalDesc">異常描述</th>
+                                        <th data-i18n="abnormalPhoto">異常照片</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detailTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #eef0f3;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="closeBtn">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 異常描述選項管理模態框 -->
     <div class="modal fade" id="descriptionOptionsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-md modal-dialog-centered">
@@ -607,7 +658,7 @@
     </div>
 
     <!-- 照片大圖查看模態框 -->
-    <div class="modal fade modal-photo-view" id="photoViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade modal-photo-view" id="photoViewModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body">
@@ -668,10 +719,6 @@
     <script>
         // ============================================================
         //  ★★★ 配置區域：請填入您的 Supabase 專案資訊 ★★★
-        //  在 Supabase Dashboard → Project Settings → API 頁面可以找到
-        //  SUPABASE_URL：Project URL（例如 https://abcdefgh.supabase.co）
-        //  SUPABASE_ANON_KEY：anon / public key
-        //  API_BASE 會自動推導出後端函式 ipqc 的網址，不需手動填
         // ============================================================
         const SUPABASE_URL = 'https://zovgygcjnkwepmodvnyc.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_M3KT6ZzPWRfIn3X8_GlFqQ_YHJe1Ghb';
@@ -747,6 +794,7 @@
                 inputEditorPass: "請輸入編輯者密碼",
                 confirm: "確認",
                 cancel: "取消",
+                closeBtn: "關閉",
                 changePassword: "修改密碼",
                 filterHeader: "查詢篩選",
                 shift: "班別",
@@ -767,6 +815,7 @@
                 totalPrefix: "篩選總計：",
                 noPersonData: "尚無人員統計數據",
                 noDescData: "尚無異常原因統計數據",
+                clickForDetail: "點擊項目可看明細",
                 seq: "序號",
                 abnormalDate: "異常日期",
                 abnormalShift: "異常班別",
@@ -800,6 +849,7 @@
                 inputEditorPass: "Enter Editor Password",
                 confirm: "Confirm",
                 cancel: "Cancel",
+                closeBtn: "Close",
                 changePassword: "Change Password",
                 filterHeader: "Filter Search",
                 shift: "Shift",
@@ -820,6 +870,7 @@
                 totalPrefix: "Filtered Total: ",
                 noPersonData: "No personnel data available",
                 noDescData: "No defect reason data available",
+                clickForDetail: "Click item to view details",
                 seq: "No.",
                 abnormalDate: "Date",
                 abnormalShift: "Shift",
@@ -845,7 +896,6 @@
             }
         };
 
-        // 月份英文縮寫
         const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         function translateDesc(desc) {
@@ -895,7 +945,6 @@
             }
         }
 
-        // ==================== 更新篩選期間標籤 ====================
         function updateFilterPeriodBadges() {
             const year = document.getElementById('filterYear').value;
             const month = document.getElementById('filterMonth').value;
@@ -929,7 +978,7 @@
             updateInterfaceLanguage();
         });
 
-        // ==================== 登入相關 ====================
+        // ==================== 登入與其他基礎邏輯 ====================
         function showViewerPasswordBox() {
             hideAllPasswordBoxes();
             document.getElementById('viewerPasswordBox').style.display = 'block';
@@ -1045,7 +1094,6 @@
             }
         }
 
-        // ==================== 初始化應用 ====================
         async function initApp() {
             updateInterfaceLanguage();
             initYearFilter();
@@ -1081,7 +1129,6 @@
             });
         }
 
-        // 依資料中的實際年份重建年份篩選（資料載入後呼叫）
         function refreshYearFilter() {
             const select = document.getElementById('filterYear');
             const current = select.value;
@@ -1170,7 +1217,6 @@
             document.getElementById('inputPhoto').value = '';
         }
 
-        // ==================== 異常描述選項管理 ====================
         async function loadDescriptionOptions() {
             try {
                 const response = await apiFetch(API_BASE + '?action=getDescriptionOptions');
@@ -1311,7 +1357,6 @@
             }
         }
 
-        // ==================== 資料載入與統計 ====================
         function getFilterParams() {
             return {
                 shift: document.getElementById('filterShift').value,
@@ -1421,6 +1466,7 @@
             });
         }
 
+        // 修改：加上 onclick 事件觸發明細視窗
         function updatePersonStatsList(byPerson) {
             const container = document.getElementById('personStatsContainer');
             const persons = Object.entries(byPerson).sort((a, b) => b[1] - a[1]);
@@ -1433,7 +1479,7 @@
             persons.forEach(([name, count]) => {
                 const shift = personShiftMap[name] || '';
                 const shiftText = shift ? `(${shift})` : '';
-                html += `<div class="person-stat-item">
+                html += `<div class="person-stat-item clickable-stat-item" onclick="showPersonDetail('${escapeHtml(name)}')">
                             <span class="person-stat-name"><i class="fas fa-user-circle me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}${shiftText}</span>
                             <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
                         </div>`;
@@ -1441,6 +1487,7 @@
             container.innerHTML = html;
         }
 
+        // 修改：加上 onclick 事件觸發明細視窗
         function updateDescriptionStatsList(byDescription) {
             const container = document.getElementById('descriptionStatsContainer');
             const descriptions = Object.entries(byDescription).sort((a, b) => b[1] - a[1]);
@@ -1452,12 +1499,70 @@
             let html = '';
             descriptions.forEach(([desc, count]) => {
                 const translatedDescName = translateDesc(desc);
-                html += `<div class="description-stat-item">
+                html += `<div class="description-stat-item clickable-stat-item" onclick="showDescriptionDetail('${escapeHtml(desc)}')">
                             <span class="description-stat-name"><i class="fas fa-tag me-2" style="color:#1a73e8;"></i>${escapeHtml(translatedDescName)}</span>
                             <span class="description-stat-count">${count} ${translations[currentLang].times}</span>
                         </div>`;
             });
             container.innerHTML = html;
+        }
+
+        // ==================== 顯示明細視窗邏輯 ====================
+        function showPersonDetail(person) {
+            const filteredData = currentData.filter(item => item.person === person);
+            const titleElement = document.getElementById('detailModalTitle');
+            
+            if(currentLang === 'zh') {
+                titleElement.innerHTML = `<i class="fas fa-search-plus me-2"></i><span>人員「${escapeHtml(person)}」的異常明細</span>`;
+            } else {
+                titleElement.innerHTML = `<i class="fas fa-search-plus me-2"></i><span>Abnormal Details for ${escapeHtml(person)}</span>`;
+            }
+            
+            renderDetailTable(filteredData);
+            new bootstrap.Modal(document.getElementById('detailModal')).show();
+        }
+
+        function showDescriptionDetail(desc) {
+            const filteredData = currentData.filter(item => item.description && item.description.includes(desc));
+            const translatedDesc = translateDesc(desc);
+            const titleElement = document.getElementById('detailModalTitle');
+            
+            if(currentLang === 'zh') {
+                titleElement.innerHTML = `<i class="fas fa-search-plus me-2"></i><span>異常原因「${escapeHtml(translatedDesc)}」的明細</span>`;
+            } else {
+                titleElement.innerHTML = `<i class="fas fa-search-plus me-2"></i><span>Details for Defect: ${escapeHtml(translatedDesc)}</span>`;
+            }
+            
+            renderDetailTable(filteredData);
+            new bootstrap.Modal(document.getElementById('detailModal')).show();
+        }
+
+        // 供明細 Modal 使用的表格渲染
+        function renderDetailTable(data) {
+            const tbody = document.getElementById('detailTableBody');
+            if (!data || data.length === 0) {
+                const noDataText = currentLang === 'zh' ? '無資料' : 'No Data';
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">${noDataText}</td></tr>`;
+                return;
+            }
+            let html = '';
+            data.forEach((item, index) => {
+                const shiftClass = 'badge-shift-' + escapeHtml(item.shift);
+                const hasPhoto = item.photo_url && item.photo_url.trim() !== '';
+                const personShift = personShiftMap[item.person] || '';
+                const isOvertime = personShift && personShift !== item.shift;
+                const personStyle = isOvertime ? 'style="color:red; font-weight:600;"' : 'style="font-weight:600;"';
+                const translatedDescription = translateDesc(item.description);
+                html += `<tr>
+                            <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
+                            <td style="white-space:nowrap;font-weight:500;"><i class="fas fa-calendar-day me-1" style="color:#1a73e8;"></i>${escapeHtml(item.date)}</td>
+                            <td><span class="badge-shift ${shiftClass}">${escapeHtml(item.shift)}</span></td>
+                            <td ${personStyle}><i class="fas fa-user me-1" style="color:#555;"></i>${escapeHtml(item.person)}</td>
+                            <td><span class="description-text" title="${escapeHtml(translatedDescription)}">${escapeHtml(translatedDescription)}</span></td>
+                            <td class="text-center">${hasPhoto ? `<img src="${escapeHtml(item.photo_url)}" class="photo-thumb" alt="異常照片" onclick="viewPhoto('${escapeHtml(item.photo_url)}')" loading="lazy">` : `<div class="photo-placeholder"><i class="fas fa-image"></i></div>`}</td>
+                        </tr>`;
+            });
+            tbody.innerHTML = html;
         }
 
         function renderDataTable(data) {
@@ -1520,7 +1625,6 @@
         function previewPhoto(event) {
             const file = event.target.files[0];
             if (!file) return;
-            // 注意：照片會以 base64 經後端函式上傳，上限設 6MB（超過容易失敗）
             if (file.size > 6 * 1024 * 1024) {
                 showToast('error', '文件過大', '照片大小不能超過6MB');
                 document.getElementById('inputPhoto').value = '';
