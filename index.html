@@ -98,13 +98,15 @@
             padding: 10px 20px; font-weight: 600; transition: var(--transition);
             display: inline-flex; align-items: center; gap: 6px;
         }
-        .btn-custom-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-custom-primary:hover { background: var(--primary-dark); transform: translateY(-1px); color: #fff;}
+        
         .btn-custom-outline {
             background: #fff; color: var(--primary-color); border: 2px solid var(--primary-color);
             border-radius: 8px; padding: 8px 16px; font-weight: 600; transition: var(--transition);
             display: inline-flex; align-items: center; gap: 6px;
         }
         .btn-custom-outline:hover { background: var(--primary-color); color: #fff; }
+        
         .btn-custom-danger {
             background: #fff; color: var(--danger-color); border: 2px solid var(--danger-color);
             border-radius: 8px; padding: 8px 16px; font-weight: 600; transition: var(--transition);
@@ -152,8 +154,7 @@
         .empty-state h5 { font-weight: 600; color: #666; }
 
         .loading-spinner { display: flex; align-items: center; justify-content: center; padding: 40px; }
-        .spinner-border { width: 3rem; height: 3rem; }
-
+        
         .photo-preview-container { position: relative; display: inline-block; margin-top: 8px; }
         .photo-preview-container img {
             max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #dee2e6; object-fit: cover;
@@ -178,34 +179,28 @@
         }
         .fab-add:hover { transform: scale(1.08); background: var(--primary-dark); }
 
-        .toast-container-custom { position: fixed; top: 20px; right: 20px; z-index: 10000; }
+        .toast-container-custom { position: fixed; top: 20px; right: 20px; z-index: 9999; }
         .toast-custom { border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); border: none; overflow: hidden; min-width: 300px; }
-        .toast-custom .toast-header { border-bottom: none; padding: 12px 16px; font-weight: 600; }
-
+        
         .person-stat-item,
         .description-stat-item {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 12px; border-bottom: 1px solid #f0f2f5; border-radius: 6px;
-            transition: var(--transition);
+            padding: 10px 12px; border-bottom: 1px solid #f0f2f5;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .clickable-stat-item:hover {
+            background-color: #f8fafd;
+            cursor: pointer;
         }
         .person-stat-item:last-child,
         .description-stat-item:last-child { border-bottom: none; }
-        
-        /* 點擊清單項目效果 */
-        .clickable-stat-item {
-            cursor: pointer;
-        }
-        .clickable-stat-item:hover {
-            background-color: #f0f8ff;
-            transform: translateX(4px);
-        }
-
         .person-stat-name,
-        .description-stat-name { font-weight: 600; color: #333; pointer-events: none; }
+        .description-stat-name { font-weight: 600; color: #333; }
         .person-stat-count,
         .description-stat-count {
             background: var(--primary-color); color: #fff; padding: 4px 12px;
-            border-radius: 20px; font-weight: 700; font-size: 0.85rem; pointer-events: none;
+            border-radius: 20px; font-weight: 700; font-size: 0.85rem;
         }
 
         .chart-container { position: relative; height: 220px; width: 100%; }
@@ -215,19 +210,6 @@
             display: block; cursor: default;
         }
         .description-text:hover { white-space: normal; overflow: visible; word-break: break-all; }
-
-        select[multiple] { height: auto; min-height: 120px; }
-        select[multiple] option { padding: 4px 8px; }
-
-        .option-item {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 0; border-bottom: 1px solid #f0f2f5;
-        }
-        .option-item input {
-            flex: 1; border: 1px solid #dee2e6; border-radius: 6px; padding: 6px 10px;
-            font-size: 0.9rem;
-        }
-        .option-item .btn-sm { white-space: nowrap; }
 
         /* 拖曳排序相關樣式 */
         .dashboard-block { transition: box-shadow 0.2s, transform 0.2s; }
@@ -243,41 +225,20 @@
             z-index: 9999; display: flex; align-items: center; justify-content: center;
         }
         .login-card {
-            background: #fff; border-radius: 20px; padding: 40px; width: 90%; max-width: 400px;
-            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;
-        }
-        .login-card h3 { color: #1a73e8; font-weight: 700; margin-bottom: 10px; }
-        .login-card .role-btn {
-            display: block; width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px;
-            font-weight: 700; font-size: 1.1rem; border: 2px solid #1a73e8; background: #fff; color: #1a73e8;
-            transition: all 0.3s; cursor: pointer;
-        }
-        .login-card .role-btn:hover { background: #1a73e8; color: #fff; }
-        .login-card .role-btn.viewer { border-color: #6c757d; color: #6c757d; }
-        .login-card .role-btn.viewer:hover { background: #6c757d; color: #fff; }
-        .password-box { display: none; margin-top: 15px; }
-        .password-box input {
-            width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px;
-            text-align: center; margin-bottom: 10px;
-        }
-        .password-box .btn-confirm {
-            background: #1a73e8; color: #fff; border: none; padding: 10px 20px;
-            border-radius: 8px; font-weight: 600; cursor: pointer;
+            background: #fff; border-radius: 20px; padding: 40px; width: 90%; max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;
         }
         .login-lang-btn {
             position: absolute; top: 15px; right: 20px; border-radius: 20px;
             font-size: 0.85rem; font-weight: 600; padding: 4px 12px;
         }
 
-        /* 篩選期間標籤樣式 */
         .filter-period-badge {
             background: #e8f0fe; color: #1a73e8; font-size: 0.75rem; font-weight: 600;
             padding: 4px 10px; border-radius: 16px; margin-left: 6px;
             display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
         }
-        .filter-period-badge i { font-size: 0.7rem; color: #1a73e8; }
-
-        /* 數據列表捲動容器 */
+        
         .table-scroll-container {
             max-height: 450px; overflow-y: auto; overflow-x: hidden; position: relative;
         }
@@ -292,26 +253,34 @@
             <button class="btn btn-outline-primary btn-sm login-lang-btn" onclick="toggleLanguage()">
                 <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
             </button>
-            <h3><i class="fas fa-lock me-2"></i><span data-i18n="loginTitle">IPQC異常資料統計</span></h3>
-            <p class="text-muted mb-4" data-i18n="selectRole">請選擇進入身分</p>
-            <button class="role-btn viewer" onclick="showViewerPasswordBox()">
-                <i class="fas fa-eye me-2"></i><span data-i18n="loginViewer">以檢視者進入</span>
-            </button>
-            <button class="role-btn" onclick="showEditorPasswordBox()">
-                <i class="fas fa-user-edit me-2"></i><span data-i18n="loginEditor">以編輯者進入</span>
-            </button>
-
-            <div id="viewerPasswordBox" class="password-box">
-                <input type="password" id="viewerPassword" data-i18n-placeholder="inputViewerPass" placeholder="請輸入檢視者密碼">
-                <button class="btn-confirm" onclick="loginAsViewer()" data-i18n="confirm">確認</button>
-                <button class="btn btn-link" onclick="hideAllPasswordBoxes()" data-i18n="cancel">取消</button>
+            <div class="text-center mb-4">
+                <h3 style="color: #1a73e8; font-weight: 700;"><i class="fas fa-lock me-2"></i><span data-i18n="loginTitle">IPQC異常資料統計</span></h3>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold" data-i18n="loginAccountLabel">員工姓名 / 帳號</label>
+                <select class="form-select" id="loginAccount">
+                    <option value="" data-i18n="loginAccountSelect">-- 請選擇姓名 --</option>
+                    <!-- 選項將由 JS 動態生成 -->
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold" data-i18n="loginModeLabel">登入模式</label>
+                <select class="form-select" id="loginMode" onchange="onLoginModeChange()">
+                    <option value="viewer" data-i18n="loginModeViewer">檢視模式 (Viewer Mode)</option>
+                    <option value="editor" data-i18n="loginModeEditor">編輯模式 (Editor Mode)</option>
+                </select>
             </div>
 
-            <div id="editorPasswordBox" class="password-box">
-                <input type="password" id="editorPassword" data-i18n-placeholder="inputEditorPass" placeholder="請輸入編輯者密碼">
-                <button class="btn-confirm" onclick="loginAsEditor()" data-i18n="confirm">確認</button>
-                <button class="btn btn-link" onclick="hideAllPasswordBoxes()" data-i18n="cancel">取消</button>
+            <div class="mb-4">
+                <label class="form-label fw-bold" data-i18n="loginPasswordLabel">密碼</label>
+                <input type="password" class="form-control" id="loginPassword" data-i18n-placeholder="loginPasswordPlaceholder" placeholder="請輸入密碼">
             </div>
+
+            <button class="btn btn-primary w-100 py-2 fw-bold" onclick="performLogin()" style="font-size: 1.1rem; border-radius: 8px;">
+                <span data-i18n="loginBtn">登入</span>
+            </button>
         </div>
     </div>
 
@@ -324,21 +293,22 @@
             </a>
             <div class="d-flex align-items-center gap-2">
                 <span class="badge-date d-none d-md-inline-block" id="currentDateDisplay">
-                    <i class="fas fa-calendar-alt me-1"></i>
-                    載入中...
+                    <i class="fas fa-calendar-alt me-1"></i> 載入中...
                 </span>
                 <button class="btn btn-outline-light btn-sm" onclick="toggleLanguage()" style="border-radius:20px;">
                     <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
                 </button>
-                <button class="btn btn-outline-light btn-sm editor-only" onclick="openChangePasswordModal()" style="border-radius:20px;">
+                <button class="btn btn-outline-light btn-sm" onclick="openChangePasswordModal()" style="border-radius:20px;">
                     <i class="fas fa-key me-1"></i><span data-i18n="changePassword">修改密碼</span>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="logout()" style="border-radius:20px; font-weight: 600;">
+                    <i class="fas fa-sign-out-alt me-1"></i><span data-i18n="logout">登出</span>
                 </button>
             </div>
         </div>
     </nav>
 
     <div class="container mt-4">
-
         <!-- 查詢篩選區域 -->
         <div class="card card-custom mb-4">
             <div class="card-header">
@@ -432,8 +402,6 @@
                             <i class="fas fa-calendar"></i> <span class="fp-text">全部</span>
                         </span>
                     </span>
-                    <!-- 提示文字 -->
-                    <small class="text-muted ms-auto" style="font-weight:normal; font-size:0.8rem;" data-i18n="clickForDetail">點擊項目可看明細</small>
                 </div>
                 <div class="card-body" id="personStatsContainer" style="max-height: 280px; overflow-y: auto;">
                     <div class="empty-state py-3">
@@ -453,8 +421,6 @@
                             <i class="fas fa-calendar"></i> <span class="fp-text">全部</span>
                         </span>
                     </span>
-                    <!-- 提示文字 -->
-                    <small class="text-muted ms-auto" style="font-weight:normal; font-size:0.8rem;" data-i18n="clickForDetail">點擊項目可看明細</small>
                 </div>
                 <div class="card-body" id="descriptionStatsContainer" style="max-height: 300px; overflow-y: auto;">
                     <div class="empty-state py-3">
@@ -511,6 +477,22 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 5. 系統登入次數統計 (僅編輯者可見) -->
+            <div class="card card-custom dashboard-block editor-only" data-block="loginStats" draggable="true">
+                <div class="card-header">
+                    <span class="drag-handle">
+                        <i class="fas fa-grip-vertical me-2"></i>
+                        <i class="fas fa-sign-in-alt"></i> <span data-i18n="loginStatsTitle">系統登入次數統計</span>
+                    </span>
+                </div>
+                <div class="card-body" id="loginStatsContainer" style="max-height: 280px; overflow-y: auto;">
+                    <div class="empty-state py-3">
+                        <i class="fas fa-history"></i>
+                        <p class="mb-0" data-i18n="noLoginData">尚無登入記錄</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -518,6 +500,35 @@
     <button class="fab-add editor-only" onclick="openAddModal()" title="新增異常記錄">
         <i class="fas fa-plus"></i>
     </button>
+
+    <!-- 統計明細模態框 -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none;">
+                <div class="modal-header" style="background: #f8f9fa; border-radius: 16px 16px 0 0; padding: 16px 24px;">
+                    <h5 class="modal-title fw-bold text-dark" id="detailModalTitle">明細</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width:50px;" data-i18n="seq">序號</th>
+                                    <th data-i18n="abnormalDate">異常日期</th>
+                                    <th data-i18n="abnormalShift">異常班別</th>
+                                    <th data-i18n="abnormalPerson">異常人員</th>
+                                    <th data-i18n="abnormalDesc">異常描述</th>
+                                    <th data-i18n="abnormalPhoto">異常照片</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- 新增數據模態框 -->
     <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
@@ -590,42 +601,6 @@
         </div>
     </div>
 
-    <!-- 異常明細視窗 Modal -->
-    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
-                <div class="modal-header" style="background: linear-gradient(135deg, #0d47a1 0%, #1a73e8 100%); color: #fff; border-radius: 16px 16px 0 0; padding: 18px 24px;">
-                    <h5 class="modal-title fw-bold" id="detailModalTitle">
-                        <i class="fas fa-search-plus me-2"></i><span>異常明細</span>
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div class="table-scroll-container" style="max-height: 60vh;">
-                        <div class="table-responsive">
-                            <table class="table table-custom mb-0">
-                                <thead>
-                                    <tr>
-                                        <th style="width:50px;" data-i18n="seq">序號</th>
-                                        <th data-i18n="abnormalDate">異常日期</th>
-                                        <th data-i18n="abnormalShift">異常班別</th>
-                                        <th data-i18n="abnormalPerson">異常人員</th>
-                                        <th data-i18n="abnormalDesc">異常描述</th>
-                                        <th data-i18n="abnormalPhoto">異常照片</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="detailTableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer" style="border-top: 1px solid #eef0f3;">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="closeBtn">關閉</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- 異常描述選項管理模態框 -->
     <div class="modal fade" id="descriptionOptionsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-md modal-dialog-centered">
@@ -646,9 +621,7 @@
                             </button>
                         </div>
                     </div>
-                    <div id="descriptionOptionsList" style="max-height: 300px; overflow-y: auto;">
-                        <!-- 動態渲染 -->
-                    </div>
+                    <div id="descriptionOptionsList" style="max-height: 300px; overflow-y: auto;"></div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #eef0f3; padding: 12px 20px;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:8px;" data-i18n="cancel">關閉</button>
@@ -658,7 +631,7 @@
     </div>
 
     <!-- 照片大圖查看模態框 -->
-    <div class="modal fade modal-photo-view" id="photoViewModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal fade modal-photo-view" id="photoViewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body">
@@ -683,22 +656,19 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label">選擇要修改的密碼</label>
-                        <select class="form-select" id="passwordTypeSelect">
-                            <option value="editor">編輯者密碼</option>
-                            <option value="viewer">檢視者密碼</option>
-                        </select>
+                        <label class="form-label" data-i18n="selectPwdToChange">選擇要修改的密碼</label>
+                        <select class="form-select" id="passwordTypeSelect"></select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">舊密碼</label>
+                        <label class="form-label" data-i18n="oldPwd">舊密碼</label>
                         <input type="password" class="form-control" id="oldPassword">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">新密碼（至少4位）</label>
+                        <label class="form-label" data-i18n="newPwd">新密碼（至少4位）</label>
                         <input type="password" class="form-control" id="newPassword">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">確認新密碼</label>
+                        <label class="form-label" data-i18n="confirmNewPwd">確認新密碼</label>
                         <input type="password" class="form-control" id="confirmNewPassword">
                     </div>
                 </div>
@@ -726,12 +696,13 @@
         // ============================================================
 
         let editorToken = null;
+        let loggedInViewerAccount = null;
         let currentData = [];
+        let currentStats = null;
         let shiftChartInstance = null;
         let photoBase64 = '';
         let descriptionOptions = [];
 
-        // 統一呼叫後端函式：自動附上 Supabase 認證 headers
         async function apiFetch(path, options = {}) {
             const headers = {
                 'Accept': 'application/json',
@@ -742,44 +713,38 @@
             return fetch(path, { ...options, headers });
         }
 
-        // ==================== 多國語言與異常描述翻譯配置 ====================
+        // ==================== 指定的人員名單 ====================
+        const ALL_PERSONNEL = [
+            "楊代億", "廖曉彤", "蔡靜儀", "賴建亦", "施榮傑", "陰其德", "黃譯鋒", "楊雅婷",
+            "埃爾默", "拉斯特", "雷伊", "漢斯", "達利斯", "甘達", "特拉多", "達爾文"
+        ];
+        
+        const S1_S3_PERSONNEL = ["楊代億", "廖曉彤", "蔡靜儀", "賴建亦"];
+        const S2_S4_PERSONNEL = ["施榮傑", "陰其德", "黃譯鋒", "楊雅婷", "埃爾默", "拉斯特", "雷伊", "漢斯", "達利斯", "甘達", "特拉多", "達爾文"];
+        
+        const personShiftMap = {};
+        ALL_PERSONNEL.forEach(p => personShiftMap[p] = 'S1');
+
+        // ==================== 多國語言與翻譯 ====================
         let currentLang = localStorage.getItem('appLang') || 'zh';
 
         const descriptionTranslations = {
-            "JR黑頭": "JR Black Head",
-            "極柄撞歪": "Tab Bent",
-            "接頭未剔除": "Joint Not Rejected",
-            "插單過流": "Manual Order Overcurrent",
-            "隔離紙未端過流": "Separator End Overcurrent",
-            "極柄角度異常": "Tab Angle Abnormal",
-            "極柄數量異常": "Tab Quantity Abnormal",
-            "JR撞(夾)傷": "JR Damaged/Pinch",
-            "極柄彎折": "Tab Folded",
-            "極片皺摺": "Electrode Wrinkled",
-            "極柄膠帶貼覆異常": "Tab Tape Abnormal",
-            "中心孔異常": "Center Hole Abnormal",
-            "JR抽頭(尾)": "JR Head/Tail Pull",
-            "極柄歪斜": "Tab Misaligned",
-            "封止膠帶貼覆異常": "Sealing Tape Abnormal",
-            "極片破損": "Electrode Broken",
-            "雙正極柄重疊寬度異常": "Dual Anode Tab Overlap Width Abnormal",
-            "極片接頭(M1)": "Electrode Joint (M1)",
-            "中心孔皺摺": "Center Hole Wrinkled",
-            "迴轉點異常": "Rotation Point Abnormal",
-            "雙正極柄合焊異常": "Dual Anode Tab Welding Abnormal",
-            "封止膠帶超出JR": "Sealing Tape Exceeds JR",
-            "極柄反折": "Tab Reverse Fold",
-            "負極柄壓花異常": "Cathode Tab Embossing Abnormal",
-            "JR異物": "JR Foreign Material",
-            "極柄長度異常": "Tab Length Abnormal",
-            "極柄裁切異常": "Tab Cutting Abnormal",
-            "隔離紙抽絲": "Separator Threading",
-            "覆蓋膠帶貼覆異常": "Cover Tape Abnormal",
-            "隔離紙末端未剔除": "Separator End Not Rejected",
-            "隔離紙異常": "Separator Abnormal",
-            "負極柄壓花位置異常": "Cathode Tab Embossing Position Abnormal",
-            "極片來料異常": "Incoming Electrode Abnormal",
-            "隔離紙錯位": "Separator Misaligned",
+            "JR黑頭": "JR Black Head", "極柄撞歪": "Tab Bent", "接頭未剔除": "Joint Not Rejected",
+            "插單過流": "Manual Order Overcurrent", "隔離紙未端過流": "Separator End Overcurrent",
+            "極柄角度異常": "Tab Angle Abnormal", "極柄數量異常": "Tab Quantity Abnormal",
+            "JR撞(夾)傷": "JR Damaged/Pinch", "極柄彎折": "Tab Folded", "極片皺摺": "Electrode Wrinkled",
+            "極柄膠帶貼覆異常": "Tab Tape Abnormal", "中心孔異常": "Center Hole Abnormal",
+            "JR抽頭(尾)": "JR Head/Tail Pull", "極柄歪斜": "Tab Misaligned",
+            "封止膠帶貼覆異常": "Sealing Tape Abnormal", "極片破損": "Electrode Broken",
+            "雙正極柄重疊寬度異常": "Dual Anode Tab Overlap Width Abnormal", "極片接頭(M1)": "Electrode Joint (M1)",
+            "中心孔皺摺": "Center Hole Wrinkled", "迴轉點異常": "Rotation Point Abnormal",
+            "雙正極柄合焊異常": "Dual Anode Tab Welding Abnormal", "封止膠帶超出JR": "Sealing Tape Exceeds JR",
+            "極柄反折": "Tab Reverse Fold", "負極柄壓花異常": "Cathode Tab Embossing Abnormal",
+            "JR異物": "JR Foreign Material", "極柄長度異常": "Tab Length Abnormal",
+            "極柄裁切異常": "Tab Cutting Abnormal", "隔離紙抽絲": "Separator Threading",
+            "覆蓋膠帶貼覆異常": "Cover Tape Abnormal", "隔離紙末端未剔除": "Separator End Not Rejected",
+            "隔離紙異常": "Separator Abnormal", "負極柄壓花位置異常": "Cathode Tab Embossing Position Abnormal",
+            "極片來料異常": "Incoming Electrode Abnormal", "隔離紙錯位": "Separator Misaligned",
             "覆蓋膠帶貼覆不良": "Cover Tape Application Defect"
         };
 
@@ -787,14 +752,17 @@
             zh: {
                 appTitle: "IPQC異常資料統計",
                 loginTitle: "IPQC異常資料統計",
-                selectRole: "請選擇進入身分",
-                loginViewer: "以檢視者進入",
-                loginEditor: "以編輯者進入",
-                inputViewerPass: "請輸入檢視者密碼",
-                inputEditorPass: "請輸入編輯者密碼",
+                loginAccountLabel: "員工姓名 / 帳號",
+                loginAccountSelect: "-- 請選擇姓名 --",
+                loginModeLabel: "登入模式",
+                loginModeViewer: "檢視模式 (Viewer Mode)",
+                loginModeEditor: "編輯模式 (Editor Mode)",
+                loginPasswordLabel: "密碼",
+                loginPasswordPlaceholder: "請輸入密碼",
+                loginBtn: "登入",
+                logout: "登出",
                 confirm: "確認",
                 cancel: "取消",
-                closeBtn: "關閉",
                 changePassword: "修改密碼",
                 filterHeader: "查詢篩選",
                 shift: "班別",
@@ -815,7 +783,6 @@
                 totalPrefix: "篩選總計：",
                 noPersonData: "尚無人員統計數據",
                 noDescData: "尚無異常原因統計數據",
-                clickForDetail: "點擊項目可看明細",
                 seq: "序號",
                 abnormalDate: "異常日期",
                 abnormalShift: "異常班別",
@@ -837,19 +804,29 @@
                 chartLabel: "異常次數",
                 filterPeriodAll: "全部期間",
                 filterPeriodYear: "年",
-                filterPeriodMonth: "月"
+                filterPeriodMonth: "月",
+                selectPwdToChange: "選擇要修改的密碼",
+                oldPwd: "舊密碼",
+                newPwd: "新密碼（至少4位）",
+                confirmNewPwd: "確認新密碼",
+                editorPwdOpt: "編輯者密碼",
+                loginStatsTitle: "系統登入次數統計",
+                noLoginData: "尚無登入記錄"
             },
             en: {
                 appTitle: "IPQC Abnormal Data Statistics",
                 loginTitle: "IPQC Statistics System",
-                selectRole: "Select Access Role",
-                loginViewer: "Enter as Viewer",
-                loginEditor: "Enter as Editor",
-                inputViewerPass: "Enter Viewer Password",
-                inputEditorPass: "Enter Editor Password",
+                loginAccountLabel: "Employee Name / Account",
+                loginAccountSelect: "-- Select Name --",
+                loginModeLabel: "Login Mode",
+                loginModeViewer: "Viewer Mode",
+                loginModeEditor: "Editor Mode",
+                loginPasswordLabel: "Password",
+                loginPasswordPlaceholder: "Enter Password",
+                loginBtn: "Login",
+                logout: "Logout",
                 confirm: "Confirm",
                 cancel: "Cancel",
-                closeBtn: "Close",
                 changePassword: "Change Password",
                 filterHeader: "Filter Search",
                 shift: "Shift",
@@ -870,7 +847,6 @@
                 totalPrefix: "Filtered Total: ",
                 noPersonData: "No personnel data available",
                 noDescData: "No defect reason data available",
-                clickForDetail: "Click item to view details",
                 seq: "No.",
                 abnormalDate: "Date",
                 abnormalShift: "Shift",
@@ -892,7 +868,14 @@
                 chartLabel: "Abnormal Count",
                 filterPeriodAll: "All Periods",
                 filterPeriodYear: "",
-                filterPeriodMonth: ""
+                filterPeriodMonth: "",
+                selectPwdToChange: "Select Password to Change",
+                oldPwd: "Old Password",
+                newPwd: "New Password (min 4 chars)",
+                confirmNewPwd: "Confirm New Password",
+                editorPwdOpt: "Editor Password",
+                loginStatsTitle: "System Login Statistics",
+                noLoginData: "No login records"
             }
         };
 
@@ -933,116 +916,174 @@
             });
             initDateDisplay();
             updateFilterPeriodBadges();
+            updateChangePasswordOptions();
+            
             renderDescriptionSelectOptions();
-            if (currentData && currentData.length > 0) {
+            if (currentData) {
                 renderDataTable(currentData);
                 updateDataCountBadge(currentData.length);
-            } else if (currentData && currentData.length === 0) {
-                updateDataCountBadge(0);
+            }
+            if (currentStats) {
+                updatePersonStatsList(currentStats.byPerson || {});
+                updateDescriptionStatsList(currentStats.byDescription || {});
             }
             if (shiftChartInstance) {
                 shiftChartInstance.update();
             }
+            if(editorToken) {
+                fetchLoginStats().then(updateLoginStatsDisplay);
+            }
         }
 
-        function updateFilterPeriodBadges() {
-            const year = document.getElementById('filterYear').value;
-            const month = document.getElementById('filterMonth').value;
-            let text = '';
-            const isEn = currentLang === 'en';
-
-            if (year === 'all' && month === 'all') {
-                text = isEn ? translations.en.filterPeriodAll : translations.zh.filterPeriodAll;
-            } else if (year !== 'all' && month === 'all') {
-                text = isEn ? year : year + translations.zh.filterPeriodYear;
-            } else if (year === 'all' && month !== 'all') {
-                if (isEn) {
-                    text = monthNamesEn[parseInt(month) - 1] || month;
-                } else {
-                    text = month + translations.zh.filterPeriodMonth;
-                }
-            } else {
-                if (isEn) {
-                    text = (monthNamesEn[parseInt(month) - 1] || month) + ' ' + year;
-                } else {
-                    text = year + translations.zh.filterPeriodYear + month + translations.zh.filterPeriodMonth;
-                }
-            }
-
-            document.querySelectorAll('.filter-period-badge .fp-text').forEach(el => {
-                el.textContent = text;
+        // ==================== 登入邏輯與下拉選單 ====================
+        function initLoginDropdown() {
+            const select = document.getElementById('loginAccount');
+            select.innerHTML = `<option value="" data-i18n="loginAccountSelect">${translations[currentLang].loginAccountSelect}</option>`;
+            ALL_PERSONNEL.forEach(p => {
+                select.innerHTML += `<option value="${p}">${p}</option>`;
             });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            updateInterfaceLanguage();
-        });
-
-        // ==================== 登入與其他基礎邏輯 ====================
-        function showViewerPasswordBox() {
-            hideAllPasswordBoxes();
-            document.getElementById('viewerPasswordBox').style.display = 'block';
-        }
-
-        function showEditorPasswordBox() {
-            hideAllPasswordBoxes();
-            document.getElementById('editorPasswordBox').style.display = 'block';
-        }
-
-        function hideAllPasswordBoxes() {
-            document.getElementById('viewerPasswordBox').style.display = 'none';
-            document.getElementById('editorPasswordBox').style.display = 'none';
-            document.getElementById('viewerPassword').value = '';
-            document.getElementById('editorPassword').value = '';
-        }
-
-        async function loginAsViewer() {
-            const password = document.getElementById('viewerPassword').value.trim();
-            if (!password) { showToast('warning', '請輸入密碼', '密碼不可空白'); return; }
-            try {
-                const response = await apiFetch(API_BASE + '?action=loginAsViewer', {
-                    method: 'POST',
-                    body: JSON.stringify({ password: password })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    editorToken = null;
-                    document.body.classList.add('viewer-mode');
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    showToast('success', '檢視者登入成功', '歡迎檢視異常資料');
-                    initApp();
-                } else {
-                    showToast('error', '登入失敗', result.message || '密碼錯誤');
-                    document.getElementById('viewerPassword').value = '';
-                }
-            } catch (error) {
-                console.error('登入錯誤:', error);
-                showToast('error', '網路錯誤', '無法連接到伺服器');
+        function onLoginModeChange() {
+            const mode = document.getElementById('loginMode').value;
+            const accountSelect = document.getElementById('loginAccount');
+            if (mode === 'editor') {
+                accountSelect.disabled = true;
+                accountSelect.value = "";
+            } else {
+                accountSelect.disabled = false;
             }
         }
 
-        async function loginAsEditor() {
-            const password = document.getElementById('editorPassword').value.trim();
-            if (!password) { showToast('warning', '請輸入密碼', '密碼不可空白'); return; }
-            try {
-                const response = await apiFetch(API_BASE + '?action=loginAsEditor', {
-                    method: 'POST',
-                    body: JSON.stringify({ password: password })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    editorToken = result.token;
-                    document.body.classList.remove('viewer-mode');
+        async function performLogin() {
+            const mode = document.getElementById('loginMode').value;
+            const password = document.getElementById('loginPassword').value.trim();
+            
+            if (mode === 'viewer') {
+                const account = document.getElementById('loginAccount').value;
+                if (!account) { showToast('warning', '資料不完整', '請選擇員工姓名'); return; }
+                if (!password) { showToast('warning', '資料不完整', '請輸入密碼'); return; }
+                
+                const storedPwd = localStorage.getItem('viewer_pwd_' + account) || '8102';
+                if (password === storedPwd) {
+                    editorToken = null;
+                    loggedInViewerAccount = account;
+                    document.body.classList.add('viewer-mode');
                     document.getElementById('loginOverlay').style.display = 'none';
-                    showToast('success', '登入成功', '歡迎，編輯者');
+                    showToast('success', '登入成功', `歡迎，${escapeHtml(account)}`);
+                    updateChangePasswordOptions();
+                    logUserLogin(account);
                     initApp();
                 } else {
-                    showToast('error', '登入失敗', result.message || '密碼錯誤');
-                    document.getElementById('editorPassword').value = '';
+                    showToast('error', '登入失敗', '密碼錯誤');
+                    document.getElementById('loginPassword').value = '';
                 }
-            } catch (error) {
-                console.error('登入錯誤:', error);
-                showToast('error', '網路錯誤', '無法連接到伺服器');
+            } else if (mode === 'editor') {
+                if (!password) { showToast('warning', '資料不完整', '請輸入編輯者密碼'); return; }
+                try {
+                    const response = await apiFetch(API_BASE + '?action=loginAsEditor', {
+                        method: 'POST',
+                        body: JSON.stringify({ password: password })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        editorToken = result.token;
+                        loggedInViewerAccount = null;
+                        document.body.classList.remove('viewer-mode');
+                        document.getElementById('loginOverlay').style.display = 'none';
+                        showToast('success', '登入成功', '歡迎，編輯者');
+                        updateChangePasswordOptions();
+                        initApp();
+                    } else {
+                        showToast('error', '登入失敗', result.message || '編輯者密碼錯誤');
+                        document.getElementById('loginPassword').value = '';
+                    }
+                } catch (error) {
+                    console.error('登入錯誤:', error);
+                    showToast('error', '網路錯誤', '無法連接到伺服器');
+                }
+            }
+        }
+
+        function logout() {
+            editorToken = null;
+            loggedInViewerAccount = null;
+            document.body.classList.add('viewer-mode');
+            
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('loginPassword').value = '';
+            
+            currentData = [];
+            currentStats = null;
+            renderDataTable([]);
+            updateDataCountBadge(0);
+            if (shiftChartInstance) {
+                shiftChartInstance.data.datasets[0].data = [0, 0, 0, 0];
+                shiftChartInstance.update();
+            }
+            document.getElementById('personStatsContainer').innerHTML = `<div class="empty-state py-3"><i class="fas fa-user-slash"></i><p class="mb-0">${translations[currentLang].noPersonData}</p></div>`;
+            document.getElementById('descriptionStatsContainer').innerHTML = `<div class="empty-state py-3"><i class="fas fa-chart-pie"></i><p class="mb-0">${translations[currentLang].noDescData}</p></div>`;
+            document.getElementById('loginStatsContainer').innerHTML = `<div class="empty-state py-3"><i class="fas fa-history"></i><p class="mb-0">${translations[currentLang].noLoginData}</p></div>`;
+            document.getElementById('chartTotalBadge').textContent = translations[currentLang].totalPrefix + '0';
+            
+            const msgTitle = currentLang === 'zh' ? '已登出' : 'Logged out';
+            const msgDesc = currentLang === 'zh' ? '您已成功登出系統' : 'You have been successfully logged out.';
+            showToast('info', msgTitle, msgDesc);
+        }
+
+        // ==================== 登入次數紀錄 ====================
+        async function logUserLogin(account) {
+            try {
+                await apiFetch(API_BASE + '?action=logUserLogin', {
+                    method: 'POST',
+                    body: JSON.stringify({ account: account, timestamp: new Date().toISOString() })
+                });
+            } catch (e) {
+                console.warn('API logUserLogin failed, fallback to local');
+            }
+            let stats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
+            stats[account] = (stats[account] || 0) + 1;
+            localStorage.setItem('sysLoginStats', JSON.stringify(stats));
+        }
+
+        async function fetchLoginStats() {
+            try {
+                const response = await apiFetch(buildUrlWithToken('getLoginStats'));
+                const result = await response.json();
+                if(result.success && result.stats) return result.stats;
+            } catch (e) {
+                console.warn('API getLoginStats failed, fallback to local');
+            }
+            return JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
+        }
+
+        function updateLoginStatsDisplay(stats) {
+            const container = document.getElementById('loginStatsContainer');
+            if(!container) return;
+            const sortedStats = Object.entries(stats).sort((a,b) => b[1] - a[1]);
+            if(!sortedStats.length) {
+                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-history"></i><p class="mb-0">${translations[currentLang].noLoginData}</p></div>`;
+                return;
+            }
+            let html = '';
+            sortedStats.forEach(([name, count]) => {
+                html += `<div class="person-stat-item">
+                            <span class="person-stat-name"><i class="fas fa-user-check me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}</span>
+                            <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
+                        </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // ==================== 修改密碼模態框 ====================
+        function updateChangePasswordOptions() {
+            const select = document.getElementById('passwordTypeSelect');
+            select.innerHTML = '';
+            if (editorToken) {
+                select.innerHTML = `<option value="editor">${translations[currentLang].editorPwdOpt}</option>`;
+            } else if (loggedInViewerAccount) {
+                const optText = currentLang === 'zh' ? `人員密碼 (${loggedInViewerAccount})` : `User Password (${loggedInViewerAccount})`;
+                select.innerHTML = `<option value="viewer">${optText}</option>`;
             }
         }
 
@@ -1058,6 +1099,7 @@
             const oldPassword = document.getElementById('oldPassword').value.trim();
             const newPassword = document.getElementById('newPassword').value.trim();
             const confirmNewPassword = document.getElementById('confirmNewPassword').value.trim();
+            
             if (!oldPassword || !newPassword || !confirmNewPassword) {
                 showToast('warning', '資料不完整', '請填寫所有欄位');
                 return;
@@ -1070,29 +1112,43 @@
                 showToast('warning', '密碼太短', '新密碼至少需要4位');
                 return;
             }
-            try {
-                const url = API_BASE + '?action=changePassword&token=' + encodeURIComponent(editorToken || '');
-                const response = await apiFetch(url, {
-                    method: 'POST',
-                    body: JSON.stringify({ type: type, oldPassword: oldPassword, newPassword: newPassword })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    showToast('success', '修改成功', '密碼已更新');
-                    bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
-                    if (type === 'editor') {
-                        editorToken = null;
-                        document.body.classList.add('viewer-mode');
-                        document.getElementById('loginOverlay').style.display = 'flex';
-                    }
-                } else {
-                    showToast('error', '修改失敗', result.message || '請重試');
+
+            if (type === 'viewer' && loggedInViewerAccount) {
+                const storedPwd = localStorage.getItem('viewer_pwd_' + loggedInViewerAccount) || '8102';
+                if (oldPassword !== storedPwd) {
+                    showToast('error', '修改失敗', '舊密碼錯誤');
+                    return;
                 }
-            } catch (error) {
-                console.error('修改密碼錯誤:', error);
-                showToast('error', '網路錯誤', '無法連接到伺服器');
+                localStorage.setItem('viewer_pwd_' + loggedInViewerAccount, newPassword);
+                showToast('success', '修改成功', '您的專屬密碼已更新');
+                bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+            } else if (type === 'editor') {
+                try {
+                    const url = API_BASE + '?action=changePassword&token=' + encodeURIComponent(editorToken || '');
+                    const response = await apiFetch(url, {
+                        method: 'POST',
+                        body: JSON.stringify({ type: 'editor', oldPassword: oldPassword, newPassword: newPassword })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        showToast('success', '修改成功', '編輯者密碼已更新，請重新登入');
+                        bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                        logout();
+                    } else {
+                        showToast('error', '修改失敗', result.message || '請重試');
+                    }
+                } catch (error) {
+                    console.error('修改密碼錯誤:', error);
+                    showToast('error', '網路錯誤', '無法連接到伺服器');
+                }
             }
         }
+
+        // ==================== 初始化與資料操作 ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            initLoginDropdown();
+            updateInterfaceLanguage();
+        });
 
         async function initApp() {
             updateInterfaceLanguage();
@@ -1167,30 +1223,6 @@
                 `<option value="">${translations[currentLang].selectPerson}</option>`;
         }
 
-        const S1_PERSONNEL = [
-            "方慎之", "陳泰安", "蔡南嘉", "李珮菁", "朱建穎", "王泳淇", "吳峻霖", "黃詠綺",
-            "蘭狄", "凱文", "勞倫司", "安東尼", "明華", "艾麥倫", "邱立斯", "拉特", "羅內爾", "艾佛森", "賈斯汀"
-        ];
-        const S2_PERSONNEL = [
-            "黃正忠", "張韶眞", "陳宥庠", "黃威翔", "羅翊禎", "黃文靖", "蔡易良", "吳奇玲",
-            "詹姆士", "達力", "山博", "羅傑", "達路", "童氏蓮", "羅德", "達布", "安吉", "羅蘭多", "馬修"
-        ];
-        const S3_PERSONNEL = [
-            "陳文全", "吳國隆", "李茂玄", "葉秀芬", "王俊智", "吳慧如", "黃筱珊", "吳明珠", "蘇炫元",
-            "托弗", "杰倫", "艾諾", "吳氏莊", "納撒", "格林", "喬司華", "喬丹", "吉姆"
-        ];
-        const S4_PERSONNEL = [
-            "陳喬志", "楊代億", "廖曉彤", "蔡靜儀", "賴建亦", "施榮傑", "陰其德", "黃譯鋒", "楊雅婷", "羅啟倫",
-            "埃爾默", "拉斯特", "雷伊", "漢斯", "達利斯", "甘達", "特拉多", "達爾文"
-        ];
-        const personShiftMap = {};
-        S1_PERSONNEL.forEach(p => personShiftMap[p] = 'S1');
-        S2_PERSONNEL.forEach(p => personShiftMap[p] = 'S2');
-        S3_PERSONNEL.forEach(p => personShiftMap[p] = 'S3');
-        S4_PERSONNEL.forEach(p => personShiftMap[p] = 'S4');
-        const S1_S3_PERSONNEL = [...S1_PERSONNEL, ...S3_PERSONNEL];
-        const S2_S4_PERSONNEL = [...S2_PERSONNEL, ...S4_PERSONNEL];
-
         function updatePersonOptions() {
             const shift = document.getElementById('inputShift').value;
             const select = document.getElementById('inputPerson');
@@ -1217,146 +1249,7 @@
             document.getElementById('inputPhoto').value = '';
         }
 
-        async function loadDescriptionOptions() {
-            try {
-                const response = await apiFetch(API_BASE + '?action=getDescriptionOptions');
-                const result = await response.json();
-                if (result.success && Array.isArray(result.options)) {
-                    descriptionOptions = result.options;
-                } else {
-                    descriptionOptions = [];
-                }
-            } catch (error) {
-                console.error('載入描述選項錯誤:', error);
-                descriptionOptions = [];
-            }
-            renderDescriptionSelectOptions();
-        }
-
-        function renderDescriptionSelectOptions() {
-            const select = document.getElementById('inputDescription');
-            select.innerHTML = '';
-            descriptionOptions.forEach(desc => {
-                const option = document.createElement('option');
-                option.value = desc;
-                option.textContent = translateDesc(desc);
-                select.appendChild(option);
-            });
-        }
-
-        function openDescriptionOptionsModal() {
-            renderDescriptionOptionsList();
-            new bootstrap.Modal(document.getElementById('descriptionOptionsModal')).show();
-        }
-
-        function renderDescriptionOptionsList() {
-            const container = document.getElementById('descriptionOptionsList');
-            if (!descriptionOptions.length) {
-                container.innerHTML = '<div class="empty-state py-3"><i class="fas fa-tags"></i><p>尚無選項</p></div>';
-                return;
-            }
-            let html = '';
-            descriptionOptions.forEach((opt, index) => {
-                html += `
-                    <div class="option-item" data-index="${index}">
-                        <input type="text" class="form-control" value="${escapeHtml(opt)}" id="optionInput_${index}">
-                        <button class="btn btn-sm btn-custom-outline" onclick="updateDescriptionOption(${index})" title="儲存修改">
-                            <i class="fas fa-save"></i>
-                        </button>
-                        <button class="btn btn-sm btn-custom-danger" onclick="deleteDescriptionOption(${index})" title="刪除">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        function buildUrlWithToken(action, extraParams = {}) {
-            const params = new URLSearchParams({ action: action, ...extraParams });
-            if (editorToken) params.append('token', editorToken);
-            return API_BASE + '?' + params.toString();
-        }
-
-        async function addDescriptionOption() {
-            const input = document.getElementById('newOptionInput');
-            const newOpt = input.value.trim();
-            if (!newOpt) { showToast('warning', '輸入錯誤', '請輸入新選項名稱'); return; }
-            if (descriptionOptions.includes(newOpt)) {
-                showToast('warning', '重複選項', '此選項已存在');
-                return;
-            }
-            try {
-                const response = await apiFetch(buildUrlWithToken('addDescriptionOption'), {
-                    method: 'POST',
-                    body: JSON.stringify({ option: newOpt })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    showToast('success', '新增成功', `已新增選項「${newOpt}」`);
-                    input.value = '';
-                    await loadDescriptionOptions();
-                    renderDescriptionOptionsList();
-                } else {
-                    showToast('error', '新增失敗', result.message || '請重試');
-                }
-            } catch (error) {
-                console.error('新增選項錯誤:', error);
-                showToast('error', '網路錯誤', '無法連接到伺服器');
-            }
-        }
-
-        async function updateDescriptionOption(index) {
-            const input = document.getElementById(`optionInput_${index}`);
-            const newOpt = input.value.trim();
-            const oldOpt = descriptionOptions[index];
-            if (!newOpt) { showToast('warning', '輸入錯誤', '選項名稱不可空白'); return; }
-            if (newOpt === oldOpt) return;
-            if (descriptionOptions.includes(newOpt)) {
-                showToast('warning', '重複選項', '此選項已存在');
-                return;
-            }
-            try {
-                const response = await apiFetch(buildUrlWithToken('updateDescriptionOption'), {
-                    method: 'POST',
-                    body: JSON.stringify({ oldOption: oldOpt, newOption: newOpt })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    showToast('success', '修改成功', `已更新為「${newOpt}」`);
-                    await loadDescriptionOptions();
-                    renderDescriptionOptionsList();
-                } else {
-                    showToast('error', '修改失敗', result.message || '請重試');
-                }
-            } catch (error) {
-                console.error('修改選項錯誤:', error);
-                showToast('error', '網路錯誤', '無法連接到伺服器');
-            }
-        }
-
-        async function deleteDescriptionOption(index) {
-            const opt = descriptionOptions[index];
-            if (!confirm(`確定要刪除選項「${opt}」嗎？`)) return;
-            try {
-                const response = await apiFetch(buildUrlWithToken('deleteDescriptionOption'), {
-                    method: 'POST',
-                    body: JSON.stringify({ option: opt })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    showToast('success', '刪除成功', `已刪除選項「${opt}」`);
-                    await loadDescriptionOptions();
-                    renderDescriptionOptionsList();
-                } else {
-                    showToast('error', '刪除失敗', result.message || '請重試');
-                }
-            } catch (error) {
-                console.error('刪除選項錯誤:', error);
-                showToast('error', '網路錯誤', '無法連接到伺服器');
-            }
-        }
-
+        // ==================== API 獲取資料 ====================
         function getFilterParams() {
             return {
                 shift: document.getElementById('filterShift').value,
@@ -1375,6 +1268,7 @@
                     fetchData(params),
                     fetchStats(params)
                 ]);
+                
                 if (dataResult.success) {
                     currentData = dataResult.data;
                     renderDataTable(currentData);
@@ -1386,13 +1280,23 @@
                     renderDataTable([]);
                     updateDataCountBadge(0);
                 }
+                
                 if (statsResult.success) {
+                    currentStats = statsResult.stats;
                     updateStatsDisplay(statsResult.stats);
+                } else {
+                    currentStats = null;
+                }
+                
+                if (editorToken) {
+                    const loginStats = await fetchLoginStats();
+                    updateLoginStatsDisplay(loginStats);
                 }
             } catch (error) {
                 console.error('載入數據錯誤:', error);
                 showToast('error', '網路錯誤', '無法連接到伺服器，請檢查 Supabase 設定');
                 currentData = [];
+                currentStats = null;
                 renderDataTable([]);
                 updateDataCountBadge(0);
             } finally {
@@ -1425,8 +1329,7 @@
         }
 
         function updateStatsDisplay(stats) {
-            document.getElementById('chartTotalBadge').textContent =
-                translations[currentLang].totalPrefix + (stats.total || 0);
+            document.getElementById('chartTotalBadge').textContent = translations[currentLang].totalPrefix + (stats.total || 0);
             updateShiftChart(stats.byShift || { S1: 0, S2: 0, S3: 0, S4: 0 });
             updatePersonStatsList(stats.byPerson || {});
             updateDescriptionStatsList(stats.byDescription || {});
@@ -1442,12 +1345,8 @@
                     datasets: [{
                         label: translations[currentLang].chartLabel,
                         data: [byShift.S1 || 0, byShift.S2 || 0, byShift.S3 || 0, byShift.S4 || 0],
-                        backgroundColor: ['rgba(240,147,251,0.85)', 'rgba(79,172,254,0.85)',
-                            'rgba(67,233,123,0.85)', 'rgba(250,112,154,0.85)'
-                        ],
-                        borderColor: ['rgba(240,147,251,1)', 'rgba(79,172,254,1)',
-                            'rgba(67,233,123,1)', 'rgba(250,112,154,1)'
-                        ],
+                        backgroundColor: ['rgba(240,147,251,0.85)', 'rgba(79,172,254,0.85)', 'rgba(67,233,123,0.85)', 'rgba(250,112,154,0.85)'],
+                        borderColor: ['rgba(240,147,251,1)', 'rgba(79,172,254,1)', 'rgba(67,233,123,1)', 'rgba(250,112,154,1)'],
                         borderWidth: 2,
                         borderRadius: 6
                     }]
@@ -1455,9 +1354,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
                         y: { beginAtZero: true, ticks: { stepSize: 1 } },
                         x: { grid: { display: false } }
@@ -1466,13 +1363,12 @@
             });
         }
 
-        // 修改：加上 onclick 事件觸發明細視窗
+        // ==================== 統計點擊明細 ====================
         function updatePersonStatsList(byPerson) {
             const container = document.getElementById('personStatsContainer');
             const persons = Object.entries(byPerson).sort((a, b) => b[1] - a[1]);
             if (!persons.length) {
-                container.innerHTML =
-                    `<div class="empty-state py-3"><i class="fas fa-user-slash"></i><p class="mb-0">${translations[currentLang].noPersonData}</p></div>`;
+                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-user-slash"></i><p class="mb-0">${translations[currentLang].noPersonData}</p></div>`;
                 return;
             }
             let html = '';
@@ -1487,13 +1383,11 @@
             container.innerHTML = html;
         }
 
-        // 修改：加上 onclick 事件觸發明細視窗
         function updateDescriptionStatsList(byDescription) {
             const container = document.getElementById('descriptionStatsContainer');
             const descriptions = Object.entries(byDescription).sort((a, b) => b[1] - a[1]);
             if (!descriptions.length) {
-                container.innerHTML =
-                    `<div class="empty-state py-3"><i class="fas fa-chart-pie"></i><p class="mb-0">${translations[currentLang].noDescData}</p></div>`;
+                container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-chart-pie"></i><p class="mb-0">${translations[currentLang].noDescData}</p></div>`;
                 return;
             }
             let html = '';
@@ -1507,64 +1401,45 @@
             container.innerHTML = html;
         }
 
-        // ==================== 顯示明細視窗邏輯 ====================
-        function showPersonDetail(person) {
-            const filteredData = currentData.filter(item => item.person === person);
-            const titleElement = document.getElementById('detailModalTitle');
-            
-            if(currentLang === 'zh') {
-                titleElement.innerHTML = `<i class="fas fa-search-plus me-2"></i><span>人員「${escapeHtml(person)}」的異常明細</span>`;
-            } else {
-                titleElement.innerHTML = `<i class="fas fa-search-plus me-2"></i><span>Abnormal Details for ${escapeHtml(person)}</span>`;
-            }
-            
+        function showPersonDetail(personName) {
+            if(!currentData) return;
+            const filteredData = currentData.filter(item => item.person === personName);
+            const title = currentLang === 'zh' ? `人員明細 - ${personName}` : `Personnel Detail - ${personName}`;
+            document.getElementById('detailModalTitle').textContent = title;
             renderDetailTable(filteredData);
             new bootstrap.Modal(document.getElementById('detailModal')).show();
         }
 
         function showDescriptionDetail(desc) {
-            const filteredData = currentData.filter(item => item.description && item.description.includes(desc));
+            if(!currentData) return;
+            const filteredData = currentData.filter(item => item.description.includes(desc));
             const translatedDesc = translateDesc(desc);
-            const titleElement = document.getElementById('detailModalTitle');
-            
-            if(currentLang === 'zh') {
-                titleElement.innerHTML = `<i class="fas fa-search-plus me-2"></i><span>異常原因「${escapeHtml(translatedDesc)}」的明細</span>`;
-            } else {
-                titleElement.innerHTML = `<i class="fas fa-search-plus me-2"></i><span>Details for Defect: ${escapeHtml(translatedDesc)}</span>`;
-            }
-            
+            const title = currentLang === 'zh' ? `異常原因明細 - ${translatedDesc}` : `Defect Detail - ${translatedDesc}`;
+            document.getElementById('detailModalTitle').textContent = title;
             renderDetailTable(filteredData);
             new bootstrap.Modal(document.getElementById('detailModal')).show();
         }
 
-        // 供明細 Modal 使用的表格渲染
         function renderDetailTable(data) {
             const tbody = document.getElementById('detailTableBody');
-            if (!data || data.length === 0) {
-                const noDataText = currentLang === 'zh' ? '無資料' : 'No Data';
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">${noDataText}</td></tr>`;
-                return;
-            }
-            let html = '';
+            tbody.innerHTML = '';
             data.forEach((item, index) => {
                 const shiftClass = 'badge-shift-' + escapeHtml(item.shift);
                 const hasPhoto = item.photo_url && item.photo_url.trim() !== '';
-                const personShift = personShiftMap[item.person] || '';
-                const isOvertime = personShift && personShift !== item.shift;
-                const personStyle = isOvertime ? 'style="color:red; font-weight:600;"' : 'style="font-weight:600;"';
+                const displayDate = item.date;
                 const translatedDescription = translateDesc(item.description);
-                html += `<tr>
-                            <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
-                            <td style="white-space:nowrap;font-weight:500;"><i class="fas fa-calendar-day me-1" style="color:#1a73e8;"></i>${escapeHtml(item.date)}</td>
-                            <td><span class="badge-shift ${shiftClass}">${escapeHtml(item.shift)}</span></td>
-                            <td ${personStyle}><i class="fas fa-user me-1" style="color:#555;"></i>${escapeHtml(item.person)}</td>
-                            <td><span class="description-text" title="${escapeHtml(translatedDescription)}">${escapeHtml(translatedDescription)}</span></td>
-                            <td class="text-center">${hasPhoto ? `<img src="${escapeHtml(item.photo_url)}" class="photo-thumb" alt="異常照片" onclick="viewPhoto('${escapeHtml(item.photo_url)}')" loading="lazy">` : `<div class="photo-placeholder"><i class="fas fa-image"></i></div>`}</td>
-                        </tr>`;
+                tbody.innerHTML += `<tr>
+                    <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
+                    <td style="white-space:nowrap;font-weight:500;"><i class="fas fa-calendar-day me-1" style="color:#1a73e8;"></i>${escapeHtml(displayDate)}</td>
+                    <td><span class="badge-shift ${shiftClass}">${escapeHtml(item.shift)}</span></td>
+                    <td style="font-weight:600;"><i class="fas fa-user me-1" style="color:#555;"></i>${escapeHtml(item.person)}</td>
+                    <td><span class="description-text" title="${escapeHtml(translatedDescription)}">${escapeHtml(translatedDescription)}</span></td>
+                    <td class="text-center">${hasPhoto ? `<img src="${escapeHtml(item.photo_url)}" class="photo-thumb" alt="異常照片" onclick="viewPhoto('${escapeHtml(item.photo_url)}')" loading="lazy">` : `<div class="photo-placeholder"><i class="fas fa-image"></i></div>`}</td>
+                </tr>`;
             });
-            tbody.innerHTML = html;
         }
 
+        // ==================== 渲染列表與功能 ====================
         function renderDataTable(data) {
             const tableBody = document.getElementById('dataTableBody');
             const emptyState = document.getElementById('emptyState');
@@ -1584,8 +1459,7 @@
                 const displayDate = item.date;
                 const personShift = personShiftMap[item.person] || '';
                 const isOvertime = personShift && personShift !== item.shift;
-                const personStyle = isOvertime ? 'style="color:red; font-weight:600;"' :
-                    'style="font-weight:600;"';
+                const personStyle = isOvertime ? 'style="color:red; font-weight:600;"' : 'style="font-weight:600;"';
                 const translatedDescription = translateDesc(item.description);
                 html += `<tr>
                             <td class="text-center" style="font-weight:600;color:#888;">${index + 1}</td>
@@ -1604,6 +1478,24 @@
             document.getElementById('dataCountBadge').textContent = count + ' ' + translations[currentLang].records;
         }
 
+        function updateFilterPeriodBadges() {
+            const year = document.getElementById('filterYear').value;
+            const month = document.getElementById('filterMonth').value;
+            let text = '';
+            const isEn = currentLang === 'en';
+
+            if (year === 'all' && month === 'all') {
+                text = isEn ? translations.en.filterPeriodAll : translations.zh.filterPeriodAll;
+            } else if (year !== 'all' && month === 'all') {
+                text = isEn ? year : year + translations.zh.filterPeriodYear;
+            } else if (year === 'all' && month !== 'all') {
+                text = isEn ? (monthNamesEn[parseInt(month) - 1] || month) : month + translations.zh.filterPeriodMonth;
+            } else {
+                text = isEn ? (monthNamesEn[parseInt(month) - 1] || month) + ' ' + year : year + translations.zh.filterPeriodYear + month + translations.zh.filterPeriodMonth;
+            }
+            document.querySelectorAll('.filter-period-badge .fp-text').forEach(el => { el.textContent = text; });
+        }
+
         function showLoading(show) {
             const spinner = document.getElementById('loadingSpinner');
             const tableWrapper = document.getElementById('dataTableWrapper');
@@ -1612,11 +1504,11 @@
                 tableWrapper.style.display = 'none';
             } else {
                 spinner.style.display = 'none';
-                if (currentData && currentData.length > 0) tableWrapper.style.display = 'block';
-                else if (currentData && currentData.length === 0) tableWrapper.style.display = 'block';
+                tableWrapper.style.display = 'block';
             }
         }
 
+        // ==================== 新增與選項操作 ====================
         function openAddModal() {
             initInputDefaults();
             new bootstrap.Modal(document.getElementById('addModal')).show();
@@ -1646,6 +1538,114 @@
             document.getElementById('photoPreview').src = '';
         }
 
+        async function loadDescriptionOptions() {
+            try {
+                const response = await apiFetch(API_BASE + '?action=getDescriptionOptions');
+                const result = await response.json();
+                if (result.success && Array.isArray(result.options)) {
+                    descriptionOptions = result.options;
+                } else {
+                    descriptionOptions = [];
+                }
+            } catch (error) {
+                descriptionOptions = [];
+            }
+            renderDescriptionSelectOptions();
+        }
+
+        function renderDescriptionSelectOptions() {
+            const select = document.getElementById('inputDescription');
+            select.innerHTML = '';
+            descriptionOptions.forEach(desc => {
+                const option = document.createElement('option');
+                option.value = desc;
+                option.textContent = translateDesc(desc);
+                select.appendChild(option);
+            });
+        }
+
+        function openDescriptionOptionsModal() {
+            renderDescriptionOptionsList();
+            new bootstrap.Modal(document.getElementById('descriptionOptionsModal')).show();
+        }
+
+        function renderDescriptionOptionsList() {
+            const container = document.getElementById('descriptionOptionsList');
+            if (!descriptionOptions.length) {
+                container.innerHTML = '<div class="empty-state py-3"><i class="fas fa-tags"></i><p>尚無選項</p></div>';
+                return;
+            }
+            let html = '';
+            descriptionOptions.forEach((opt, index) => {
+                html += `<div class="option-item d-flex align-items-center gap-2 py-2 border-bottom" data-index="${index}">
+                            <input type="text" class="form-control" value="${escapeHtml(opt)}" id="optionInput_${index}">
+                            <button class="btn btn-sm btn-custom-outline" onclick="updateDescriptionOption(${index})" title="儲存"><i class="fas fa-save"></i></button>
+                            <button class="btn btn-sm btn-custom-danger" onclick="deleteDescriptionOption(${index})" title="刪除"><i class="fas fa-trash-alt"></i></button>
+                        </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function buildUrlWithToken(action, extraParams = {}) {
+            const params = new URLSearchParams({ action: action, ...extraParams });
+            if (editorToken) params.append('token', editorToken);
+            return API_BASE + '?' + params.toString();
+        }
+
+        async function addDescriptionOption() {
+            const input = document.getElementById('newOptionInput');
+            const newOpt = input.value.trim();
+            if (!newOpt) { showToast('warning', '輸入錯誤', '請輸入新選項名稱'); return; }
+            if (descriptionOptions.includes(newOpt)) { showToast('warning', '重複選項', '此選項已存在'); return; }
+            try {
+                const response = await apiFetch(buildUrlWithToken('addDescriptionOption'), {
+                    method: 'POST', body: JSON.stringify({ option: newOpt })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('success', '新增成功', `已新增選項「${newOpt}」`);
+                    input.value = '';
+                    await loadDescriptionOptions();
+                    renderDescriptionOptionsList();
+                } else { showToast('error', '新增失敗', result.message); }
+            } catch (error) { showToast('error', '網路錯誤', '無法連接到伺服器'); }
+        }
+
+        async function updateDescriptionOption(index) {
+            const input = document.getElementById(`optionInput_${index}`);
+            const newOpt = input.value.trim();
+            const oldOpt = descriptionOptions[index];
+            if (!newOpt || newOpt === oldOpt) return;
+            if (descriptionOptions.includes(newOpt)) { showToast('warning', '重複選項', '此選項已存在'); return; }
+            try {
+                const response = await apiFetch(buildUrlWithToken('updateDescriptionOption'), {
+                    method: 'POST', body: JSON.stringify({ oldOption: oldOpt, newOption: newOpt })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('success', '修改成功', `已更新為「${newOpt}」`);
+                    await loadDescriptionOptions();
+                    renderDescriptionOptionsList();
+                } else { showToast('error', '修改失敗', result.message); }
+            } catch (error) { showToast('error', '網路錯誤', '無法連接到伺服器'); }
+        }
+
+        async function deleteDescriptionOption(index) {
+            const opt = descriptionOptions[index];
+            if (!confirm(`確定要刪除選項「${opt}」嗎？`)) return;
+            try {
+                const response = await apiFetch(buildUrlWithToken('deleteDescriptionOption'), {
+                    method: 'POST', body: JSON.stringify({ option: opt })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('success', '刪除成功', `已刪除選項「${opt}」`);
+                    await loadDescriptionOptions();
+                    renderDescriptionOptionsList();
+                } else { showToast('error', '刪除失敗', result.message); }
+            } catch (error) { showToast('error', '網路錯誤', '無法連接到伺服器'); }
+        }
+
         async function submitData() {
             const date = document.getElementById('inputDate').value;
             const shift = document.getElementById('inputShift').value;
@@ -1654,8 +1654,7 @@
             const selectedDescriptions = Array.from(descSelect.selectedOptions).map(opt => opt.value);
             const description = selectedDescriptions.join('、');
             if (!date || !shift || !person || selectedDescriptions.length === 0) {
-                showToast('warning', '資料不完整', '請填寫所有必填欄位（異常描述至少選擇一項）');
-                return;
+                showToast('warning', '資料不完整', '請填寫所有必填欄位'); return;
             }
             const saveBtn = document.querySelector('#addModal .btn-custom-primary');
             const originalText = saveBtn.innerHTML;
@@ -1665,13 +1664,10 @@
                 let finalPhotoUrl = '';
                 if (photoBase64) {
                     const uploadResult = await uploadPhotoToAPI(photoBase64);
-                    if (uploadResult.success) {
-                        finalPhotoUrl = uploadResult.photoUrl;
-                    } else {
-                        showToast('error', '照片上傳失敗', uploadResult.message || '請重試');
-                        saveBtn.disabled = false;
-                        saveBtn.innerHTML = originalText;
-                        return;
+                    if (uploadResult.success) { finalPhotoUrl = uploadResult.photoUrl; }
+                    else {
+                        showToast('error', '照片上傳失敗', uploadResult.message);
+                        saveBtn.disabled = false; saveBtn.innerHTML = originalText; return;
                     }
                 }
                 const dataPayload = { date, shift, person, description, photoUrl: finalPhotoUrl };
@@ -1681,62 +1677,40 @@
                     bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
                     initInputDefaults();
                     await loadDataAndStats();
-                } else {
-                    showToast('error', '新增失敗', addResult.message || '請重試');
-                }
-            } catch (error) {
-                console.error('提交數據錯誤:', error);
-                showToast('error', '網路錯誤', '無法連接到伺服器');
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = originalText;
-            }
+                } else { showToast('error', '新增失敗', addResult.message); }
+            } catch (error) { showToast('error', '網路錯誤', '無法連接到伺服器'); }
+            finally { saveBtn.disabled = false; saveBtn.innerHTML = originalText; }
         }
 
         async function uploadPhotoToAPI(base64Data) {
             try {
                 const response = await apiFetch(buildUrlWithToken('uploadPhoto'), {
                     method: 'POST',
-                    body: JSON.stringify({ base64: base64Data, fileName: 'photo_' + new Date().getTime() +
-                            '.jpg', mimeType: base64Data.split(';')[0].split(':')[1] || 'image/jpeg' })
+                    body: JSON.stringify({ base64: base64Data, fileName: 'photo_' + Date.now() + '.jpg', mimeType: base64Data.split(';')[0].split(':')[1] || 'image/jpeg' })
                 });
                 return await response.json();
-            } catch (error) {
-                console.error('上傳照片錯誤:', error);
-                return { success: false, message: '網路錯誤：' + error.message };
-            }
+            } catch (error) { return { success: false, message: error.message }; }
         }
 
         async function addDataToAPI(data) {
             try {
                 const response = await apiFetch(buildUrlWithToken('addData'), {
-                    method: 'POST',
-                    body: JSON.stringify(data)
+                    method: 'POST', body: JSON.stringify(data)
                 });
                 return await response.json();
-            } catch (error) {
-                console.error('添加數據錯誤:', error);
-                return { success: false, message: '網路錯誤：' + error.message };
-            }
+            } catch (error) { return { success: false, message: error.message }; }
         }
 
         async function deleteRecord(id) {
-            if (!confirm('確定要刪除這筆異常記錄嗎？此操作無法復原。')) return;
+            if (!confirm('確定要刪除這筆異常記錄嗎？')) return;
             try {
-                const response = await apiFetch(buildUrlWithToken('deleteData', { id: id }), {
-                    method: 'POST'
-                });
+                const response = await apiFetch(buildUrlWithToken('deleteData', { id: id }), { method: 'POST' });
                 const result = await response.json();
                 if (result.success) {
                     showToast('success', '刪除成功', '記錄已刪除');
                     await loadDataAndStats();
-                } else {
-                    showToast('error', '刪除失敗', result.message || '請重試');
-                }
-            } catch (error) {
-                console.error('刪除記錄錯誤:', error);
-                showToast('error', '網路錯誤', '無法連接到伺服器');
-            }
+                } else { showToast('error', '刪除失敗', result.message); }
+            } catch (error) { showToast('error', '網路錯誤', '無法連接到伺服器'); }
         }
 
         function viewPhoto(url) {
@@ -1746,29 +1720,18 @@
 
         function exportCSV() {
             if (!currentData || currentData.length === 0) {
-                showToast('warning', '無數據', '沒有可匯出的數據');
-                return;
+                showToast('warning', '無數據', '沒有可匯出的數據'); return;
             }
             const isEn = currentLang === 'en';
-            const headers = isEn ?
-                ['Seq', 'Date', 'Shift', 'Personnel', 'Description', 'Photo URL'] :
-                ['序號', '異常日期', '異常班別', '異常人員', '異常描述', '照片URL'];
+            const headers = isEn ? ['Seq', 'Date', 'Shift', 'Personnel', 'Description', 'Photo URL'] : ['序號', '異常日期', '異常班別', '異常人員', '異常描述', '照片URL'];
             const rows = currentData.map((item, index) => [
-                index + 1,
-                item.date,
-                item.shift,
-                item.person,
-                translateDesc(item.description),
-                item.photo_url || ''
+                index + 1, item.date, item.shift, item.person, translateDesc(item.description), item.photo_url || ''
             ]);
-            const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(
-                /"/g, '""') + '"').join(','))].join('\n');
+            const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))].join('\n');
             const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            const params = getFilterParams();
-            link.download =
-                `IPQC異常資料_${params.year || '全部'}_${params.month || '全部'}_${new Date().getTime()}.csv`;
+            link.download = `IPQC_Data_${Date.now()}.csv`;
             link.click();
             URL.revokeObjectURL(link.href);
             showToast('success', '匯出成功', 'CSV檔案已下載');
@@ -1793,16 +1756,14 @@
 
         function showToast(type, title, message) {
             const container = document.getElementById('toastContainer');
-            const iconMap = { success: 'fa-check-circle', error: 'fa-exclamation-circle',
-                warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+            const iconMap = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
             const colorMap = { success: '#34a853', error: '#ea4335', warning: '#fbbc04', info: '#1a73e8' };
-            const toastId = 'toast_' + new Date().getTime();
-            const icon = iconMap[type] || iconMap.info;
+            const toastId = 'toast_' + Date.now();
             const color = colorMap[type] || colorMap.info;
             const toastHtml = `
                 <div id="${toastId}" class="toast toast-custom" role="alert" style="border-left: 5px solid ${color};">
                     <div class="toast-header" style="background: #fff;">
-                        <i class="fas ${icon} me-2" style="color: ${color}; font-size: 1.2rem;"></i>
+                        <i class="fas ${iconMap[type] || iconMap.info} me-2" style="color: ${color}; font-size: 1.2rem;"></i>
                         <strong class="me-auto" style="color: #333;">${escapeHtml(title)}</strong>
                         <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
                     </div>
@@ -1812,10 +1773,10 @@
             const toastEl = document.getElementById(toastId);
             const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
             toast.show();
-            toastEl.addEventListener('hidden.bs.toast', function() { toastEl.remove(); });
+            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
         }
 
-        // ==================== 區塊拖曳排序功能 ====================
+        // ==================== 拖曳排序功能 ====================
         function initDashboardDragDrop() {
             const container = document.getElementById('dashboardContainer');
             const blocks = container.querySelectorAll('.dashboard-block');
@@ -1831,42 +1792,27 @@
                 const handle = block.querySelector('.drag-handle');
                 handle.addEventListener('mousedown', () => { block.draggable = true; });
                 handle.addEventListener('mouseup', () => { block.draggable = false; });
-                handle.addEventListener('touchstart', () => { block.draggable = true; }, { passive: true });
-                handle.addEventListener('touchend', () => { block.draggable = false; });
                 block.addEventListener('dragstart', (e) => {
-                    draggedBlock = block;
-                    block.classList.add('dragging');
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', block.dataset.block);
+                    draggedBlock = block; block.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', block.dataset.block);
                 });
                 block.addEventListener('dragend', () => {
-                    block.classList.remove('dragging');
-                    draggedBlock = null;
-                    saveDashboardOrder();
+                    block.classList.remove('dragging'); draggedBlock = null; saveDashboardOrder();
                 });
                 block.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    block.classList.add('drag-over');
+                    e.preventDefault(); e.dataTransfer.dropEffect = 'move'; block.classList.add('drag-over');
                 });
-                block.addEventListener('dragleave', () => {
-                    block.classList.remove('drag-over');
-                });
+                block.addEventListener('dragleave', () => block.classList.remove('drag-over'));
                 block.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    block.classList.remove('drag-over');
+                    e.preventDefault(); block.classList.remove('drag-over');
                     if (draggedBlock && draggedBlock !== block) {
                         const rect = block.getBoundingClientRect();
                         const after = e.clientY > rect.top + rect.height / 2;
-                        if (after) {
-                            block.parentNode.insertBefore(draggedBlock, block.nextSibling);
-                        } else {
-                            block.parentNode.insertBefore(draggedBlock, block);
-                        }
+                        if (after) block.parentNode.insertBefore(draggedBlock, block.nextSibling);
+                        else block.parentNode.insertBefore(draggedBlock, block);
                     }
                 });
             });
-
             function saveDashboardOrder() {
                 const orderedBlocks = container.querySelectorAll('.dashboard-block');
                 const order = Array.from(orderedBlocks).map(block => block.dataset.block);
@@ -1874,7 +1820,6 @@
             }
         }
 
-        // ==================== 監聽篩選變更以即時更新標籤 ====================
         document.getElementById('filterYear').addEventListener('change', updateFilterPeriodBadges);
         document.getElementById('filterMonth').addEventListener('change', updateFilterPeriodBadges);
     </script>
