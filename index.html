@@ -718,19 +718,29 @@
             return fetch(path, { ...options, headers });
         }
 
-        // ==================== 指定的人員名單 ====================
+        // ==================== 指定的人員名單 (依班別) ====================
+        const SHIFT_PERSONNEL = {
+            S1: ["方慎之","陳泰安","蔡南嘉","李珮菁","朱建穎","王泳淇","吳峻霖","黃詠綺","蘭狄","凱文","勞倫司","安東尼","明華","艾麥倫","邱立斯","拉特","羅內爾","艾佛森","賈斯汀"],
+            S2: ["黃正忠","張韶眞","陳宥庠","黃威翔","黃文靖","蔡易良","吳奇玲","詹姆士","達力","山博","羅傑","達路","童氏蓮","羅德","達布","安吉","羅蘭多","馬修"],
+            S3: ["陳文全","吳國隆","李茂玄","葉秀芬","王俊智","吳慧如","黃筱珊","吳明珠","蘇炫元","托弗","杰倫","艾諾","吳氏莊","納撒","格林","喬丹","吉姆"],
+            S4: ["陳喬志","楊代億","廖曉彤","蔡靜儀","賴建亦","施榮傑","陰其德","黃譯鋒","楊雅婷","埃爾默","拉斯特","雷伊","漢斯","達利斯","甘達","特拉多","達爾文"]
+        };
+        
+        // 展平所有人員名單
         const ALL_PERSONNEL = [
-            "楊代億", "廖曉彤", "蔡靜儀", "賴建亦", "施榮傑", "陰其德", "黃譯鋒", "楊雅婷",
-            "埃爾默", "拉斯特", "雷伊", "漢斯", "達利斯", "甘達", "特拉多", "達爾文"
+            ...SHIFT_PERSONNEL.S1,
+            ...SHIFT_PERSONNEL.S2,
+            ...SHIFT_PERSONNEL.S3,
+            ...SHIFT_PERSONNEL.S4
         ];
         
-        const S1_S3_PERSONNEL = ["楊代億", "廖曉彤", "蔡靜儀", "賴建亦"];
-        const S2_S4_PERSONNEL = ["施榮傑", "陰其德", "黃譯鋒", "楊雅婷", "埃爾默", "拉斯特", "雷伊", "漢斯", "達利斯", "甘達", "特拉多", "達爾文"];
-        
-        // 建立人員所屬班別群組 (S1群組上S1或S3，S2群組上S2或S4)
+        // 建立人員對應正常班別的 Map
         const personShiftMap = {};
-        S1_S3_PERSONNEL.forEach(p => personShiftMap[p] = 'S1_S3');
-        S2_S4_PERSONNEL.forEach(p => personShiftMap[p] = 'S2_S4');
+        Object.keys(SHIFT_PERSONNEL).forEach(shift => {
+            SHIFT_PERSONNEL[shift].forEach(person => {
+                personShiftMap[person] = shift;
+            });
+        });
 
         // ==================== 多國語言與翻譯 ====================
         let currentLang = localStorage.getItem('appLang') || 'zh';
@@ -942,8 +952,11 @@
             // 將陳喬志放在最上方
             select.innerHTML += `<option value="陳喬志" style="font-weight:bold; color:var(--primary-color);">陳喬志</option>`;
             
+            // 其他所有非陳喬志的員工
             ALL_PERSONNEL.forEach(p => {
-                select.innerHTML += `<option value="${p}">${p}</option>`;
+                if (p !== '陳喬志') {
+                    select.innerHTML += `<option value="${p}">${p}</option>`;
+                }
             });
         }
 
@@ -1083,7 +1096,7 @@
             if(!container) return;
             
             // 1. 合併所有人員名單（包含編輯者），確保未登入者顯示 0 次
-            const allNames = [...ALL_PERSONNEL, '陳喬志'];
+            const allNames = Array.from(new Set([...ALL_PERSONNEL, '陳喬志']));
             const stats = {};
             allNames.forEach(name => {
                 let data = rawStats[name];
@@ -1288,10 +1301,8 @@
         function updatePersonOptions() {
             const shift = document.getElementById('inputShift').value;
             const select = document.getElementById('inputPerson');
-            let list = [];
-            if (shift === 'S1' || shift === 'S3') list = S1_S3_PERSONNEL;
-            else if (shift === 'S2' || shift === 'S4') list = S2_S4_PERSONNEL;
-            else {
+            let list = SHIFT_PERSONNEL[shift] || [];
+            if (list.length === 0) {
                 select.innerHTML = `<option value="">${translations[currentLang].selectPerson}</option>`;
                 return;
             }
@@ -1430,10 +1441,10 @@
             }
             let html = '';
             persons.forEach(([name, count]) => {
-                const group = personShiftMap[name] || '';
-                const groupText = group ? `(${group.replace('_', '/')})` : '';
+                const normalShift = personShiftMap[name] || '';
+                const shiftText = normalShift ? `(${normalShift})` : '';
                 html += `<div class="person-stat-item clickable-stat-item" onclick="showPersonDetail('${escapeHtml(name)}')">
-                            <span class="person-stat-name"><i class="fas fa-user-circle me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}${groupText}</span>
+                            <span class="person-stat-name"><i class="fas fa-user-circle me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}${shiftText}</span>
                             <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
                         </div>`;
             });
@@ -1486,12 +1497,9 @@
                 const displayDate = item.date;
                 const translatedDescription = translateDesc(item.description);
                 
-                // 加班判斷邏輯 (亮紅色標註)
-                const group = personShiftMap[item.person] || '';
-                let isOvertime = false;
-                if (group === 'S1_S3' && (item.shift === 'S2' || item.shift === 'S4')) isOvertime = true;
-                if (group === 'S2_S4' && (item.shift === 'S1' || item.shift === 'S3')) isOvertime = true;
-                
+                // 加班判定邏輯
+                const normalShift = personShiftMap[item.person] || '';
+                const isOvertime = normalShift && normalShift !== item.shift;
                 const personStyle = isOvertime ? 'style="color:#ff0000; font-weight:bold;"' : 'style="font-weight:600;"';
 
                 tbody.innerHTML += `<tr>
@@ -1525,12 +1533,9 @@
                 const displayDate = item.date;
                 const translatedDescription = translateDesc(item.description);
 
-                // 加班判斷邏輯 (亮紅色標註)
-                const group = personShiftMap[item.person] || '';
-                let isOvertime = false;
-                if (group === 'S1_S3' && (item.shift === 'S2' || item.shift === 'S4')) isOvertime = true;
-                if (group === 'S2_S4' && (item.shift === 'S1' || item.shift === 'S3')) isOvertime = true;
-                
+                // 加班判定邏輯
+                const normalShift = personShiftMap[item.person] || '';
+                const isOvertime = normalShift && normalShift !== item.shift;
                 const personStyle = isOvertime ? 'style="color:#ff0000; font-weight:bold;"' : 'style="font-weight:600;"';
 
                 html += `<tr>
