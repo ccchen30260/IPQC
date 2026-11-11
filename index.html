@@ -244,14 +244,6 @@
             max-height: 450px; overflow-y: auto; overflow-x: hidden; position: relative;
         }
         .table-scroll-container .table-responsive { overflow-x: auto; }
-        
-        /* 登入統計重置按鈕樣式 */
-        .btn-reset-login {
-            padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; margin-left: 8px;
-            border: 1px solid #dc3545; color: #dc3545; background: transparent;
-            transition: all 0.2s;
-        }
-        .btn-reset-login:hover { background: #dc3545; color: #fff; }
     </style>
 </head>
 <body class="viewer-mode">
@@ -1160,19 +1152,11 @@
                     lastLoginText = d.toLocaleString(locale, { hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 }
 
-                // 編輯者才顯示歸零按鈕
-                const resetBtn = editorToken ? `
-                    <button class="btn-reset-login" onclick="resetUserLoginStats('${escapeHtml(name)}')" title="次數歸零重計">
-                        <i class="fas fa-undo me-1"></i>歸零
-                    </button>
-                ` : '';
-
                 html += `<div class="person-stat-item" style="flex-direction: column; align-items: flex-start; padding: 12px 10px;">
                             <div class="d-flex justify-content-between w-100 align-items-center mb-1">
                                 <span class="person-stat-name"><i class="fas fa-user-check me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}</span>
                                 <div class="d-flex align-items-center">
                                     <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
-                                    ${resetBtn}
                                 </div>
                             </div>
                             <div class="text-muted w-100" style="font-size: 0.8rem;">
@@ -1181,31 +1165,6 @@
                         </div>`;
             });
             container.innerHTML = html;
-        }
-
-        async function resetUserLoginStats(account) {
-            if (!confirm(`確定要將「${account}」的登入次數與時間歸零重計嗎？`)) return;
-            
-            try {
-                // 嘗試呼叫後端 API (如果後端有實作)
-                await apiFetch(buildUrlWithToken('resetLoginStats'), {
-                    method: 'POST',
-                    body: JSON.stringify({ account: account })
-                });
-            } catch (e) {
-                console.warn('API resetLoginStats failed, fallback to local');
-            }
-            
-            // 更新本地 localStorage
-            let stats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
-            stats[account] = { count: 0, lastLogin: null };
-            localStorage.setItem('sysLoginStats', JSON.stringify(stats));
-            
-            showToast('success', '重置成功', `已將「${account}」的登入次數歸零`);
-            
-            // 刷新 UI
-            const newStats = await fetchLoginStats();
-            updateLoginStatsDisplay(newStats);
         }
 
         async function openLoginStatsModal() {
@@ -1912,13 +1871,10 @@
 
         // ==================== 拖曳排序功能 ====================
         function initDashboardDragDrop() {
-            // 檢視模式下禁止拖曳
-            if (document.body.classList.contains('viewer-mode')) return;
-
             const container = document.getElementById('dashboardContainer');
             const blocks = container.querySelectorAll('.dashboard-block');
-            let draggedBlock = null;
             
+            // 1. 套用儲存的排序 (無論是檢視者或編輯者)
             const savedOrder = (JSON.parse(localStorage.getItem('dashboardOrder') || '[]'))
                 .filter(id => container.querySelector(`[data-block="${id}"]`));
             if (savedOrder.length && savedOrder.length === blocks.length) {
@@ -1927,7 +1883,12 @@
                     if (block) container.appendChild(block);
                 });
             }
-            
+
+            // 2. 檢視者不允許拖曳，直接結束
+            if (document.body.classList.contains('viewer-mode')) return;
+
+            // 3. 編輯者綁定拖曳事件
+            let draggedBlock = null;
             blocks.forEach(block => {
                 const handle = block.querySelector('.drag-handle');
                 if (!handle) return;
