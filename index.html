@@ -298,6 +298,9 @@
                 <button class="btn btn-outline-light btn-sm" onclick="toggleLanguage()" style="border-radius:20px;">
                     <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
                 </button>
+                <button class="btn btn-outline-light btn-sm editor-only" onclick="openLoginStatsModal()" style="border-radius:20px;">
+                    <i class="fas fa-sign-in-alt me-1"></i><span data-i18n="loginStatsTitle">系統登入次數統計</span>
+                </button>
                 <button class="btn btn-outline-light btn-sm" onclick="openChangePasswordModal()" style="border-radius:20px;">
                     <i class="fas fa-key me-1"></i><span data-i18n="changePassword">修改密碼</span>
                 </button>
@@ -474,22 +477,6 @@
                                 <p class="text-muted" data-i18n="noDataSub">點擊右下角 + 按鈕新增異常記錄</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5. 系統登入次數統計 (僅編輯者可見) -->
-            <div class="card card-custom dashboard-block editor-only" data-block="loginStats" draggable="true">
-                <div class="card-header">
-                    <span class="drag-handle">
-                        <i class="fas fa-grip-vertical me-2"></i>
-                        <i class="fas fa-sign-in-alt"></i> <span data-i18n="loginStatsTitle">系統登入次數統計</span>
-                    </span>
-                </div>
-                <div class="card-body" id="loginStatsContainer" style="max-height: 280px; overflow-y: auto;">
-                    <div class="empty-state py-3">
-                        <i class="fas fa-history"></i>
-                        <p class="mb-0" data-i18n="noLoginData">尚無登入記錄</p>
                     </div>
                 </div>
             </div>
@@ -675,6 +662,31 @@
                 <div class="modal-footer" style="border-top:1px solid #eef0f3;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">取消</button>
                     <button type="button" class="btn btn-primary" onclick="submitChangePassword()" data-i18n="confirm">確認修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系統登入次數統計模態框 -->
+    <div class="modal fade" id="loginStatsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content" style="border-radius:16px; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+                <div class="modal-header" style="background:linear-gradient(135deg,#1a73e8,#0d47a1); color:#fff; border-radius:16px 16px 0 0; padding:16px 20px;">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-sign-in-alt me-2"></i><span data-i18n="loginStatsTitle">系統登入次數統計</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div id="loginStatsContainer" style="max-height:60vh; overflow-y:auto;">
+                        <div class="empty-state py-3">
+                            <i class="fas fa-history"></i>
+                            <p class="mb-0" data-i18n="noLoginData">尚無登入記錄</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #eef0f3; padding:12px 20px;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:8px;" data-i18n="cancel">關閉</button>
                 </div>
             </div>
         </div>
@@ -930,9 +942,6 @@
             if (shiftChartInstance) {
                 shiftChartInstance.update();
             }
-            if(editorToken) {
-                fetchLoginStats().then(updateLoginStatsDisplay);
-            }
         }
 
         // ==================== 登入邏輯與下拉選單 ====================
@@ -1073,6 +1082,12 @@
                         </div>`;
             });
             container.innerHTML = html;
+        }
+
+        async function openLoginStatsModal() {
+            new bootstrap.Modal(document.getElementById('loginStatsModal')).show();
+            const stats = await fetchLoginStats();
+            updateLoginStatsDisplay(stats);
         }
 
         // ==================== 修改密碼模態框 ====================
@@ -1286,11 +1301,6 @@
                     updateStatsDisplay(statsResult.stats);
                 } else {
                     currentStats = null;
-                }
-                
-                if (editorToken) {
-                    const loginStats = await fetchLoginStats();
-                    updateLoginStatsDisplay(loginStats);
                 }
             } catch (error) {
                 console.error('載入數據錯誤:', error);
@@ -1781,8 +1791,9 @@
             const container = document.getElementById('dashboardContainer');
             const blocks = container.querySelectorAll('.dashboard-block');
             let draggedBlock = null;
-            const savedOrder = JSON.parse(localStorage.getItem('dashboardOrder') || '[]');
-            if (savedOrder.length === blocks.length) {
+            const savedOrder = (JSON.parse(localStorage.getItem('dashboardOrder') || '[]'))
+                .filter(id => container.querySelector(`[data-block="${id}"]`));
+            if (savedOrder.length && savedOrder.length === blocks.length) {
                 savedOrder.forEach(blockId => {
                     const block = container.querySelector(`[data-block="${blockId}"]`);
                     if (block) container.appendChild(block);
