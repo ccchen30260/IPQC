@@ -700,6 +700,13 @@
         const API_BASE = SUPABASE_URL.replace('.supabase.co', '.functions.supabase.co') + '/ipqc';
         // ============================================================
 
+        // 強制重置登入次數的版本控制 (用來清空舊紀錄)
+        const STATS_VERSION = 'v2_reset';
+        if (localStorage.getItem('sysLoginStats_version') !== STATS_VERSION) {
+            localStorage.removeItem('sysLoginStats');
+            localStorage.setItem('sysLoginStats_version', STATS_VERSION);
+        }
+
         let editorToken = null;
         let loggedInViewerAccount = null;
         let currentData = [];
@@ -1095,8 +1102,8 @@
             const container = document.getElementById('loginStatsContainer');
             if(!container) return;
             
-            // 1. 暫時只列出 S4 人員名單
-            const allNames = [...SHIFT_PERSONNEL.S4];
+            // 1. 只列出 S4 人員名單，並排除陳喬志
+            const allNames = SHIFT_PERSONNEL.S4.filter(name => name !== '陳喬志');
             const stats = {};
             allNames.forEach(name => {
                 let data = rawStats[name];
