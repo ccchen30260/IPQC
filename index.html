@@ -217,6 +217,7 @@
         .dashboard-block .drag-handle { cursor: grab; user-select: none; }
         .dashboard-block .drag-handle:active { cursor: grabbing; }
         .dashboard-block.drag-over { border-top: 4px solid var(--primary-color); }
+        body.viewer-mode .drag-handle { cursor: default; }
 
         /* 登入畫面樣式 */
         .login-overlay {
@@ -374,10 +375,10 @@
             </div>
         </div>
 
-        <!-- 可拖曳排序的儀表板區塊 -->
+        <!-- 可拖曳排序的儀表板區塊 (注意：移除了 HTML 上的 draggable="true"，由 JS 動態控制) -->
         <div id="dashboardContainer" class="d-flex flex-column gap-3 mb-4">
             <!-- 1. 班別統計圖表 -->
-            <div class="card card-custom dashboard-block" data-block="shiftChart" draggable="true">
+            <div class="card card-custom dashboard-block" data-block="shiftChart">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
@@ -396,7 +397,7 @@
             </div>
 
             <!-- 2. 人員異常統計 -->
-            <div class="card card-custom dashboard-block" data-block="personStats" draggable="true">
+            <div class="card card-custom dashboard-block" data-block="personStats">
                 <div class="card-header">
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
@@ -415,7 +416,7 @@
             </div>
 
             <!-- 3. 異常原因統計表 -->
-            <div class="card card-custom dashboard-block" data-block="descriptionStats" draggable="true">
+            <div class="card card-custom dashboard-block" data-block="descriptionStats">
                 <div class="card-header">
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
@@ -434,7 +435,7 @@
             </div>
 
             <!-- 4. 異常數據列表 -->
-            <div class="card card-custom dashboard-block" data-block="dataList" draggable="true">
+            <div class="card card-custom dashboard-block" data-block="dataList">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span class="drag-handle">
                         <i class="fas fa-grip-vertical me-2"></i>
@@ -823,7 +824,8 @@
                 confirmNewPwd: "確認新密碼",
                 editorPwdOpt: "編輯者密碼",
                 loginStatsTitle: "系統登入次數統計",
-                noLoginData: "尚無登入記錄"
+                noLoginData: "尚無登入記錄",
+                lastLogin: "最後登入："
             },
             en: {
                 appTitle: "IPQC Abnormal Data Statistics",
@@ -887,7 +889,8 @@
                 confirmNewPwd: "Confirm New Password",
                 editorPwdOpt: "Editor Password",
                 loginStatsTitle: "System Login Statistics",
-                noLoginData: "No login records"
+                noLoginData: "No login records",
+                lastLogin: "Last Login: "
             }
         };
 
@@ -1042,43 +1045,103 @@
 
         // ==================== 登入次數紀錄 ====================
         async function logUserLogin(account) {
+            const now = new Date().toISOString();
             try {
                 await apiFetch(API_BASE + '?action=logUserLogin', {
                     method: 'POST',
-                    body: JSON.stringify({ account: account, timestamp: new Date().toISOString() })
+                    body: JSON.stringify({ account: account, timestamp: now })
                 });
             } catch (e) {
                 console.warn('API logUserLogin failed, fallback to local');
             }
+            
             let stats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
-            stats[account] = (stats[account] || 0) + 1;
+            // 支援新舊格式轉換
+            if (typeof stats[account] === 'number') {
+                stats[account] = { count: stats[account], lastLogin: now };
+            } else if (stats[account]) {
+                stats[account].count = (stats[account].count || 0) + 1;
+                stats[account].lastLogin = now;
+            } else {
+                stats[account] = { count: 1, lastLogin: now };
+            }
             localStorage.setItem('sysLoginStats', JSON.stringify(stats));
         }
 
         async function fetchLoginStats() {
+            let stats = {};
             try {
                 const response = await apiFetch(buildUrlWithToken('getLoginStats'));
                 const result = await response.json();
-                if(result.success && result.stats) return result.stats;
+                if(result.success && result.stats) {
+                    stats = result.stats;
+                }
             } catch (e) {
                 console.warn('API getLoginStats failed, fallback to local');
             }
-            return JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
+
+            const localStats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
+            
+            // 合併本地與遠端數據，優先確保包含最後登入時間
+            for (let key in localStats) {
+                if (typeof localStats[key] === 'number') {
+                    localStats[key] = { count: localStats[key], lastLogin: null };
+                }
+            }
+
+            if (Object.keys(stats).length === 0) {
+                return localStats;
+            }
+            
+            for (let key in localStats) {
+                 if (!stats[key]) {
+                     stats[key] = localStats[key];
+                 } else {
+                     if (typeof stats[key] === 'number') {
+                         stats[key] = { count: stats[key], lastLogin: localStats[key].lastLogin };
+                     } else if (!stats[key].lastLogin) {
+                         stats[key].lastLogin = localStats[key].lastLogin;
+                     }
+                 }
+            }
+            return stats;
         }
 
         function updateLoginStatsDisplay(stats) {
             const container = document.getElementById('loginStatsContainer');
             if(!container) return;
-            const sortedStats = Object.entries(stats).sort((a,b) => b[1] - a[1]);
+            
+            // 排序：優先依照次數
+            const sortedStats = Object.entries(stats).sort((a,b) => {
+                const countA = typeof a[1] === 'number' ? a[1] : a[1].count;
+                const countB = typeof b[1] === 'number' ? b[1] : b[1].count;
+                return countB - countA;
+            });
+            
             if(!sortedStats.length) {
                 container.innerHTML = `<div class="empty-state py-3"><i class="fas fa-history"></i><p class="mb-0">${translations[currentLang].noLoginData}</p></div>`;
                 return;
             }
+            
             let html = '';
-            sortedStats.forEach(([name, count]) => {
-                html += `<div class="person-stat-item">
-                            <span class="person-stat-name"><i class="fas fa-user-check me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}</span>
-                            <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
+            sortedStats.forEach(([name, data]) => {
+                const count = typeof data === 'number' ? data : data.count;
+                let lastLoginText = '-';
+                
+                if (data.lastLogin) {
+                    const d = new Date(data.lastLogin);
+                    const locale = currentLang === 'zh' ? 'zh-TW' : 'en-US';
+                    lastLoginText = d.toLocaleString(locale, { hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                }
+
+                html += `<div class="person-stat-item" style="flex-direction: column; align-items: flex-start; padding: 12px 10px;">
+                            <div class="d-flex justify-content-between w-100 align-items-center mb-1">
+                                <span class="person-stat-name"><i class="fas fa-user-check me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}</span>
+                                <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
+                            </div>
+                            <div class="text-muted w-100" style="font-size: 0.8rem;">
+                                <i class="fas fa-clock me-1"></i>${translations[currentLang].lastLogin}${lastLoginText}
+                            </div>
                         </div>`;
             });
             container.innerHTML = html;
@@ -1788,9 +1851,13 @@
 
         // ==================== 拖曳排序功能 ====================
         function initDashboardDragDrop() {
+            // 檢視模式下禁止拖曳
+            if (document.body.classList.contains('viewer-mode')) return;
+
             const container = document.getElementById('dashboardContainer');
             const blocks = container.querySelectorAll('.dashboard-block');
             let draggedBlock = null;
+            
             const savedOrder = (JSON.parse(localStorage.getItem('dashboardOrder') || '[]'))
                 .filter(id => container.querySelector(`[data-block="${id}"]`));
             if (savedOrder.length && savedOrder.length === blocks.length) {
@@ -1799,23 +1866,42 @@
                     if (block) container.appendChild(block);
                 });
             }
+            
             blocks.forEach(block => {
                 const handle = block.querySelector('.drag-handle');
+                if (!handle) return;
+
+                // 初始設為不可拖曳，只有按在把手時才啟用，避免誤觸拖曳
+                block.draggable = false;
+
                 handle.addEventListener('mousedown', () => { block.draggable = true; });
                 handle.addEventListener('mouseup', () => { block.draggable = false; });
+                
+                // 加上 touch 事件處理，優化行動端體驗
+                handle.addEventListener('touchstart', () => { block.draggable = true; }, {passive: true});
+                handle.addEventListener('touchend', () => { block.draggable = false; });
+
                 block.addEventListener('dragstart', (e) => {
-                    draggedBlock = block; block.classList.add('dragging');
-                    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', block.dataset.block);
+                    draggedBlock = block; 
+                    block.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move'; 
+                    e.dataTransfer.setData('text/plain', block.dataset.block);
                 });
                 block.addEventListener('dragend', () => {
-                    block.classList.remove('dragging'); draggedBlock = null; saveDashboardOrder();
+                    block.classList.remove('dragging'); 
+                    block.draggable = false;
+                    draggedBlock = null; 
+                    saveDashboardOrder();
                 });
                 block.addEventListener('dragover', (e) => {
-                    e.preventDefault(); e.dataTransfer.dropEffect = 'move'; block.classList.add('drag-over');
+                    e.preventDefault(); 
+                    e.dataTransfer.dropEffect = 'move'; 
+                    block.classList.add('drag-over');
                 });
                 block.addEventListener('dragleave', () => block.classList.remove('drag-over'));
                 block.addEventListener('drop', (e) => {
-                    e.preventDefault(); block.classList.remove('drag-over');
+                    e.preventDefault(); 
+                    block.classList.remove('drag-over');
                     if (draggedBlock && draggedBlock !== block) {
                         const rect = block.getBoundingClientRect();
                         const after = e.clientY > rect.top + rect.height / 2;
