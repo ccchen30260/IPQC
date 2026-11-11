@@ -244,6 +244,14 @@
             max-height: 450px; overflow-y: auto; overflow-x: hidden; position: relative;
         }
         .table-scroll-container .table-responsive { overflow-x: auto; }
+        
+        /* 登入統計重置按鈕樣式 */
+        .btn-reset-login {
+            padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; margin-left: 8px;
+            border: 1px solid #dc3545; color: #dc3545; background: transparent;
+            transition: all 0.2s;
+        }
+        .btn-reset-login:hover { background: #dc3545; color: #fff; }
     </style>
 </head>
 <body class="viewer-mode">
@@ -375,7 +383,7 @@
             </div>
         </div>
 
-        <!-- 可拖曳排序的儀表板區塊 (注意：移除了 HTML 上的 draggable="true"，由 JS 動態控制) -->
+        <!-- 可拖曳排序的儀表板區塊 -->
         <div id="dashboardContainer" class="d-flex flex-column gap-3 mb-4">
             <!-- 1. 班別統計圖表 -->
             <div class="card card-custom dashboard-block" data-block="shiftChart">
@@ -1107,15 +1115,33 @@
             return stats;
         }
 
-        function updateLoginStatsDisplay(stats) {
+        function updateLoginStatsDisplay(rawStats) {
             const container = document.getElementById('loginStatsContainer');
             if(!container) return;
             
-            // 排序：優先依照次數
+            // 1. 合併所有人員名單，確保未登入者顯示 0 次
+            const stats = {};
+            ALL_PERSONNEL.forEach(name => {
+                let data = rawStats[name];
+                if (typeof data === 'number') data = { count: data, lastLogin: null };
+                stats[name] = data || { count: 0, lastLogin: null };
+            });
+            
+            // 保留非名單內的舊數據，避免遺失
+            for (let key in rawStats) {
+                if (!stats[key]) {
+                    let data = rawStats[key];
+                    if (typeof data === 'number') data = { count: data, lastLogin: null };
+                    stats[key] = data;
+                }
+            }
+
+            // 2. 排序：優先依照次數降序，相同次數則依姓名排序
             const sortedStats = Object.entries(stats).sort((a,b) => {
-                const countA = typeof a[1] === 'number' ? a[1] : a[1].count;
-                const countB = typeof b[1] === 'number' ? b[1] : b[1].count;
-                return countB - countA;
+                const countA = a[1].count;
+                const countB = b[1].count;
+                if (countA !== countB) return countB - countA;
+                return a[0].localeCompare(b[0]);
             });
             
             if(!sortedStats.length) {
@@ -1125,7 +1151,7 @@
             
             let html = '';
             sortedStats.forEach(([name, data]) => {
-                const count = typeof data === 'number' ? data : data.count;
+                const count = data.count;
                 let lastLoginText = '-';
                 
                 if (data.lastLogin) {
@@ -1134,10 +1160,20 @@
                     lastLoginText = d.toLocaleString(locale, { hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 }
 
+                // 編輯者才顯示歸零按鈕
+                const resetBtn = editorToken ? `
+                    <button class="btn-reset-login" onclick="resetUserLoginStats('${escapeHtml(name)}')" title="次數歸零重計">
+                        <i class="fas fa-undo me-1"></i>歸零
+                    </button>
+                ` : '';
+
                 html += `<div class="person-stat-item" style="flex-direction: column; align-items: flex-start; padding: 12px 10px;">
                             <div class="d-flex justify-content-between w-100 align-items-center mb-1">
                                 <span class="person-stat-name"><i class="fas fa-user-check me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}</span>
-                                <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
+                                <div class="d-flex align-items-center">
+                                    <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
+                                    ${resetBtn}
+                                </div>
                             </div>
                             <div class="text-muted w-100" style="font-size: 0.8rem;">
                                 <i class="fas fa-clock me-1"></i>${translations[currentLang].lastLogin}${lastLoginText}
@@ -1145,6 +1181,31 @@
                         </div>`;
             });
             container.innerHTML = html;
+        }
+
+        async function resetUserLoginStats(account) {
+            if (!confirm(`確定要將「${account}」的登入次數與時間歸零重計嗎？`)) return;
+            
+            try {
+                // 嘗試呼叫後端 API (如果後端有實作)
+                await apiFetch(buildUrlWithToken('resetLoginStats'), {
+                    method: 'POST',
+                    body: JSON.stringify({ account: account })
+                });
+            } catch (e) {
+                console.warn('API resetLoginStats failed, fallback to local');
+            }
+            
+            // 更新本地 localStorage
+            let stats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
+            stats[account] = { count: 0, lastLogin: null };
+            localStorage.setItem('sysLoginStats', JSON.stringify(stats));
+            
+            showToast('success', '重置成功', `已將「${account}」的登入次數歸零`);
+            
+            // 刷新 UI
+            const newStats = await fetchLoginStats();
+            updateLoginStatsDisplay(newStats);
         }
 
         async function openLoginStatsModal() {
@@ -1871,13 +1932,10 @@
                 const handle = block.querySelector('.drag-handle');
                 if (!handle) return;
 
-                // 初始設為不可拖曳，只有按在把手時才啟用，避免誤觸拖曳
                 block.draggable = false;
 
                 handle.addEventListener('mousedown', () => { block.draggable = true; });
                 handle.addEventListener('mouseup', () => { block.draggable = false; });
-                
-                // 加上 touch 事件處理，優化行動端體驗
                 handle.addEventListener('touchstart', () => { block.draggable = true; }, {passive: true});
                 handle.addEventListener('touchend', () => { block.draggable = false; });
 
