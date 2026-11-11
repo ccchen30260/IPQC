@@ -1095,23 +1095,14 @@
             const container = document.getElementById('loginStatsContainer');
             if(!container) return;
             
-            // 1. 合併所有人員名單（包含編輯者），確保未登入者顯示 0 次
-            const allNames = Array.from(new Set([...ALL_PERSONNEL, '陳喬志']));
+            // 1. 暫時只列出 S4 人員名單
+            const allNames = [...SHIFT_PERSONNEL.S4];
             const stats = {};
             allNames.forEach(name => {
                 let data = rawStats[name];
                 if (typeof data === 'number') data = { count: data, lastLogin: null };
                 stats[name] = data || { count: 0, lastLogin: null };
             });
-            
-            // 保留非名單內的舊數據，避免遺失
-            for (let key in rawStats) {
-                if (!stats[key]) {
-                    let data = rawStats[key];
-                    if (typeof data === 'number') data = { count: data, lastLogin: null };
-                    stats[key] = data;
-                }
-            }
 
             // 2. 排序：優先依照次數降序，相同次數則依姓名排序
             const sortedStats = Object.entries(stats).sort((a,b) => {
