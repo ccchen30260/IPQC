@@ -949,12 +949,12 @@
         function initLoginDropdown() {
             const select = document.getElementById('loginAccount');
             select.innerHTML = `<option value="" data-i18n="loginAccountSelect">${translations[currentLang].loginAccountSelect}</option>`;
-            // 將陳喬志放在最上方
-            select.innerHTML += `<option value="陳喬志" style="font-weight:bold; color:var(--primary-color);">陳喬志</option>`;
             
-            // 其他所有非陳喬志的員工
-            ALL_PERSONNEL.forEach(p => {
-                if (p !== '陳喬志') {
+            // 暫時只顯示 S4 人員
+            SHIFT_PERSONNEL.S4.forEach(p => {
+                if (p === '陳喬志') {
+                    select.innerHTML += `<option value="${p}" style="font-weight:bold; color:var(--primary-color);">${p}</option>`;
+                } else {
                     select.innerHTML += `<option value="${p}">${p}</option>`;
                 }
             });
