@@ -1299,11 +1299,18 @@
         function updatePersonOptions() {
             const shift = document.getElementById('inputShift').value;
             const select = document.getElementById('inputPerson');
-            let list = SHIFT_PERSONNEL[shift] || [];
-            if (list.length === 0) {
+            let list = [];
+
+            // 連動邏輯：S1/S3 合併；S2/S4 合併
+            if (shift === 'S1' || shift === 'S3') {
+                list = [...SHIFT_PERSONNEL.S1, ...SHIFT_PERSONNEL.S3];
+            } else if (shift === 'S2' || shift === 'S4') {
+                list = [...SHIFT_PERSONNEL.S2, ...SHIFT_PERSONNEL.S4];
+            } else {
                 select.innerHTML = `<option value="">${translations[currentLang].selectPerson}</option>`;
                 return;
             }
+
             let html = `<option value="">${translations[currentLang].selectPersonDefault}</option>`;
             list.forEach(name => html += `<option value="${name}">${name}</option>`);
             select.innerHTML = html;
