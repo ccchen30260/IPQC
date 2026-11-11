@@ -937,11 +937,12 @@
         function initLoginDropdown() {
             const select = document.getElementById('loginAccount');
             select.innerHTML = `<option value="" data-i18n="loginAccountSelect">${translations[currentLang].loginAccountSelect}</option>`;
+            // 將陳喬志放在最上方
+            select.innerHTML += `<option value="陳喬志" style="font-weight:bold; color:var(--primary-color);">陳喬志</option>`;
+            
             ALL_PERSONNEL.forEach(p => {
                 select.innerHTML += `<option value="${p}">${p}</option>`;
             });
-            // 加入編輯者帳號
-            select.innerHTML += `<option value="陳喬志" style="font-weight:bold; color:var(--primary-color);">陳喬志 (編輯者)</option>`;
         }
 
         async function performLogin() {
