@@ -244,6 +244,14 @@
             max-height: 450px; overflow-y: auto; overflow-x: hidden; position: relative;
         }
         .table-scroll-container .table-responsive { overflow-x: auto; }
+
+        /* 歸零按鈕樣式 */
+        .btn-reset-login {
+            padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; margin-left: 6px;
+            border: 1px solid var(--danger-color); color: var(--danger-color); background: transparent;
+            transition: all 0.2s; cursor: pointer;
+        }
+        .btn-reset-login:hover { background: var(--danger-color); color: #fff; }
     </style>
 </head>
 <body class="viewer-mode">
@@ -1051,7 +1059,7 @@
 
             const localStats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
             
-            // 合併本地與遠端數據，優先確保包含最後登入時間
+            // 合併本地與遠端數據
             for (let key in localStats) {
                 if (typeof localStats[key] === 'number') {
                     localStats[key] = { count: localStats[key], lastLogin: null };
@@ -1066,10 +1074,17 @@
                  if (!stats[key]) {
                      stats[key] = localStats[key];
                  } else {
-                     if (typeof stats[key] === 'number') {
-                         stats[key] = { count: stats[key], lastLogin: localStats[key].lastLogin };
-                     } else if (!stats[key].lastLogin) {
-                         stats[key].lastLogin = localStats[key].lastLogin;
+                     let remoteData = typeof stats[key] === 'number' ? { count: stats[key], lastLogin: null } : stats[key];
+                     let localData = localStats[key];
+                     
+                     // 若本地有重置記錄 (count 為 0)，則強制採用本地，避免又被遠端舊資料覆蓋
+                     if (localData.count === 0) {
+                         stats[key] = { count: 0, lastLogin: null };
+                     } else {
+                         stats[key] = { 
+                             count: Math.max(remoteData.count || 0, localData.count || 0),
+                             lastLogin: remoteData.lastLogin || localData.lastLogin
+                         };
                      }
                  }
             }
@@ -1127,6 +1142,9 @@
                                 <span class="person-stat-name"><i class="fas fa-user-check me-2" style="color:#1a73e8;"></i>${escapeHtml(name)}</span>
                                 <div class="d-flex align-items-center">
                                     <span class="person-stat-count">${count} ${translations[currentLang].times}</span>
+                                    <button class="btn-reset-login" onclick="resetUserLoginStats('${escapeHtml(name)}')" title="次數歸零">
+                                        <i class="fas fa-undo me-1"></i>歸零
+                                    </button>
                                 </div>
                             </div>
                             <div class="text-muted w-100" style="font-size: 0.8rem;">
@@ -1135,6 +1153,31 @@
                         </div>`;
             });
             container.innerHTML = html;
+        }
+
+        async function resetUserLoginStats(account) {
+            if (!confirm(`確定要將「${account}」的登入次數歸零嗎？`)) return;
+            
+            try {
+                // 嘗試呼叫後端 API 歸零
+                await apiFetch(buildUrlWithToken('resetLoginStats'), {
+                    method: 'POST',
+                    body: JSON.stringify({ account: account })
+                });
+            } catch (e) {
+                console.warn('API resetLoginStats failed, fallback to local');
+            }
+            
+            // 更新本地 localStorage
+            let stats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
+            stats[account] = { count: 0, lastLogin: null };
+            localStorage.setItem('sysLoginStats', JSON.stringify(stats));
+            
+            showToast('success', '重置成功', `已將「${account}」的登入次數歸零`);
+            
+            // 刷新 UI
+            const newStats = await fetchLoginStats();
+            updateLoginStatsDisplay(newStats);
         }
 
         async function openLoginStatsModal() {
