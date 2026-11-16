@@ -701,7 +701,7 @@
         // ============================================================
 
         // 強制重置登入次數的版本控制 (用來清空舊紀錄)
-        const STATS_VERSION = 'v2_reset';
+        const STATS_VERSION = 'v3_reset_20261116'; 
         if (localStorage.getItem('sysLoginStats_version') !== STATS_VERSION) {
             localStorage.removeItem('sysLoginStats');
             localStorage.setItem('sysLoginStats_version', STATS_VERSION);
@@ -1060,6 +1060,11 @@
         }
 
         async function fetchLoginStats() {
+            // 為了先歸零重新計算，我們暫時先不從遠端拉取舊資料
+            // 直接返回本地資料（已被版本號清空過）
+            return JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
+            
+            /* 原始遠端拉取邏輯（待需要時可解開）
             let stats = {};
             try {
                 const response = await apiFetch(buildUrlWithToken('getLoginStats'));
@@ -1073,7 +1078,7 @@
 
             const localStats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
             
-            // 合併本地與遠端數據，優先確保包含最後登入時間
+            // 合併本地與遠端數據
             for (let key in localStats) {
                 if (typeof localStats[key] === 'number') {
                     localStats[key] = { count: localStats[key], lastLogin: null };
@@ -1096,6 +1101,7 @@
                  }
             }
             return stats;
+            */
         }
 
         function updateLoginStatsDisplay(rawStats) {
