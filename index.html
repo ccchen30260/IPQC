@@ -1726,10 +1726,15 @@
                 let finalPhotoUrl = '';
                 if (photoBase64) {
                     const uploadResult = await uploadPhotoToAPI(photoBase64);
-                    if (uploadResult.success) { finalPhotoUrl = uploadResult.photoUrl; }
-                    else {
-                        showToast('error', '照片上傳失敗', uploadResult.message);
-                        saveBtn.disabled = false; saveBtn.innerHTML = originalText; return;
+                    if (uploadResult.success) { 
+                        finalPhotoUrl = uploadResult.photoUrl; 
+                    } else {
+                        // 如果是因為權限不足（本地假 Token）導致上傳失敗，詢問是否繼續新增
+                        if (!confirm(`照片上傳失敗：${uploadResult.message || '未授權'}\n\n是否不包含照片，繼續新增記錄？`)) {
+                            saveBtn.disabled = false; 
+                            saveBtn.innerHTML = originalText; 
+                            return;
+                        }
                     }
                 }
                 const dataPayload = { date, shift, person, description, photoUrl: finalPhotoUrl };
@@ -1756,7 +1761,6 @@
 
         async function addDataToAPI(data) {
             try {
-                // 使用不帶假 token 的 Url 傳送資料，避免後端驗證失敗
                 const url = buildUrlWithToken('addData');
                 const response = await apiFetch(url, {
                     method: 'POST', body: JSON.stringify(data)
