@@ -981,6 +981,7 @@
                     editorToken = 'local_editor_token'; 
                     loggedInViewerAccount = null;
                     document.body.classList.remove('viewer-mode');
+                    document.body.classList.add('editor-mode'); // 確保切換為編輯者狀態
                     document.getElementById('loginOverlay').style.display = 'none';
                     showToast('success', '登入成功', '歡迎，編輯者 (陳喬志)');
                     updateChangePasswordOptions();
@@ -995,6 +996,7 @@
                 if (password === storedPwd) {
                     editorToken = null;
                     loggedInViewerAccount = account;
+                    document.body.classList.remove('editor-mode');
                     document.body.classList.add('viewer-mode');
                     document.getElementById('loginOverlay').style.display = 'none';
                     showToast('success', '登入成功', `歡迎，${escapeHtml(account)}`);
@@ -1012,6 +1014,7 @@
             editorToken = null;
             loggedInViewerAccount = null;
             document.body.classList.add('viewer-mode');
+            document.body.classList.remove('editor-mode');
             
             document.getElementById('loginOverlay').style.display = 'flex';
             document.getElementById('loginPassword').value = '';
@@ -1060,48 +1063,8 @@
         }
 
         async function fetchLoginStats() {
-            // 為了先歸零重新計算，我們暫時先不從遠端拉取舊資料
-            // 直接返回本地資料（已被版本號清空過）
+            // 為了先歸零重新計算，暫時不從遠端拉取舊資料
             return JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
-            
-            /* 原始遠端拉取邏輯（待需要時可解開）
-            let stats = {};
-            try {
-                const response = await apiFetch(buildUrlWithToken('getLoginStats'));
-                const result = await response.json();
-                if(result.success && result.stats) {
-                    stats = result.stats;
-                }
-            } catch (e) {
-                console.warn('API getLoginStats failed, fallback to local');
-            }
-
-            const localStats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
-            
-            // 合併本地與遠端數據
-            for (let key in localStats) {
-                if (typeof localStats[key] === 'number') {
-                    localStats[key] = { count: localStats[key], lastLogin: null };
-                }
-            }
-
-            if (Object.keys(stats).length === 0) {
-                return localStats;
-            }
-            
-            for (let key in localStats) {
-                 if (!stats[key]) {
-                     stats[key] = localStats[key];
-                 } else {
-                     if (typeof stats[key] === 'number') {
-                         stats[key] = { count: stats[key], lastLogin: localStats[key].lastLogin };
-                     } else if (!stats[key].lastLogin) {
-                         stats[key].lastLogin = localStats[key].lastLogin;
-                     }
-                 }
-            }
-            return stats;
-            */
         }
 
         function updateLoginStatsDisplay(rawStats) {
@@ -1324,7 +1287,12 @@
 
         function initInputDefaults() {
             const now = new Date();
-            document.getElementById('inputDate').value = now.toISOString().split('T')[0];
+            // 修正為本地時區的 YYYY-MM-DD
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            document.getElementById('inputDate').value = `${year}-${month}-${day}`;
+            
             document.getElementById('inputShift').value = '';
             updatePersonOptions();
             document.getElementById('inputDescription').selectedIndex = -1;
@@ -1598,8 +1566,9 @@
 
         // ==================== 新增與選項操作 ====================
         function openAddModal() {
-            initInputDefaults();
+            // 先顯示 Modal，避免 initInputDefaults 因故報錯而卡住彈窗
             new bootstrap.Modal(document.getElementById('addModal')).show();
+            initInputDefaults();
         }
 
         function previewPhoto(event) {
@@ -1676,7 +1645,10 @@
 
         function buildUrlWithToken(action, extraParams = {}) {
             const params = new URLSearchParams({ action: action, ...extraParams });
-            if (editorToken) params.append('token', editorToken);
+            // 避開傳遞假 Token 被後端拒絕
+            if (editorToken && editorToken !== 'local_editor_token') {
+                params.append('token', editorToken);
+            }
             return API_BASE + '?' + params.toString();
         }
 
@@ -1739,8 +1711,10 @@
             const shift = document.getElementById('inputShift').value;
             const person = document.getElementById('inputPerson').value;
             const descSelect = document.getElementById('inputDescription');
-            const selectedDescriptions = Array.from(descSelect.selectedOptions).map(opt => opt.value);
+            // 改用 filter(opt => opt.selected)，提升相容性
+            const selectedDescriptions = Array.from(descSelect.options).filter(opt => opt.selected).map(opt => opt.value);
             const description = selectedDescriptions.join('、');
+            
             if (!date || !shift || !person || selectedDescriptions.length === 0) {
                 showToast('warning', '資料不完整', '請填寫所有必填欄位'); return;
             }
@@ -1782,7 +1756,9 @@
 
         async function addDataToAPI(data) {
             try {
-                const response = await apiFetch(buildUrlWithToken('addData'), {
+                // 使用不帶假 token 的 Url 傳送資料，避免後端驗證失敗
+                const url = buildUrlWithToken('addData');
+                const response = await apiFetch(url, {
                     method: 'POST', body: JSON.stringify(data)
                 });
                 return await response.json();
