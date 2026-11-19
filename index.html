@@ -330,6 +330,9 @@
                 <button class="btn btn-outline-light btn-sm" onclick="toggleLanguage()" style="border-radius:20px;">
                     <i class="fas fa-globe me-1"></i><span class="langToggleBtnText">EN</span>
                 </button>
+                <button class="btn btn-outline-light btn-sm editor-only" onclick="openVisitStatsModal()" style="border-radius:20px;">
+                    <i class="fas fa-chart-line me-1"></i><span data-i18n="visitStatsBtn">訪問紀錄</span>
+                </button>
                 <button class="btn btn-outline-light btn-sm editor-only" onclick="openChangePasswordModal()" style="border-radius:20px;">
                     <i class="fas fa-key me-1"></i><span data-i18n="changePassword">修改密碼</span>
                 </button>
@@ -710,6 +713,45 @@
         </div>
     </div>
 
+    <!-- 訪問次數統計模態框（僅編輯者可見） -->
+    <div class="modal fade" id="visitStatsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: #fff; border-radius: 16px 16px 0 0; padding: 16px 20px;">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-chart-line me-2"></i><span data-i18n="visitStatsTitle">網頁訪問次數統計（檢視者）</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3" style="background: #f1f4f9; border-radius: 12px;">
+                        <span class="fw-bold" style="font-size: 1.05rem; color: #333;" data-i18n="totalVisitsLabel">總訪問次數：</span>
+                        <span class="badge bg-primary" style="font-size: 1.15rem; padding: 8px 16px; border-radius: 20px;" id="totalVisitsCount">0</span>
+                    </div>
+                    <div class="table-scroll-container" style="max-height: 350px; border: 1px solid #eef0f3; border-radius: 8px;">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px; text-align: center;" data-i18n="seq">序號</th>
+                                    <th data-i18n="visitDateTime">訪問日期時間</th>
+                                </tr>
+                            </thead>
+                            <tbody id="visitLogsTableBody">
+                                <!-- 動態載入 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between" style="border-top: 1px solid #eef0f3; padding: 12px 20px;">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearVisitLogs()" style="border-radius: 8px;">
+                        <i class="fas fa-trash-alt me-1"></i><span data-i18n="clearLogs">清除紀錄</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;" data-i18n="closeBtn">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast 通知容器 -->
     <div class="toast-container-custom" id="toastContainer"></div>
 
@@ -796,6 +838,12 @@
                 cancel: "取消",
                 closeBtn: "關閉",
                 changePassword: "修改密碼",
+                visitStatsBtn: "訪問紀錄",
+                visitStatsTitle: "網頁訪問次數統計（檢視者）",
+                totalVisitsLabel: "總訪問次數：",
+                visitDateTime: "訪問日期時間",
+                clearLogs: "清除紀錄",
+                noVisitLogs: "尚無訪問紀錄",
                 filterHeader: "查詢篩選",
                 shift: "班別",
                 allShifts: "全部班別",
@@ -851,6 +899,12 @@
                 cancel: "Cancel",
                 closeBtn: "Close",
                 changePassword: "Change Password",
+                visitStatsBtn: "Visit Logs",
+                visitStatsTitle: "Page Visit Statistics (Viewers)",
+                totalVisitsLabel: "Total Visits:",
+                visitDateTime: "Visit Date & Time",
+                clearLogs: "Clear Logs",
+                noVisitLogs: "No visit records yet",
                 filterHeader: "Filter Search",
                 shift: "Shift",
                 allShifts: "All Shifts",
@@ -1009,6 +1063,7 @@
                     editorToken = null;
                     document.body.classList.add('viewer-mode');
                     document.getElementById('loginOverlay').style.display = 'none';
+                    await recordViewerVisit();
                     showToast('success', '檢視者登入成功', '歡迎檢視異常資料');
                     initApp();
                 } else {
@@ -1019,6 +1074,99 @@
                 console.error('登入錯誤:', error);
                 showToast('error', '網路錯誤', '無法連接到伺服器');
             }
+        }
+
+        // ==================== 網頁訪問次數統計功能 ====================
+        function formatDateTimeNow() {
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        }
+
+        async function recordViewerVisit() {
+            const timestamp = formatDateTimeNow();
+            // 同步備份至本地端儲存空間
+            try {
+                const localLogs = JSON.parse(localStorage.getItem('ipqc_visit_logs') || '[]');
+                localLogs.unshift({ timestamp });
+                localStorage.setItem('ipqc_visit_logs', JSON.stringify(localLogs));
+            } catch (e) {
+                console.error('本地儲存訪問紀錄失敗:', e);
+            }
+            // 嘗試傳送至後端資料庫（若後端支援此 action）
+            try {
+                await apiFetch(API_BASE + '?action=recordVisit', {
+                    method: 'POST',
+                    body: JSON.stringify({ timestamp })
+                });
+            } catch (e) {
+                // 若後端尚未建立此端點，靜默忽略並由 localStorage 維持運作
+            }
+        }
+
+        async function openVisitStatsModal() {
+            const modalEl = document.getElementById('visitStatsModal');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+
+            const tbody = document.getElementById('visitLogsTableBody');
+            const countBadge = document.getElementById('totalVisitsCount');
+            tbody.innerHTML = '<tr><td colspan="2" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>';
+
+            let logs = [];
+            // 優先嘗試從後端讀取紀錄
+            try {
+                const response = await apiFetch(buildUrlWithToken('getVisitLogs'));
+                const result = await response.json();
+                if (result.success && Array.isArray(result.logs)) {
+                    logs = result.logs;
+                }
+            } catch (e) {
+                // 忽略網路或端點錯誤，改讀本地資料
+            }
+
+            // 若後端無資料或未設定，則讀取本地端紀錄
+            if (logs.length === 0) {
+                try {
+                    logs = JSON.parse(localStorage.getItem('ipqc_visit_logs') || '[]');
+                } catch (e) {
+                    logs = [];
+                }
+            }
+
+            countBadge.textContent = logs.length;
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="text-center py-4 text-muted">${translations[currentLang].noVisitLogs}</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            logs.forEach((log, index) => {
+                const timeStr = typeof log === 'string' ? log : (log.timestamp || log.created_at || '');
+                html += `
+                    <tr>
+                        <td class="text-center fw-bold text-muted">${index + 1}</td>
+                        <td><i class="fas fa-clock me-2" style="color: #1a73e8;"></i>${escapeHtml(timeStr)}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        async function clearVisitLogs() {
+            const confirmMsg = currentLang === 'zh' ? '確定要清除所有訪問紀錄嗎？' : 'Are you sure you want to clear all visit logs?';
+            if (!confirm(confirmMsg)) return;
+
+            localStorage.removeItem('ipqc_visit_logs');
+            try {
+                await apiFetch(buildUrlWithToken('clearVisitLogs'), { method: 'POST' });
+            } catch (e) {}
+
+            document.getElementById('totalVisitsCount').textContent = '0';
+            document.getElementById('visitLogsTableBody').innerHTML =
+                `<tr><td colspan="2" class="text-center py-4 text-muted">${translations[currentLang].noVisitLogs}</td></tr>`;
+            showToast('success', currentLang === 'zh' ? '清除成功' : 'Cleared', currentLang === 'zh' ? '訪問紀錄已清空' : 'Visit logs have been cleared');
         }
 
         async function loginAsEditor() {
