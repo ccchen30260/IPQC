@@ -336,6 +336,9 @@
                 <button class="btn btn-outline-light btn-sm editor-only" onclick="openChangePasswordModal()" style="border-radius:20px;">
                     <i class="fas fa-key me-1"></i><span data-i18n="changePassword">修改密碼</span>
                 </button>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()" style="border-radius:20px;">
+                    <i class="fas fa-sign-out-alt me-1"></i><span data-i18n="logout">登出</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -838,6 +841,7 @@
                 cancel: "取消",
                 closeBtn: "關閉",
                 changePassword: "修改密碼",
+                logout: "登出",
                 visitStatsBtn: "訪問紀錄",
                 visitStatsTitle: "網頁訪問次數統計（檢視者）",
                 totalVisitsLabel: "總訪問次數：",
@@ -899,6 +903,7 @@
                 cancel: "Cancel",
                 closeBtn: "Close",
                 changePassword: "Change Password",
+                logout: "Logout",
                 visitStatsBtn: "Visit Logs",
                 visitStatsTitle: "Page Visit Statistics (Viewers)",
                 totalVisitsLabel: "Total Visits:",
@@ -1048,6 +1053,14 @@
             document.getElementById('editorPasswordBox').style.display = 'none';
             document.getElementById('viewerPassword').value = '';
             document.getElementById('editorPassword').value = '';
+        }
+
+        function logout() {
+            editorToken = null;
+            document.body.classList.add('viewer-mode');
+            hideAllPasswordBoxes();
+            document.getElementById('loginOverlay').style.display = 'flex';
+            showToast('info', currentLang === 'zh' ? '已登出' : 'Logged Out', currentLang === 'zh' ? '您已安全登出系統' : 'You have been logged out');
         }
 
         async function loginAsViewer() {
