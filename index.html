@@ -259,17 +259,10 @@
             </div>
             
             <div class="mb-3">
-                <label class="form-label fw-bold" data-i18n="loginModeLabel">登入模式</label>
-                <select class="form-select" id="loginMode" onchange="onLoginModeChange()">
-                    <option value="viewer" data-i18n="loginModeViewer">檢視模式 (Viewer Mode)</option>
-                    <option value="editor" data-i18n="loginModeEditor">編輯模式 (Editor Mode)</option>
-                </select>
-            </div>
-
-            <div class="mb-3" id="accountGroup">
                 <label class="form-label fw-bold" data-i18n="loginAccountLabel">員工姓名 / 帳號</label>
                 <select class="form-select" id="loginAccount">
                     <option value="" data-i18n="loginAccountSelect">-- 請選擇姓名 --</option>
+                    <!-- 選項將由 JS 動態生成 -->
                 </select>
             </div>
 
@@ -785,9 +778,6 @@
                 loginTitle: "IPQC異常資料統計",
                 loginAccountLabel: "員工姓名 / 帳號",
                 loginAccountSelect: "-- 請選擇姓名 --",
-                loginModeLabel: "登入模式",
-                loginModeViewer: "檢視模式 (Viewer Mode)",
-                loginModeEditor: "編輯模式 (Editor Mode)",
                 loginPasswordLabel: "密碼",
                 loginPasswordPlaceholder: "請輸入密碼",
                 loginBtn: "登入",
@@ -850,9 +840,6 @@
                 loginTitle: "IPQC Statistics System",
                 loginAccountLabel: "Employee Name / Account",
                 loginAccountSelect: "-- Select Name --",
-                loginModeLabel: "Login Mode",
-                loginModeViewer: "Viewer Mode",
-                loginModeEditor: "Editor Mode",
                 loginPasswordLabel: "Password",
                 loginPasswordPlaceholder: "Enter Password",
                 loginBtn: "Login",
@@ -970,38 +957,32 @@
             const select = document.getElementById('loginAccount');
             select.innerHTML = `<option value="" data-i18n="loginAccountSelect">${translations[currentLang].loginAccountSelect}</option>`;
             
-            // 檢視者只顯示 S4 人員，並排除陳喬志
-            SHIFT_PERSONNEL.S4.filter(name => name !== '陳喬志').forEach(p => {
-                select.innerHTML += `<option value="${p}">${p}</option>`;
+            // 暫時只顯示 S4 人員
+            SHIFT_PERSONNEL.S4.forEach(p => {
+                if (p === '陳喬志') {
+                    select.innerHTML += `<option value="${p}" style="font-weight:bold; color:var(--primary-color);">${p}</option>`;
+                } else {
+                    select.innerHTML += `<option value="${p}">${p}</option>`;
+                }
             });
         }
 
-        function onLoginModeChange() {
-            const mode = document.getElementById('loginMode').value;
-            const accountGroup = document.getElementById('accountGroup');
-            const accountSelect = document.getElementById('loginAccount');
-            
-            if (mode === 'editor') {
-                accountGroup.style.display = 'none';
-                accountSelect.value = ""; // 清空選擇
-            } else {
-                accountGroup.style.display = 'block';
-            }
-        }
-
         async function performLogin() {
-            const mode = document.getElementById('loginMode').value;
+            const account = document.getElementById('loginAccount').value;
             const password = document.getElementById('loginPassword').value.trim();
             
-            if (mode === 'editor') {
-                if (!password) { showToast('warning', '資料不完整', '請輸入編輯者密碼'); return; }
+            if (!account) { showToast('warning', '資料不完整', '請選擇員工姓名'); return; }
+            if (!password) { showToast('warning', '資料不完整', '請輸入密碼'); return; }
+            
+            if (account === '陳喬志') {
+                // 編輯者驗證邏輯
                 const editorPwd = localStorage.getItem('editor_pwd') || '8888';
                 if (password === editorPwd) {
                     editorToken = 'local_editor_token'; 
                     loggedInViewerAccount = null;
                     document.body.classList.remove('viewer-mode');
                     document.getElementById('loginOverlay').style.display = 'none';
-                    showToast('success', '登入成功', '歡迎，編輯者');
+                    showToast('success', '登入成功', '歡迎，編輯者 (陳喬志)');
                     updateChangePasswordOptions();
                     initApp();
                 } else {
@@ -1009,10 +990,7 @@
                     document.getElementById('loginPassword').value = '';
                 }
             } else {
-                const account = document.getElementById('loginAccount').value;
-                if (!account) { showToast('warning', '資料不完整', '請選擇員工姓名'); return; }
-                if (!password) { showToast('warning', '資料不完整', '請輸入密碼'); return; }
-                
+                // 檢視者驗證邏輯
                 const storedPwd = localStorage.getItem('viewer_pwd_' + account) || '8102';
                 if (password === storedPwd) {
                     editorToken = null;
@@ -1035,12 +1013,8 @@
             loggedInViewerAccount = null;
             document.body.classList.add('viewer-mode');
             
-            // 重置登入畫面
             document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('loginMode').value = 'viewer';
-            onLoginModeChange();
             document.getElementById('loginPassword').value = '';
-            document.getElementById('loginAccount').value = '';
             
             currentData = [];
             currentStats = null;
@@ -1086,8 +1060,48 @@
         }
 
         async function fetchLoginStats() {
-            // 為了先歸零重新計算，暫時不從遠端拉取舊資料
+            // 為了先歸零重新計算，我們暫時先不從遠端拉取舊資料
+            // 直接返回本地資料（已被版本號清空過）
             return JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
+            
+            /* 原始遠端拉取邏輯（待需要時可解開）
+            let stats = {};
+            try {
+                const response = await apiFetch(buildUrlWithToken('getLoginStats'));
+                const result = await response.json();
+                if(result.success && result.stats) {
+                    stats = result.stats;
+                }
+            } catch (e) {
+                console.warn('API getLoginStats failed, fallback to local');
+            }
+
+            const localStats = JSON.parse(localStorage.getItem('sysLoginStats') || '{}');
+            
+            // 合併本地與遠端數據
+            for (let key in localStats) {
+                if (typeof localStats[key] === 'number') {
+                    localStats[key] = { count: localStats[key], lastLogin: null };
+                }
+            }
+
+            if (Object.keys(stats).length === 0) {
+                return localStats;
+            }
+            
+            for (let key in localStats) {
+                 if (!stats[key]) {
+                     stats[key] = localStats[key];
+                 } else {
+                     if (typeof stats[key] === 'number') {
+                         stats[key] = { count: stats[key], lastLogin: localStats[key].lastLogin };
+                     } else if (!stats[key].lastLogin) {
+                         stats[key].lastLogin = localStats[key].lastLogin;
+                     }
+                 }
+            }
+            return stats;
+            */
         }
 
         function updateLoginStatsDisplay(rawStats) {
@@ -1153,7 +1167,7 @@
             const select = document.getElementById('passwordTypeSelect');
             select.innerHTML = '';
             if (editorToken) {
-                const optText = currentLang === 'zh' ? `編輯者密碼` : `Editor Password`;
+                const optText = currentLang === 'zh' ? `編輯者密碼 (陳喬志)` : `Editor Password (Chen)`;
                 select.innerHTML = `<option value="editor">${optText}</option>`;
             } else if (loggedInViewerAccount) {
                 const optText = currentLang === 'zh' ? `人員密碼 (${loggedInViewerAccount})` : `User Password (${loggedInViewerAccount})`;
@@ -1310,12 +1324,7 @@
 
         function initInputDefaults() {
             const now = new Date();
-            // 修正為本地時區的 YYYY-MM-DD
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            document.getElementById('inputDate').value = `${year}-${month}-${day}`;
-            
+            document.getElementById('inputDate').value = now.toISOString().split('T')[0];
             document.getElementById('inputShift').value = '';
             updatePersonOptions();
             document.getElementById('inputDescription').selectedIndex = -1;
@@ -1589,9 +1598,8 @@
 
         // ==================== 新增與選項操作 ====================
         function openAddModal() {
-            // 先顯示 Modal，避免 initInputDefaults 因故報錯而卡住彈窗
-            new bootstrap.Modal(document.getElementById('addModal')).show();
             initInputDefaults();
+            new bootstrap.Modal(document.getElementById('addModal')).show();
         }
 
         function previewPhoto(event) {
@@ -1668,10 +1676,7 @@
 
         function buildUrlWithToken(action, extraParams = {}) {
             const params = new URLSearchParams({ action: action, ...extraParams });
-            // 避開傳遞假 Token 被後端拒絕
-            if (editorToken && editorToken !== 'local_editor_token') {
-                params.append('token', editorToken);
-            }
+            if (editorToken) params.append('token', editorToken);
             return API_BASE + '?' + params.toString();
         }
 
@@ -1734,10 +1739,8 @@
             const shift = document.getElementById('inputShift').value;
             const person = document.getElementById('inputPerson').value;
             const descSelect = document.getElementById('inputDescription');
-            // 改用 filter(opt => opt.selected)，提升相容性
-            const selectedDescriptions = Array.from(descSelect.options).filter(opt => opt.selected).map(opt => opt.value);
+            const selectedDescriptions = Array.from(descSelect.selectedOptions).map(opt => opt.value);
             const description = selectedDescriptions.join('、');
-            
             if (!date || !shift || !person || selectedDescriptions.length === 0) {
                 showToast('warning', '資料不完整', '請填寫所有必填欄位'); return;
             }
@@ -1749,15 +1752,10 @@
                 let finalPhotoUrl = '';
                 if (photoBase64) {
                     const uploadResult = await uploadPhotoToAPI(photoBase64);
-                    if (uploadResult.success) { 
-                        finalPhotoUrl = uploadResult.photoUrl; 
-                    } else {
-                        // 如果是因為權限不足（本地假 Token）導致上傳失敗，詢問是否繼續新增
-                        if (!confirm(`照片上傳失敗：${uploadResult.message || '未授權'}\n\n是否不包含照片，繼續新增記錄？`)) {
-                            saveBtn.disabled = false; 
-                            saveBtn.innerHTML = originalText; 
-                            return;
-                        }
+                    if (uploadResult.success) { finalPhotoUrl = uploadResult.photoUrl; }
+                    else {
+                        showToast('error', '照片上傳失敗', uploadResult.message);
+                        saveBtn.disabled = false; saveBtn.innerHTML = originalText; return;
                     }
                 }
                 const dataPayload = { date, shift, person, description, photoUrl: finalPhotoUrl };
@@ -1784,8 +1782,7 @@
 
         async function addDataToAPI(data) {
             try {
-                const url = buildUrlWithToken('addData');
-                const response = await apiFetch(url, {
+                const response = await apiFetch(buildUrlWithToken('addData'), {
                     method: 'POST', body: JSON.stringify(data)
                 });
                 return await response.json();
