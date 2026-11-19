@@ -259,10 +259,17 @@
             </div>
             
             <div class="mb-3">
+                <label class="form-label fw-bold" data-i18n="loginModeLabel">登入模式</label>
+                <select class="form-select" id="loginMode" onchange="onLoginModeChange()">
+                    <option value="viewer" data-i18n="loginModeViewer">檢視模式 (Viewer Mode)</option>
+                    <option value="editor" data-i18n="loginModeEditor">編輯模式 (Editor Mode)</option>
+                </select>
+            </div>
+
+            <div class="mb-3" id="accountGroup">
                 <label class="form-label fw-bold" data-i18n="loginAccountLabel">員工姓名 / 帳號</label>
                 <select class="form-select" id="loginAccount">
                     <option value="" data-i18n="loginAccountSelect">-- 請選擇姓名 --</option>
-                    <!-- 選項將由 JS 動態生成 -->
                 </select>
             </div>
 
@@ -778,6 +785,9 @@
                 loginTitle: "IPQC異常資料統計",
                 loginAccountLabel: "員工姓名 / 帳號",
                 loginAccountSelect: "-- 請選擇姓名 --",
+                loginModeLabel: "登入模式",
+                loginModeViewer: "檢視模式 (Viewer Mode)",
+                loginModeEditor: "編輯模式 (Editor Mode)",
                 loginPasswordLabel: "密碼",
                 loginPasswordPlaceholder: "請輸入密碼",
                 loginBtn: "登入",
@@ -840,6 +850,9 @@
                 loginTitle: "IPQC Statistics System",
                 loginAccountLabel: "Employee Name / Account",
                 loginAccountSelect: "-- Select Name --",
+                loginModeLabel: "Login Mode",
+                loginModeViewer: "Viewer Mode",
+                loginModeEditor: "Editor Mode",
                 loginPasswordLabel: "Password",
                 loginPasswordPlaceholder: "Enter Password",
                 loginBtn: "Login",
@@ -957,33 +970,38 @@
             const select = document.getElementById('loginAccount');
             select.innerHTML = `<option value="" data-i18n="loginAccountSelect">${translations[currentLang].loginAccountSelect}</option>`;
             
-            // 暫時只顯示 S4 人員
-            SHIFT_PERSONNEL.S4.forEach(p => {
-                if (p === '陳喬志') {
-                    select.innerHTML += `<option value="${p}" style="font-weight:bold; color:var(--primary-color);">${p}</option>`;
-                } else {
-                    select.innerHTML += `<option value="${p}">${p}</option>`;
-                }
+            // 檢視者只顯示 S4 人員，並排除陳喬志
+            SHIFT_PERSONNEL.S4.filter(name => name !== '陳喬志').forEach(p => {
+                select.innerHTML += `<option value="${p}">${p}</option>`;
             });
         }
 
+        function onLoginModeChange() {
+            const mode = document.getElementById('loginMode').value;
+            const accountGroup = document.getElementById('accountGroup');
+            const accountSelect = document.getElementById('loginAccount');
+            
+            if (mode === 'editor') {
+                accountGroup.style.display = 'none';
+                accountSelect.value = ""; // 清空選擇
+            } else {
+                accountGroup.style.display = 'block';
+            }
+        }
+
         async function performLogin() {
-            const account = document.getElementById('loginAccount').value;
+            const mode = document.getElementById('loginMode').value;
             const password = document.getElementById('loginPassword').value.trim();
             
-            if (!account) { showToast('warning', '資料不完整', '請選擇員工姓名'); return; }
-            if (!password) { showToast('warning', '資料不完整', '請輸入密碼'); return; }
-            
-            if (account === '陳喬志') {
-                // 編輯者驗證邏輯
+            if (mode === 'editor') {
+                if (!password) { showToast('warning', '資料不完整', '請輸入編輯者密碼'); return; }
                 const editorPwd = localStorage.getItem('editor_pwd') || '8888';
                 if (password === editorPwd) {
                     editorToken = 'local_editor_token'; 
                     loggedInViewerAccount = null;
                     document.body.classList.remove('viewer-mode');
-                    document.body.classList.add('editor-mode'); // 確保切換為編輯者狀態
                     document.getElementById('loginOverlay').style.display = 'none';
-                    showToast('success', '登入成功', '歡迎，編輯者 (陳喬志)');
+                    showToast('success', '登入成功', '歡迎，編輯者');
                     updateChangePasswordOptions();
                     initApp();
                 } else {
@@ -991,12 +1009,14 @@
                     document.getElementById('loginPassword').value = '';
                 }
             } else {
-                // 檢視者驗證邏輯
+                const account = document.getElementById('loginAccount').value;
+                if (!account) { showToast('warning', '資料不完整', '請選擇員工姓名'); return; }
+                if (!password) { showToast('warning', '資料不完整', '請輸入密碼'); return; }
+                
                 const storedPwd = localStorage.getItem('viewer_pwd_' + account) || '8102';
                 if (password === storedPwd) {
                     editorToken = null;
                     loggedInViewerAccount = account;
-                    document.body.classList.remove('editor-mode');
                     document.body.classList.add('viewer-mode');
                     document.getElementById('loginOverlay').style.display = 'none';
                     showToast('success', '登入成功', `歡迎，${escapeHtml(account)}`);
@@ -1014,10 +1034,13 @@
             editorToken = null;
             loggedInViewerAccount = null;
             document.body.classList.add('viewer-mode');
-            document.body.classList.remove('editor-mode');
             
+            // 重置登入畫面
             document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('loginMode').value = 'viewer';
+            onLoginModeChange();
             document.getElementById('loginPassword').value = '';
+            document.getElementById('loginAccount').value = '';
             
             currentData = [];
             currentStats = null;
@@ -1130,7 +1153,7 @@
             const select = document.getElementById('passwordTypeSelect');
             select.innerHTML = '';
             if (editorToken) {
-                const optText = currentLang === 'zh' ? `編輯者密碼 (陳喬志)` : `Editor Password (Chen)`;
+                const optText = currentLang === 'zh' ? `編輯者密碼` : `Editor Password`;
                 select.innerHTML = `<option value="editor">${optText}</option>`;
             } else if (loggedInViewerAccount) {
                 const optText = currentLang === 'zh' ? `人員密碼 (${loggedInViewerAccount})` : `User Password (${loggedInViewerAccount})`;
